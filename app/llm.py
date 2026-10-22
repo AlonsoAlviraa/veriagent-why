@@ -13,6 +13,18 @@ MODELS = {"s2": env("REASONING_MODEL", "nvidia/nemotron-3.5-super-vl-120b-a12b")
           "s1": env("FAST_MODEL", "nvidia/nemotron-3.5-lightning-30b-a3b")}
 
 
+_DEADLINE = [None]  # absolute epoch seconds for the current run (8-min cap); set by the orchestrator
+
+
+def set_deadline(ts: float | None) -> None:
+    _DEADLINE[0] = ts
+
+
+def remaining() -> float | None:
+    import time
+    return None if _DEADLINE[0] is None else _DEADLINE[0] - time.time()
+
+
 def complete(messages: list[dict], tier: str = "s2", max_tokens: int = 1024) -> dict:
     p = provider()
     if p == "sample":
@@ -40,6 +52,11 @@ def complete(messages: list[dict], tier: str = "s2", max_tokens: int = 1024) -> 
         # S2 thinking is off by default too: on the free endpoint, super-vl with thinking on exceeded a
         # 120 s timeout for a short planner prompt, vs ~16 s with it off. NVIDIA_S2_THINKING=on to enable.
         body["chat_template_kwargs"] = {"enable_thinking": False}
+    left = remaining()
+    if left is not None:
+        if left <= 1:
+            raise TimeoutError("run deadline reached (TIMEOUTS run_s)")
+        timeout = min(timeout, left)
     req = urllib.request.Request(base.rstrip("/") + "/chat/completions", data=json.dumps(body).encode(), headers=headers)
     out = _post(req, timeout, p)
     return {"provider": p, "model": model, "content": clean_content(out["choices"][0]["message"].get("content")),
@@ -63,7 +80,8 @@ def _post(req, timeout, p):
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 return json.load(r)
         except urllib.error.HTTPError as e:
-            if (e.code != 429 and e.code < 500) or attempt == 3:
+            left = remaining()
+            if (e.code != 429 and e.code < 500) or attempt == 3 or (left is not None and left < 5):
                 raise
             ra = e.headers.get("Retry-After") if e.headers else None
             time.sleep(float(ra) if ra and ra.replace(".", "").isdigit() else 2 * 2 ** attempt)
