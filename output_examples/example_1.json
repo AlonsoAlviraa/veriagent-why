@@ -1,10 +1,203 @@
 {
-  "_note": "TODO: replace with the REAL output of running example_1 (never hand-written)",
   "run_id": "example-001",
-  "status": "TODO",
-  "output": { "summary": "TODO", "evidence": [], "confidence": null, "limitations": [] },
-  "agents": [],
-  "trace_id": "TODO",
+  "status": "success",
+  "output": {
+    "summary": "- Question: Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?\n- Baseline 2026-09-15..2026-09-30 vs period 2026-10-01..2026-10-14\n- Resolution: resolved\n- Data: SYNTHETIC labelled sample dataset",
+    "result": {
+      "question": {
+        "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+        "kpi": "on_time_rate",
+        "period": [
+          "2026-10-01",
+          "2026-10-14"
+        ],
+        "baseline": [
+          "2026-09-15",
+          "2026-09-30"
+        ]
+      },
+      "analysis": {
+        "causes": [
+          {
+            "segment": {
+              "carrier": "CarrierB",
+              "region": "North"
+            },
+            "hyp": "H_carrier_x_region",
+            "estimated_contribution": 1.0,
+            "raw_share_of_excess_late": 1.062,
+            "label": "carrier_sla_breach"
+          },
+          {
+            "segment": {
+              "carrier": "CarrierB"
+            },
+            "hyp": "H_carrier",
+            "estimated_contribution": 1.0,
+            "raw_share_of_excess_late": 1.085,
+            "label": "carrier_sla_breach"
+          },
+          {
+            "segment": {
+              "region": "North"
+            },
+            "hyp": "H_region",
+            "estimated_contribution": 1.0,
+            "raw_share_of_excess_late": 1.039,
+            "label": "none"
+          }
+        ],
+        "top_cause": {
+          "segment": {
+            "carrier": "CarrierB",
+            "region": "North"
+          },
+          "hyp": "H_carrier_x_region",
+          "estimated_contribution": 1.0,
+          "raw_share_of_excess_late": 1.062,
+          "label": "carrier_sla_breach"
+        },
+        "top_cause_label": "carrier_sla_breach",
+        "discarded": [
+          {
+            "hyp": "H_promo",
+            "verdict": "refutes",
+            "promo_id": "PROMO-HOME-SOUTH",
+            "dates_overlap": true,
+            "share_of_excess_late": -0.001,
+            "promo_shipments": 49,
+            "promo_late": 3
+          }
+        ],
+        "blocked": []
+      },
+      "claims": [
+        {
+          "id": "C_ontime_period",
+          "metric": "on_time_rate",
+          "segment": {
+            "carrier": "CarrierB",
+            "region": "North"
+          },
+          "window": [
+            "2026-10-01",
+            "2026-10-14"
+          ],
+          "value": 44.16,
+          "row_ids": [
+            "S000977",
+            "S000979",
+            "S001028",
+            "S001040",
+            "S001068"
+          ],
+          "text": "On-time rate for carrier=CarrierB, region=North was 44.2% in the period window (2026-10-01..2026-10-14)."
+        },
+        {
+          "id": "C_ontime_baseline",
+          "metric": "on_time_rate",
+          "segment": {
+            "carrier": "CarrierB",
+            "region": "North"
+          },
+          "window": [
+            "2026-09-15",
+            "2026-09-30"
+          ],
+          "value": 93.02,
+          "row_ids": [
+            "S000014",
+            "S000021",
+            "S000024",
+            "S000032",
+            "S000045"
+          ],
+          "text": "On-time rate for carrier=CarrierB, region=North was 93.0% in the baseline window (2026-09-15..2026-09-30)."
+        }
+      ],
+      "blocked_claims": [],
+      "confidence": {
+        "confidence": 100,
+        "C": 1.0,
+        "A": 1.0,
+        "R": 0.0,
+        "caps": [],
+        "formula": "round(100*(0.45*C + 0.35*A + 0.20*(1-R)))",
+        "views": {
+          "v_logistics": {
+            "baseline_rate": 0.0698,
+            "period_rate": 0.5584,
+            "agrees": true
+          },
+          "v_tickets": {
+            "baseline_rate": 0.0233,
+            "period_rate": 0.2597,
+            "agrees": true
+          },
+          "v_returns": {
+            "baseline_rate": 0.0,
+            "period_rate": 0.013,
+            "agrees": true
+          },
+          "v_promotions": "no promotion overlaps the top-cause segment",
+          "v_orders": "not used for direction in this build"
+        }
+      },
+      "token_report": {
+        "backend": "local-inprocess (TODO: Meterless Markovian)",
+        "token_unit": "whitespace tokens (approx.)",
+        "rounds": [
+          {
+            "round": 1,
+            "projected_tokens": 327,
+            "actual_tokens": 263
+          },
+          {
+            "round": 2,
+            "projected_tokens": 422,
+            "actual_tokens": 278
+          }
+        ],
+        "projected_total": 749,
+        "actual_total": 541,
+        "avoided_by_s1": 208
+      },
+      "resolution": "resolved",
+      "evidence_graph": {
+        "backend": "local-inprocess (TODO: Meterless H-MEM)",
+        "nodes": 14,
+        "edges": 8
+      },
+      "memo_md": "# Decision memo: why did on-time delivery drop? (run example-001)\nTop cause: **carrier_sla_breach** in carrier=CarrierB, region=North (estimated share of the excess late shipments vs the baseline late rate: 106%; above 100% means other segments improved).\n\n- Question: Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?\n- Baseline 2026-09-15..2026-09-30 vs period 2026-10-01..2026-10-14\n- Resolution: resolved\n- Data: SYNTHETIC labelled sample dataset\n\n## Findings (each verified by the Claim Gate)\n- On-time rate for carrier=CarrierB, region=North was 44.2% in the period window (2026-10-01..2026-10-14). Rows: S000977, S000979, S001028, S001040, S001068\n- On-time rate for carrier=CarrierB, region=North was 93.0% in the baseline window (2026-09-15..2026-09-30). Rows: S000014, S000021, S000024, S000032, S000045\n\n## Discarded alternatives\n- Promotion PROMO-HOME-SOUTH: dates overlap the period, but its shipments account for 0% of the excess late shipments (3 late of 49). Refuted.\n\n## Confidence: 100/100\n- Formula: round(100*(0.45*C + 0.35*A + 0.20*(1-R))); C=1.0, A=1.0, R=0.0; caps: none\n\n## Recommended actions\n- Review the SLA performance of CarrierB in North and consider rerouting.\n\n## Limitations\n- Synthetic data. Sample provider: deterministic rules, no language model.\n- Evidence graph and token report use a local in-process implementation, not yet the Meterless engines.\n"
+    },
+    "artifacts": [
+      "logs/memo-example-001.md"
+    ]
+  },
+  "agents": [
+    {
+      "name": "planner"
+    },
+    {
+      "name": "retriever"
+    },
+    {
+      "name": "s1_filter"
+    },
+    {
+      "name": "evidence_evaluator"
+    },
+    {
+      "name": "cause_analyst"
+    },
+    {
+      "name": "writer"
+    },
+    {
+      "name": "claim_gate"
+    }
+  ],
+  "trace_id": "10af4d6bbd674732",
   "log_file": "logs/trace-example-001.jsonl",
-  "execution_time_seconds": null
+  "execution_time_seconds": 0.125
 }

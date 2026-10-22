@@ -17,7 +17,23 @@ git clone https://github.com/AlonsoAlviraa/veriagent-why
 cd veriagent-why
 cp .env.example .env   # fill in your own values locally
 ```
-`SAMPLE_MODE=true` is planned to run offline with no credentials. Not implemented yet.
+## Run (SAMPLE_MODE, offline, no credentials)
+```bash
+python -m venv .venv && . .venv/bin/activate
+pip install -r requirements.txt
+python scripts/make_data.py            # builds data/snapshot.duckdb (synthetic, seeded); also built on demand
+python run.py --input input_examples/example_1.json
+python -m pytest -q
+python run.py --serve                  # POST http://localhost:8000/run
+```
+`SAMPLE_MODE` defaults to `true` when unset. In sample mode the agents use their deterministic path (no language model), with real SQL over the synthetic views. Each run writes `logs/trace-<run_id>.jsonl` and `logs/memo-<run_id>.md`. `output_examples/example_1.json` is the saved output of the command above.
+
+## Current status (build day 1)
+- Working: seeded synthetic data generator, full agent pipeline in SAMPLE_MODE with both loops, deterministic Claim Gate and confidence, JSONL traces, Markdown memo, FastAPI `POST /run`, tests.
+- Not yet: Zetaris backend (the adapter has a sample DuckDB backend; the Zetaris REST backend is a TODO), Meterless H-MEM / Markovian (a local in-process stand-in with the same role is used for now), live Nemotron calls through Nightshift or NVIDIA (provider switch wired, not used by agents yet), eval harness and baseline, UI, PDF memo.
+
+## Confidence (deterministic)
+`conf = round(100 × (0.45·C + 0.35·A + 0.20·(1−R)))`, where C = share of all proposed claims that passed the Claim Gate, A = share of views with relevant rows that agree with the top cause (A = 0 and cap 50 if none), R = refuting ÷ (supporting + refuting) edges for the top cause. Partial runs are capped at 40. See `app/confidence.py`.
 
 ## AI and Model Usage
 Placeholder, to be completed as the build progresses.
