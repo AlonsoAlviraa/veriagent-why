@@ -51,3 +51,13 @@ def check_claim(db, claim: dict) -> dict:
         if abs(actual - float(claim["value"])) > tol:
             reasons.append(f"value {claim['value']} != db {round(actual, 2)}")
     return {"claim_id": claim["id"], "passed": not reasons, "reasons": reasons, "db_value": actual}
+
+
+NUM = __import__("re").compile(r"(?<![\w-])\d+(?:\.\d+)?")
+
+
+def check_narrative(text: str, sources: list[str]) -> dict:
+    """Every number in model-written prose must appear in the approved facts (within 0.05)."""
+    allowed = [float(x) for s in sources for x in NUM.findall(s)]
+    bad = [n for n in NUM.findall(text) if not any(abs(float(n) - a) <= 0.05 for a in allowed)]
+    return {"claim_id": "narrative", "passed": not bad, "reasons": [f"unsupported numbers: {bad}"] if bad else []}

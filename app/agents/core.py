@@ -5,6 +5,26 @@ Each agent has its own inputs, tools, output schema and authority (see docs/ARCH
 from __future__ import annotations
 from ..bm25 import bm25, tok
 from ..memory import HMem, count_tokens
+from . import llm_steps
+
+
+class LLMCtx:
+    """live=False in SAMPLE_MODE: no model is called. Records every model call for the trace."""
+    def __init__(self, live: bool):
+        self.live, self.calls = live, []
+
+    def attempt(self, agent: str, fn, *a):
+        if not self.live:
+            return None
+        try:
+            out, meta = fn(*a)
+            metas = meta if isinstance(meta, list) else [meta]
+            for m in metas:
+                self.calls.append({"agent": agent, "provider": m.get("provider"), "model": m.get("model"), "ok": True, "usage": m.get("usage")})
+            return out
+        except Exception as e:  # fall back to the deterministic path, logged
+            self.calls.append({"agent": agent, "ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}", "fallback": "deterministic"})
+            return None
 
 TAXONOMY = ["carrier_sla_breach", "supplier_cost_increase", "promotion_effect", "seasonality", "stockout", "none"]
 DIMS = ["carrier", "region"]
@@ -14,7 +34,7 @@ class Planner:
     """Writes competing hypotheses + query plans into H-MEM. Revises on Evaluator feedback."""
     name = "planner"
 
-    def plan(self, q: dict, mem: HMem, feedback: dict | None) -> list[dict]:
+    def plan(self, q: dict, mem: HMem, feedback: dict | None, ctx: "LLMCtx | None" = None, memory_context: str = "") -> list[dict]:
         if feedback and feedback.get("drill"):
             dims = feedback["drill"]
             hyps = [{"id": "H_" + "_x_".join(dims), "type": "segment", "dims": dims,
@@ -24,8 +44,11 @@ class Planner:
                      "text": f"On-time drop concentrated in one {d}"} for d in DIMS]
             hyps.append({"id": "H_promo", "type": "promotion", "dims": [],
                          "text": "A promotion active in the period caused the drop"})
+            chosen = ctx.attempt(self.name, llm_steps.plan, q["query"], memory_context) if ctx else None
+            if chosen:
+                hyps = [h for h in hyps if h["id"] in chosen]
         for h in hyps:
-            mem.add_node(h["id"], "hypothesis", text=h["text"])
+            mem.add_node(h["id"], "hypothesis", source=self.name, text=h["text"])
         return hyps
 
 
@@ -88,13 +111,14 @@ class S1Filter:
             return lex if excess > 0 else 0.0
         return lex
 
-    def run(self, chunks: list[dict], mem: HMem, threshold: float = 0.3) -> tuple[list[dict], int, int]:
+    def run(self, chunks: list[dict], mem: HMem, threshold: float = 0.3, ctx: "LLMCtx | None" = None, question: str = "") -> tuple[list[dict], int, int]:
         kept = []
-        for c in chunks:
-            c["relevance"] = round(self.score(c), 3)
+        live = ctx.attempt(self.name, llm_steps.s1_scores, [c["text"] for c in chunks], question) if ctx and chunks else None
+        for i, c in enumerate(chunks):
+            c["relevance"] = round(live[i] if live else self.score(c), 3)
             if c["relevance"] >= threshold:
                 kept.append(c)
-                nid = mem.add_node(f"E{len(mem.nodes)}", "evidence", view=c["view"], text=c["text"][:200])
+                nid = mem.add_node(f"E{len(mem.nodes)}", "evidence", source=self.name, view=c["view"], text=c["text"][:200])
                 c["node"] = nid
         return kept, sum(count_tokens(c["text"]) for c in chunks), sum(count_tokens(c["text"]) for c in kept)
 
@@ -106,7 +130,7 @@ class EvidenceEvaluator:
     def __init__(self, db, retriever: Retriever):
         self.db, self.r = db, retriever
 
-    def evaluate(self, hyps, kept, q, mem: HMem) -> dict:
+    def evaluate(self, hyps, kept, q, mem: HMem, ctx: "LLMCtx | None" = None) -> dict:
         tot = self.db.query("SELECT SUM(CASE WHEN ship_date BETWEEN ? AND ? THEN 1 ELSE 0 END) n_b, "
                             "SUM(CASE WHEN ship_date BETWEEN ? AND ? AND NOT on_time THEN 1 ELSE 0 END) l_b, "
                             "SUM(CASE WHEN ship_date BETWEEN ? AND ? THEN 1 ELSE 0 END) n_p, "
@@ -141,6 +165,13 @@ class EvidenceEvaluator:
                                      "share_of_excess_late": round(share, 3), "promo_shipments": r["n"], "promo_late": r["late"]})
                 if not promos:
                     verdicts.append({"hyp": h["id"], "verdict": "gap", "reason": "no promotion overlaps the period"})
+        if ctx and ctx.live:
+            texts = {h["id"]: h["text"] for h in hyps}
+            for v in verdicts:
+                lv = ctx.attempt(self.name, llm_steps.verdict, texts.get(v["hyp"], v["hyp"]), {k: x for k, x in v.items() if k not in ("hyp", "verdict")})
+                if lv:
+                    v["rule_verdict"], v["verdict"] = v["verdict"], lv
+            supported = [h for h in hyps if any(v["hyp"] == h["id"] and v["verdict"] == "supports" for v in verdicts)]
         for v in verdicts:
             ev = [c["node"] for c in kept if c["hyp"] == v["hyp"] and "node" in c]
             for e in ev or [mem.add_node(f"E{len(mem.nodes)}", "evidence", view="evaluator_requery", text=str(v))]:
@@ -157,7 +188,7 @@ class CauseAnalyst:
     """Ranks causes with a deterministic decomposition and picks top_cause_label from the taxonomy."""
     name = "cause_analyst"
 
-    def analyse(self, all_verdicts: list[dict], blocked: set[str]) -> dict:
+    def analyse(self, all_verdicts: list[dict], blocked: set[str], ctx: "LLMCtx | None" = None) -> dict:
         seg = [v for v in all_verdicts if v["verdict"] == "supports" and "segment" in v]
         seg.sort(key=lambda v: (-len(v["segment"]), -v["share_of_excess_late"]))
         causes = [{"segment": v["segment"], "hyp": v["hyp"], "estimated_contribution": min(1.0, v["share_of_excess_late"]),
@@ -165,7 +196,11 @@ class CauseAnalyst:
                    "label": "carrier_sla_breach" if "carrier" in v["segment"] else "none"} for v in seg]
         discarded = [v for v in all_verdicts if v["verdict"] == "refutes" and "promo_id" in v]
         top = causes[0] if causes else None
-        return {"causes": causes, "top_cause": top, "top_cause_label": top["label"] if top else "none",
+        lab = top["label"] if top else "none"
+        if top and ctx:
+            lab = ctx.attempt(self.name, llm_steps.label, causes) or lab
+            top["label"] = lab
+        return {"causes": causes, "top_cause": top, "top_cause_label": lab,
                 "discarded": discarded, "blocked": sorted(blocked)}
 
 

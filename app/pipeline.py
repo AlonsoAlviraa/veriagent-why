@@ -6,7 +6,11 @@ from .adapters.zetaris import get_backend
 from .agents.core import Planner, Retriever, S1Filter, EvidenceEvaluator, CauseAnalyst, Writer, ClaimGate
 from .confidence import confidence
 from .config import CAPS, TIMEOUTS, provider
-from .memory import HMem, Markovian
+from .memory import HMem, count_tokens
+from .meterless import Bridge
+from .agents.core import LLMCtx
+from .agents import llm_steps
+from .checks.claims import check_narrative
 from .trace import Tracer
 from .memo import render_memo
 
@@ -60,46 +64,87 @@ def run(inp: dict, run_id: str | None = None) -> dict:
     t0 = time.time()
     run_id = run_id or uuid.uuid4().hex[:12]
     tr = Tracer(run_id)
-    tr.log("orchestrator", "start", provider=provider())
+    prov = provider()
+    ctx = LLMCtx(live=prov != "sample")
+    tr.log("orchestrator", "start", provider=prov)
     q = parse_question(inp)
     db = get_backend()
-    tr.log("orchestrator", "backend", name=db.name)
-    mem, mk = HMem(), Markovian()
+    try:
+        bridge = Bridge()
+        bridge.call("reset")
+    except Exception as e:
+        bridge = None
+        tr.log("orchestrator", "meterless_unavailable", error=str(e))
+    tr.log("orchestrator", "backend", data=db.name, meterless="bridge" if bridge else "local-fallback")
+    try:
+        return _run(inp, q, db, bridge, tr, ctx, t0, run_id)
+    finally:
+        if bridge:
+            bridge.close()
+
+
+def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
+    mem = HMem(bridge)
     planner, retr, s1 = Planner(), Retriever(db), S1Filter()
     ev, analyst, writer, gate = EvidenceEvaluator(db, retr), CauseAnalyst(), Writer(db), ClaimGate(db)
-    feedback, all_verdicts, status = None, [], "success"
-    for rnd in range(1, CAPS["evaluator_rounds"] + 1):
-        hyps = planner.plan(q, mem, feedback)
-        tr.log(planner.name, "hypotheses", round=rnd, hypotheses=[h["id"] for h in hyps], revised=bool(feedback))
+    st = {"feedback": None, "verdicts": [], "rounds": [], "done": False}
+
+    def investigate_round(step: int, carryover: str) -> str:
+        rnd = step + 1
+        n0 = len(ctx.calls)
+        hyps = planner.plan(q, mem, st["feedback"], ctx, carryover or mem.recall(q["query"]))
+        tr.log(planner.name, "hypotheses", round=rnd, hypotheses=[h["id"] for h in hyps], revised=bool(st["feedback"]))
         chunks = retr.retrieve(hyps, q)
         tr.log(retr.name, "retrieved", round=rnd, chunks=len(chunks))
-        kept, proj, act = s1.run(chunks, mem)
-        mk.record(rnd, proj, act)
+        kept, proj, act = s1.run(chunks, mem, ctx=ctx, question=q["query"])
+        st["rounds"].append({"round": rnd, "s1_projected_tokens": proj, "s1_actual_tokens": act})
         tr.log(s1.name, "filtered", round=rnd, kept=len(kept), dropped=len(chunks) - len(kept), projected_tokens=proj, actual_tokens=act)
-        res = ev.evaluate(hyps, kept, q, mem)
-        all_verdicts += res["verdicts"]
+        res = ev.evaluate(hyps, kept, q, mem, ctx)
+        st["verdicts"] += res["verdicts"]
         tr.log(ev.name, "verdicts", round=rnd, verdicts=res["verdicts"], feedback=res["feedback"])
-        feedback = res["feedback"]
-        if not feedback:
-            break
-        tr.log(ev.name, "send_back_to_planner", round=rnd, reason=feedback["gap"])
-        if time.time() - t0 > TIMEOUTS["run_s"]:
-            break
+        for c in ctx.calls[n0:]:
+            tr.log(c["agent"], "model_call", round=rnd, call=c)
+        st["feedback"] = res["feedback"]
+        summary = "; ".join(f"{v['hyp']}={v['verdict']}" for v in res["verdicts"])
+        if not st["feedback"] or time.time() - t0 > TIMEOUTS["run_s"]:
+            st["done"] = not st["feedback"]
+            return f"Round {rnd}: {summary}. [TASK_COMPLETE]"
+        tr.log(ev.name, "send_back_to_planner", round=rnd, reason=st["feedback"]["gap"])
+        return (f"Round {rnd}: {summary}.\n[STATE_CHECKPOINT]\nCOMPLETED: round {rnd}\nREMAINING: drill {st['feedback']['drill']}\n"
+                f"DECISIONS: {summary}\nCONTEXT: {q['query']}")
+
+    if bridge:
+        mk = bridge.call("markovian.run", on_step=lambda m: investigate_round(m["step"], m["carryover"]),
+                         goal=q["query"], memoryContext=mem.recall(q["query"]), maxChunks=CAPS["evaluator_rounds"])
+        tr.log("markovian", "run", **{k: mk[k] for k in ("status", "chunks", "totalTokensUsed", "totalTokensSaved", "tokenLabel")})
     else:
-        status = "partial"
-    if feedback:
-        status = "partial"
+        mk = {"status": "local-fallback"}
+        for step in range(CAPS["evaluator_rounds"]):
+            if "[TASK_COMPLETE]" in investigate_round(step, ""):
+                break
+    status = "success" if st["done"] else "partial"
     blocked: set[str] = set()
     proposed: dict[str, dict] = {}
-    results = []
+    results, narrative = [], None
     for g in range(CAPS["claim_gate_rounds"] + 1):
-        analysis = analyst.analyse(all_verdicts, blocked)
+        n0 = len(ctx.calls)
+        analysis = analyst.analyse(st["verdicts"], blocked, ctx)
         tr.log(analyst.name, "ranked", top_cause_label=analysis["top_cause_label"], causes=analysis["causes"])
         claims = writer.write(analysis, q, blocked)
         for c in claims:
             proposed[c["id"]] = c
-        tr.log(writer.name, "claims", claims=[c["id"] for c in claims])
+        narrative = None
+        if ctx.live and "narrative" not in blocked:
+            narrative = ctx.attempt(writer.name, llm_steps.narrative, claims, analysis["discarded"])
+            if narrative:
+                proposed["narrative"] = {"id": "narrative", "text": narrative}
+        for c in ctx.calls[n0:]:
+            tr.log(c["agent"], "model_call", call=c)
+        tr.log(writer.name, "claims", claims=[c["id"] for c in claims], narrative=bool(narrative))
         results = gate.check(claims)
+        if narrative:
+            src = [c["text"] for c in claims] + [str(d) for d in analysis["discarded"]] + [q["query"]]
+            results.append(check_narrative(narrative, src))
         failed = [r for r in results if not r["passed"]]
         tr.log(gate.name, "checked", passed=[r["claim_id"] for r in results if r["passed"]], blocked=[{"id": r["claim_id"], "reasons": r["reasons"]} for r in failed])
         if not failed:
@@ -118,15 +163,23 @@ def run(inp: dict, run_id: str | None = None) -> dict:
     agree, relevant, vdet = view_agreement(db, top["segment"], q) if top else (0, 0, {})
     conf = confidence(len(proposed), len(passed), agree, relevant, sup, ref, partial=status == "partial")
     conf["views"] = vdet
-    out = {"question": q, "analysis": analysis, "claims": [proposed[i] for i in proposed if i in passed],
-           "blocked_claims": sorted(set(proposed) - passed), "confidence": conf, "token_report": mk.report(),
-           "resolution": "resolved" if status == "success" else "unresolved",
-           "evidence_graph": {"backend": mem.backend, "nodes": len(mem.nodes), "edges": len(mem.edges)}}
+    ledger = mem.ledger()
+    lpath = tr.path.parent / f"hmem-ledger-{run_id}.jsonl"
+    lpath.write_text("".join(__import__("json").dumps(e, default=str) + "\n" for e in ledger["entries"]))
+    proj = sum(r["s1_projected_tokens"] for r in st["rounds"]); act = sum(r["s1_actual_tokens"] for r in st["rounds"])
+    out = {"question": q, "analysis": analysis, "claims": [proposed[i] for i in proposed if i in passed and i != "narrative"],
+           "narrative": proposed["narrative"]["text"] if "narrative" in passed else None,
+           "blocked_claims": sorted(set(proposed) - passed), "confidence": conf,
+           "token_report": {"s1_filter": {"unit": "whitespace tokens (approx.)", "rounds": st["rounds"], "projected_total": proj,
+                                          "actual_total": act, "avoided_by_s1": proj - act}, "markovian": mk},
+           "model_calls": ctx.calls, "resolution": "resolved" if status == "success" else "unresolved",
+           "evidence_graph": {"backend": mem.backend, "nodes": len(mem.nodes), "edges": len(mem.edges),
+                              "hmem_ledger_entries": len(ledger["entries"]), "hmem_ledger_file": f"logs/{lpath.name}"}}
     out["memo_md"] = render_memo(out, run_id)
     memo_path = tr.path.parent / f"memo-{run_id}.md"
     memo_path.write_text(out["memo_md"])
     tr.log("orchestrator", "end", status=status, confidence=conf["confidence"])
     return {"run_id": run_id, "status": status, "output": {"summary": out["memo_md"].splitlines()[1],
-            "result": out, "artifacts": [str(memo_path.relative_to(tr.path.parents[1]))]},
+            "result": out, "artifacts": [f"logs/{memo_path.name}", f"logs/{lpath.name}"]},
             "agents": [{"name": a.name} for a in (planner, retr, s1, ev, analyst, writer, gate)],
             "trace_id": tr.trace_id, "log_file": f"logs/{tr.path.name}", "execution_time_seconds": round(time.time() - t0, 3)}
