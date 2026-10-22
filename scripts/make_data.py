@@ -114,7 +114,14 @@ def write_duckdb(tables: dict, out: Path) -> None:
     for t, sch in schemas.items():
         con.execute(f"CREATE TABLE t_{t} ({sch})")
         cols = [c.split()[0] for c in sch.split(", ")]
-        if tables[t]: con.executemany(f"INSERT INTO t_{t} VALUES ({','.join('?'*len(cols))})", [[r[c] for c in cols] for r in tables[t]])
+        if tables[t]:  # bulk load via a temporary CSV (executemany was ~85 s for 24 datasets)
+            import csv, tempfile
+            with tempfile.NamedTemporaryFile("w", suffix=".csv", newline="", delete=False) as f:
+                w = csv.writer(f)
+                for r in tables[t]:
+                    w.writerow(["" if r[c] is None else r[c] for c in cols])
+            con.execute(f"COPY t_{t} FROM '{f.name}' (HEADER false, NULLSTR '')")
+            Path(f.name).unlink()
         con.execute(f"CREATE VIEW v_{t} AS SELECT * FROM t_{t}")
     con.close()
 
