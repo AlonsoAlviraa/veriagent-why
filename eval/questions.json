@@ -1,0 +1,640 @@
+[
+  {
+    "qid": "q01",
+    "split": "dev",
+    "kind": "carrier_breach",
+    "seed": 1001,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierA",
+        "region": "East",
+        "p": 0.5
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q01"
+    }
+  },
+  {
+    "qid": "q02",
+    "split": "dev",
+    "kind": "carrier_breach",
+    "seed": 1002,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierC",
+        "region": "West",
+        "p": 0.45
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q02"
+    }
+  },
+  {
+    "qid": "q03",
+    "split": "dev",
+    "kind": "carrier_breach",
+    "seed": 1003,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierB",
+        "region": "South",
+        "p": 0.6
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q03"
+    }
+  },
+  {
+    "qid": "q04",
+    "split": "dev",
+    "kind": "breach_with_date_promo_trap",
+    "seed": 1004,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierA",
+        "region": "West",
+        "p": 0.5
+      },
+      "promo": {
+        "category": "beauty",
+        "region": "East",
+        "causes_late": false
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q04"
+    }
+  },
+  {
+    "qid": "q05",
+    "split": "dev",
+    "kind": "negative_control",
+    "seed": 1005,
+    "scenario": {},
+    "expected_label": "none",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q05"
+    }
+  },
+  {
+    "qid": "q06",
+    "split": "dev",
+    "kind": "carrier_breach",
+    "seed": 1006,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierC",
+        "region": "North",
+        "p": 0.4
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q06"
+    }
+  },
+  {
+    "qid": "q07",
+    "split": "test",
+    "kind": "carrier_breach",
+    "seed": 1007,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierA",
+        "region": "North",
+        "p": 0.5
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q07"
+    }
+  },
+  {
+    "qid": "q08",
+    "split": "test",
+    "kind": "carrier_breach",
+    "seed": 1008,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierB",
+        "region": "East",
+        "p": 0.45
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q08"
+    }
+  },
+  {
+    "qid": "q09",
+    "split": "test",
+    "kind": "carrier_breach",
+    "seed": 1009,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierC",
+        "region": "South",
+        "p": 0.55
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q09"
+    }
+  },
+  {
+    "qid": "q10",
+    "split": "test",
+    "kind": "carrier_breach",
+    "seed": 1010,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierA",
+        "region": "South",
+        "p": 0.4
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q10"
+    }
+  },
+  {
+    "qid": "q11",
+    "split": "test",
+    "kind": "carrier_breach",
+    "seed": 1011,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierB",
+        "region": "West",
+        "p": 0.5
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q11"
+    }
+  },
+  {
+    "qid": "q12",
+    "split": "test",
+    "kind": "carrier_breach",
+    "seed": 1012,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierC",
+        "region": "East",
+        "p": 0.35
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q12"
+    }
+  },
+  {
+    "qid": "q13",
+    "split": "test",
+    "kind": "breach_with_date_promo_trap",
+    "seed": 1013,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierC",
+        "region": "West",
+        "p": 0.5
+      },
+      "promo": {
+        "category": "apparel",
+        "region": "North",
+        "causes_late": false
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q13"
+    }
+  },
+  {
+    "qid": "q14",
+    "split": "test",
+    "kind": "breach_with_date_promo_trap",
+    "seed": 1014,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierA",
+        "region": "East",
+        "p": 0.5
+      },
+      "promo": {
+        "category": "electronics",
+        "region": "South",
+        "causes_late": false
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q14"
+    }
+  },
+  {
+    "qid": "q15",
+    "split": "test",
+    "kind": "breach_with_date_promo_trap",
+    "seed": 1015,
+    "scenario": {
+      "breach": {
+        "carrier": "CarrierB",
+        "region": "South",
+        "p": 0.5
+      },
+      "promo": {
+        "category": "home",
+        "region": "West",
+        "causes_late": false
+      }
+    },
+    "expected_label": "carrier_sla_breach",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q15"
+    }
+  },
+  {
+    "qid": "q16",
+    "split": "test",
+    "kind": "seasonality",
+    "seed": 1016,
+    "scenario": {
+      "seasonal_p": 0.25
+    },
+    "expected_label": "seasonality",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q16"
+    }
+  },
+  {
+    "qid": "q17",
+    "split": "test",
+    "kind": "seasonality",
+    "seed": 1017,
+    "scenario": {
+      "seasonal_p": 0.2
+    },
+    "expected_label": "seasonality",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q17"
+    }
+  },
+  {
+    "qid": "q18",
+    "split": "test",
+    "kind": "seasonality",
+    "seed": 1018,
+    "scenario": {
+      "seasonal_p": 0.3
+    },
+    "expected_label": "seasonality",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q18"
+    }
+  },
+  {
+    "qid": "q19",
+    "split": "test",
+    "kind": "promotion_effect",
+    "seed": 1019,
+    "scenario": {
+      "promo": {
+        "category": "electronics",
+        "region": "North",
+        "causes_late": true
+      }
+    },
+    "expected_label": "promotion_effect",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q19"
+    }
+  },
+  {
+    "qid": "q20",
+    "split": "test",
+    "kind": "promotion_effect",
+    "seed": 1020,
+    "scenario": {
+      "promo": {
+        "category": "apparel",
+        "region": "East",
+        "causes_late": true
+      }
+    },
+    "expected_label": "promotion_effect",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q20"
+    }
+  },
+  {
+    "qid": "q21",
+    "split": "test",
+    "kind": "promotion_effect",
+    "seed": 1021,
+    "scenario": {
+      "promo": {
+        "category": "beauty",
+        "region": "West",
+        "causes_late": true
+      }
+    },
+    "expected_label": "promotion_effect",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q21"
+    }
+  },
+  {
+    "qid": "q22",
+    "split": "test",
+    "kind": "negative_control",
+    "seed": 1022,
+    "scenario": {},
+    "expected_label": "none",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q22"
+    }
+  },
+  {
+    "qid": "q23",
+    "split": "test",
+    "kind": "negative_control",
+    "seed": 1023,
+    "scenario": {
+      "promo": {
+        "category": "home",
+        "region": "North",
+        "causes_late": false
+      }
+    },
+    "expected_label": "none",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q23"
+    }
+  },
+  {
+    "qid": "q24",
+    "split": "test",
+    "kind": "negative_control",
+    "seed": 1024,
+    "scenario": {},
+    "expected_label": "none",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q24"
+    }
+  }
+]
