@@ -1,4 +1,4 @@
-"""Writes eval/questions.json (36 questions: 18 dev, 18 test [contaminated, see RESULTS_HISTORY]; dev cases were added over time) and eval/SPLITS.sha256.
+"""Writes eval/questions.json (40 questions: 22 dev, 18 test [contaminated, see RESULTS_HISTORY]; dev cases were added over time) and eval/SPLITS.sha256.
 Each question has its own seeded synthetic dataset (eval/build_datasets.py). The demo scenario
 (seed 42) is NOT in any split. Trap types promotion_effect and seasonality are test-only.
 Run once; the test split is frozen by its hash and must not be edited after the first test run."""
@@ -62,6 +62,11 @@ SPEC = [  # (split, kind, scenario, expected label)
     ("dev", "noisy_negative_distractor", {"noise": N(static=("CarrierB", "South"), bump=("CarrierA", "East", 0.1))}, "none"),
     ("dev", "noisy_seasonality", {"seasonal_p": 0.24, "noise": N()}, "seasonality"),
     ("dev", "noisy_promotion_effect", {"promo": {"category": "beauty", "region": "North", "causes_late": True}, "noise": N(static=("CarrierA", "West"))}, "promotion_effect"),
+    # Added 22 Oct: HARDER dev cases (weak signal, heavy missing data, close multi-cause, breach inside a broad rise).
+    ("dev", "weak_noisy_breach", {**breach("CarrierB", "West", 0.22), "noise": N(drop=0.6)}, "carrier_sla_breach"),
+    ("dev", "close_multi_cause", {**breach("CarrierC", "East", 0.4), "noise": N(breach2=("CarrierA", "South", 0.34))}, "carrier_sla_breach"),
+    ("dev", "breach_inside_broad_rise", {**breach("CarrierA", "West", 0.55), "seasonal_p": None, "noise": N(bump=("CarrierB", "North", 0.15))}, "carrier_sla_breach"),
+    ("dev", "noisy_negative_heavy_missing", {"noise": N(drop=0.8, static=("CarrierC", "West"))}, "none"),
 ]
 
 def secondary(sc):
@@ -81,7 +86,7 @@ def main():
     for q in qs:  # keep the frozen test split byte-identical to its original form
         if q["split"] == "test":
             q.pop("expected_segment"); q.pop("expected_secondary")
-    assert sum(q["split"] == "test" for q in qs) == 18 and len(qs) == 36
+    assert sum(q["split"] == "test" for q in qs) == 18 and len(qs) == 40
     (E / "questions.json").write_text(json.dumps(qs, indent=2) + "\n")
     test = json.dumps([q for q in qs if q["split"] == "test"], sort_keys=True).encode()
     (E / "SPLITS.sha256").write_text(hashlib.sha256(test).hexdigest() + "  test split of eval/questions.json\n")

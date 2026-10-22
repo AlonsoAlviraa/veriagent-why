@@ -21,3 +21,9 @@ Noisy variant (`noise` key, see `N()` in `make_questions.py`): per-carrier base 
 
 ## Commands
 `python eval/make_questions.py`, `python eval/make_test_v2.py` (already run; do not regenerate), `python eval/build_datasets.py [--v2]`, `python eval/eval.py --split dev`, `python eval/eval.py --split test_v2 --final-v2` (final run only).
+
+## Dev notes (22 Oct 2026, sample provider)
+- 22 dev questions: agent 21/22, baseline 6/22. Agent segment match 11/13, secondary cause detected 1/3, secondary false positives 0/19.
+- q37 (weak breach, 60% missing tickets/returns): agent returns "unresolved" (confidence 20), which is the intended behaviour when the signal is too weak, but it counts as a miss.
+- q38 (close multi-cause): the planted primary (CarrierC/East, p=0.40) came out weaker in the sampled rows than the planted secondary (CarrierA/South, p=0.34), so the agent's "top" follows the data, not the planted ranking. Ground-truth ordering is ill-defined for close causes; this case was not tuned on.
+- The secondary-cause z threshold (3.0) was chosen on dev; see the comment in `app/agents/core.py`.

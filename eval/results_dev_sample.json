@@ -1,21 +1,21 @@
 {
   "secondary_metrics": {
-    "segment_match": "10/10",
-    "secondary_detected": "1/2",
-    "secondary_false_positives": "0/16"
+    "segment_match": "11/13",
+    "secondary_detected": "1/3",
+    "secondary_false_positives": "0/19"
   },
   "split": "dev",
   "provider": "sample",
-  "n": 18,
-  "agent_k": 18,
+  "n": 22,
+  "agent_k": 21,
   "agent_wilson95": [
-    0.8241154494176252,
-    1.0
+    0.7820151050048196,
+    0.9919307806988522
   ],
-  "baseline_k": 5,
+  "baseline_k": 6,
   "baseline_wilson95": [
-    0.12499569146355474,
-    0.5087307754619452
+    0.1315058201581444,
+    0.4815212369900198
   ],
   "rows": [
     {
@@ -40,7 +40,7 @@
       "baseline_context_tokens": 501,
       "agent_s2_context_tokens": 508,
       "log": "logs/trace-eval-q01.jsonl",
-      "secs": 0.45
+      "secs": 0.4
     },
     {
       "qid": "q02",
@@ -64,7 +64,7 @@
       "baseline_context_tokens": 657,
       "agent_s2_context_tokens": 666,
       "log": "logs/trace-eval-q02.jsonl",
-      "secs": 0.25
+      "secs": 0.24
     },
     {
       "qid": "q03",
@@ -112,7 +112,7 @@
       "baseline_context_tokens": 594,
       "agent_s2_context_tokens": 603,
       "log": "logs/trace-eval-q04.jsonl",
-      "secs": 0.25
+      "secs": 0.24
     },
     {
       "qid": "q05",
@@ -130,7 +130,7 @@
       "baseline_context_tokens": 315,
       "agent_s2_context_tokens": 320,
       "log": "logs/trace-eval-q05.jsonl",
-      "secs": 0.22
+      "secs": 0.23
     },
     {
       "qid": "q06",
@@ -154,7 +154,7 @@
       "baseline_context_tokens": 700,
       "agent_s2_context_tokens": 704,
       "log": "logs/trace-eval-q06.jsonl",
-      "secs": 0.24
+      "secs": 0.25
     },
     {
       "qid": "q25",
@@ -172,7 +172,7 @@
       "baseline_context_tokens": 356,
       "agent_s2_context_tokens": 357,
       "log": "logs/trace-eval-q25.jsonl",
-      "secs": 0.25
+      "secs": 0.24
     },
     {
       "qid": "q26",
@@ -190,7 +190,7 @@
       "baseline_context_tokens": 353,
       "agent_s2_context_tokens": 360,
       "log": "logs/trace-eval-q26.jsonl",
-      "secs": 0.23
+      "secs": 0.25
     },
     {
       "qid": "q27",
@@ -211,7 +211,7 @@
       "baseline_context_tokens": 489,
       "agent_s2_context_tokens": 493,
       "log": "logs/trace-eval-q27.jsonl",
-      "secs": 0.24
+      "secs": 0.25
     },
     {
       "qid": "q28",
@@ -232,7 +232,7 @@
       "baseline_context_tokens": 488,
       "agent_s2_context_tokens": 493,
       "log": "logs/trace-eval-q28.jsonl",
-      "secs": 0.25
+      "secs": 0.26
     },
     {
       "qid": "q29",
@@ -256,7 +256,7 @@
       "baseline_context_tokens": 606,
       "agent_s2_context_tokens": 616,
       "log": "logs/trace-eval-q29.jsonl",
-      "secs": 0.23
+      "secs": 0.25
     },
     {
       "qid": "q30",
@@ -280,7 +280,7 @@
       "baseline_context_tokens": 598,
       "agent_s2_context_tokens": 600,
       "log": "logs/trace-eval-q30.jsonl",
-      "secs": 0.24
+      "secs": 0.25
     },
     {
       "qid": "q31",
@@ -310,7 +310,7 @@
       "baseline_context_tokens": 537,
       "agent_s2_context_tokens": 540,
       "log": "logs/trace-eval-q31.jsonl",
-      "secs": 0.24
+      "secs": 0.25
     },
     {
       "qid": "q32",
@@ -361,7 +361,7 @@
       "baseline_context_tokens": 651,
       "agent_s2_context_tokens": 657,
       "log": "logs/trace-eval-q33.jsonl",
-      "secs": 0.25
+      "secs": 0.26
     },
     {
       "qid": "q34",
@@ -379,7 +379,7 @@
       "baseline_context_tokens": 205,
       "agent_s2_context_tokens": 207,
       "log": "logs/trace-eval-q34.jsonl",
-      "secs": 0.21
+      "secs": 0.23
     },
     {
       "qid": "q35",
@@ -397,7 +397,7 @@
       "baseline_context_tokens": 356,
       "agent_s2_context_tokens": 363,
       "log": "logs/trace-eval-q35.jsonl",
-      "secs": 0.23
+      "secs": 0.27
     },
     {
       "qid": "q36",
@@ -418,7 +418,97 @@
       "baseline_context_tokens": 611,
       "agent_s2_context_tokens": 619,
       "log": "logs/trace-eval-q36.jsonl",
-      "secs": 0.26
+      "secs": 0.25
+    },
+    {
+      "qid": "q37",
+      "kind": "weak_noisy_breach",
+      "expected": "carrier_sla_breach",
+      "agent": "none",
+      "agent_status": "partial",
+      "agent_confidence": 20,
+      "agent_segment": null,
+      "expected_segment": {
+        "carrier": "CarrierB",
+        "region": "West"
+      },
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "unresolved",
+      "baseline": "none",
+      "baseline_context_tokens": 213,
+      "agent_s2_context_tokens": 218,
+      "log": "logs/trace-eval-q37.jsonl",
+      "secs": 0.21
+    },
+    {
+      "qid": "q38",
+      "kind": "close_multi_cause",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 100,
+      "agent_segment": {
+        "carrier": "CarrierA",
+        "region": "South"
+      },
+      "expected_segment": {
+        "carrier": "CarrierC",
+        "region": "East"
+      },
+      "agent_secondary": null,
+      "expected_secondary": {
+        "carrier": "CarrierA",
+        "region": "South"
+      },
+      "resolution": "resolved",
+      "baseline": "none",
+      "baseline_context_tokens": 624,
+      "agent_s2_context_tokens": 624,
+      "log": "logs/trace-eval-q38.jsonl",
+      "secs": 0.24
+    },
+    {
+      "qid": "q39",
+      "kind": "breach_inside_broad_rise",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 100,
+      "agent_segment": {
+        "carrier": "CarrierA",
+        "region": "West"
+      },
+      "expected_segment": {
+        "carrier": "CarrierA",
+        "region": "West"
+      },
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "none",
+      "baseline_context_tokens": 500,
+      "agent_s2_context_tokens": 502,
+      "log": "logs/trace-eval-q39.jsonl",
+      "secs": 0.25
+    },
+    {
+      "qid": "q40",
+      "kind": "noisy_negative_heavy_missing",
+      "expected": "none",
+      "agent": "none",
+      "agent_status": "partial",
+      "agent_confidence": 20,
+      "agent_segment": null,
+      "expected_segment": null,
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "unresolved",
+      "baseline": "none",
+      "baseline_context_tokens": 143,
+      "agent_s2_context_tokens": 151,
+      "log": "logs/trace-eval-q40.jsonl",
+      "secs": 0.2
     }
   ]
 }
