@@ -47,9 +47,12 @@ The open-source Meterless reference engines (github.com/Meterless/Meterless, Apa
 `LLM_PROVIDER=nightshift|nvidia|sample` (`SAMPLE_MODE=true` forces `sample`). `nightshift`: Meterless Nightshift OpenAI-compatible endpoint (`NIGHTSHIFT_BASE_URL`). `nvidia`: NVIDIA API (`NVIDIA_API_KEY`, read from the environment only, never logged). Models: `REASONING_MODEL` (default `nvidia/nemotron-3.5-super-vl-120b-a12b`, S2: Planner, Cause Analyst, Writer) and `FAST_MODEL` (default `nvidia/nemotron-3.5-lightning-30b-a3b`, S1: relevance filter, Evaluator). Model outputs are validated JSON; any failure (empty reply, HTTP error, invalid JSON or label) falls back to the deterministic path and is logged. Numbers always come from SQL.
 
 ## Evaluation
-`make data`, `make eval-dev`, `make eval-test` (frozen; hash in `eval/SPLITS.sha256`).
-28 questions on seeded synthetic datasets: 10 dev (4 added later, see below), 18 test. Negative controls in both splits; the demo scenario in neither. Baseline: plain RAG (BM25 over serialised rows, same data, question and token budget; same model in live mode). Metric: exact match of `top_cause_label`, k/n with a Wilson 95% interval.
-History and caveats: [`eval/RESULTS_HISTORY.md`](eval/RESULTS_HISTORY.md). In short, with the sample provider (no model on either side): test run 1, 14/18 vs 6/18; after adding seasonality and promotion-vs-carrier logic tuned on 4 new dev questions, test run 2, 18/18 vs 6/18. Run 2 is not an unseen-family evaluation, and the data is clean synthetic data written by the same author. The model-based comparison has not been run.
+See [`eval/README.md`](eval/README.md). Three sets:
+- **dev** (22 questions, clean + noisy + harder cases): used for tuning. Sample provider, no model on either side: agent 21/22, plain-RAG baseline 6/22.
+- **test v1** (18): **contaminated** (run twice, the second time after seeing failures); kept only as history in [`eval/RESULTS_HISTORY.md`](eval/RESULTS_HISTORY.md).
+- **test v2** (18, noisy generator, new seeds): **held out and never run**. Reserved for the final Nemotron eval; frozen by `eval/SPLITS_test_v2.sha256`.
+Metric: exact match of `top_cause_label`, k/n with a Wilson 95% interval; segment and secondary-cause detection where defined. Data is synthetic and written by the same author as the agent.
+Live check before the model eval: `make smoke-nvidia` (skips cleanly if `NVIDIA_API_KEY` is unset; never prints it).
 
 ## Confidence (deterministic)
 `conf = round(100 × (0.45·C + 0.35·A + 0.20·(1−R)))`, where C = share of all proposed claims that passed the Claim Gate, A = share of views with relevant rows that agree with the top cause (A = 0 and cap 50 if none), R = refuting ÷ (supporting + refuting) edges for the top cause. Partial runs are capped at 40. See `app/confidence.py`.

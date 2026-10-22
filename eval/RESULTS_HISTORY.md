@@ -17,3 +17,6 @@ Caveats (read before quoting run 2):
 - KPI lens (`app/kpis.py`): `return_rate` added next to `on_time_rate`.
 - Materiality guard in the Evidence Evaluator: no cause is supported if the KPI rose < 1 pp or by < 5 excess events; a promotion needs >= 5 excess events.
 - Dev split after these changes (sample provider): agent 10/10, baseline 3/10, same as before. Test numbers above refer to the code at the run-2 commit.
+
+## 22 Oct 2026, later: v1 test retired
+The v1 test split is treated as **contaminated** from now on and will not be run again. A new held-out set, `questions_test_v2.json` (18 noisy questions, seeds 5001+), was written and frozen before the robustness work and is reserved for the final Nemotron eval. See `eval/README.md`.
