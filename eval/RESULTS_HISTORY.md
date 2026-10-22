@@ -12,3 +12,8 @@ Caveats (read before quoting run 2):
 - The data generator and the planted causes were written by the same author as the agent. The scenarios are clean and synthetic. Expect lower scores on real or noisier data.
 - No model was used. The baseline's sample-mode reader is a fixed rule (`eval/baseline_rag.py`). The model comparison with Nemotron is still to be run.
 - Details: `eval/history/`.
+
+## Code changes after run 2 (test split NOT rerun; the rerun budget is used)
+- KPI lens (`app/kpis.py`): `return_rate` added next to `on_time_rate`.
+- Materiality guard in the Evidence Evaluator: no cause is supported if the KPI rose < 1 pp or by < 5 excess events; a promotion needs >= 5 excess events.
+- Dev split after these changes (sample provider): agent 10/10, baseline 3/10, same as before. Test numbers above refer to the code at the run-2 commit.

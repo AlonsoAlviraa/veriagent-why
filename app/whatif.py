@@ -17,9 +17,10 @@ def whatif(db, result: dict) -> dict:
     n_seg, late_seg = agg(w, v, q["period"])
     nb, lb = agg(w, v, q["baseline"])
     exp_seg = n_seg * (lb / nb) if nb else late_seg
-    observed = 100 * (1 - late_all / n_all)
-    est = 100 * (1 - (late_all - late_seg + exp_seg) / n_all)
+    from .kpis import KPIS, display_rate
+    observed = display_rate(q["kpi"], 100 * (1 - late_all / n_all))
+    est = display_rate(q["kpi"], 100 * (1 - (late_all - late_seg + exp_seg) / n_all))
     return {"label": "ESTIMATE", "available": True, "badge": "ESTIMATE - model-based, not observed",
-            "neutralised_segment": top["segment"], "observed_on_time_rate": round(observed, 2),
+            "neutralised_segment": top["segment"], "kpi": q["kpi"], "observed_on_time_rate": round(observed, 2),
             "estimated_on_time_rate_if_segment_at_baseline": round(est, 2),
             "method": "replace the segment's period late count with its period volume x its own baseline late rate"}

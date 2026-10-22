@@ -72,7 +72,8 @@ def whatif_ep(run_id: str):
     from .adapters.zetaris import get_backend
     from .whatif import whatif
     r = result(run_id)
-    return whatif(get_backend(r["question"].get("dataset")), r)
+    from .kpis import KpiLens
+    return whatif(KpiLens(get_backend(r["question"].get("dataset")), r["question"]["kpi"]), r)
 
 
 @app.get("/memo/{run_id}.md", response_class=PlainTextResponse)

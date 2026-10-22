@@ -145,6 +145,10 @@ class EvidenceEvaluator:
                             [*q["baseline"], *q["baseline"], *q["period"], *q["period"]])[0]
         base_rate = tot["l_b"] / tot["n_b"]
         total_excess = tot["l_p"] - tot["n_p"] * base_rate
+        MIN_RISE_PP, MIN_EXCESS = 1.0, 5  # materiality guard: below this the KPI did not move enough to explain
+        moved = tot["n_p"] and 100 * (tot["l_p"] / tot["n_p"] - base_rate) >= MIN_RISE_PP and total_excess >= MIN_EXCESS
+        if not moved:
+            total_excess = 0
         verdicts, supported = [], []
         for h in hyps:
             if h["type"] == "segment":
@@ -178,7 +182,7 @@ class EvidenceEvaluator:
                                       [*q["period"], pr["category"], pr["region"]])[0]
                     exp = (r["n"] or 0) * base_rate
                     share = ((r["late"] or 0) - exp) / total_excess if total_excess > 0 else 0
-                    v = "supports" if share >= 0.5 else "refutes"
+                    v = "supports" if share >= 0.5 and (r["late"] or 0) - exp >= MIN_EXCESS else "refutes"
                     verdicts.append({"hyp": h["id"], "verdict": v, "promo_id": pr["promo_id"], "dates_overlap": True,
                                      "promo_segment": {"category": pr["category"], "region": pr["region"]},
                                      "share_of_excess_late": round(share, 3), "promo_shipments": r["n"], "promo_late": r["late"]})
@@ -199,7 +203,7 @@ class EvidenceEvaluator:
         seg_sup = [h for h in supported if h["type"] == "segment"]
         if seg_sup and all(len(h["dims"]) == 1 for h in seg_sup):
             feedback = {"gap": "single-dimension segment supported; drill down to carrier x region to locate the cause", "drill": sorted(DIMS)}
-        return {"verdicts": verdicts, "feedback": feedback, "base_rate_pp": round(100 * base_rate, 2),
+        return {"verdicts": verdicts, "feedback": feedback, "base_rate_pp": round(100 * base_rate, 2), "kpi_moved_materially": bool(moved),
                 "total_excess_late": round(total_excess, 1), "totals": tot}
 
 
@@ -274,6 +278,8 @@ class Writer:
             from ..checks.claims import metric_value
             for name, win in (("period", q["period"]), ("baseline", q["baseline"])):
                 v = metric_value(self.db, "on_time_rate", top["segment"], win)
+                from ..kpis import KPIS, display_rate
+                kp = q["kpi"]
                 cid = f"C_ontime_{name}"
                 if cid in blocked or v is None:
                     continue
@@ -281,7 +287,7 @@ class Writer:
                     f"SELECT l.shipment_id FROM {FROM} WHERE {w} AND l.ship_date BETWEEN ? AND ? ORDER BY l.shipment_id LIMIT 5", [*top["segment"].values(), *win])]
                 claims.append({"id": cid, "metric": "on_time_rate", "segment": top["segment"], "window": win,
                                "value": round(v, 2), "row_ids": rid,
-                               "text": f"On-time rate for {', '.join(f'{k}={x}' for k, x in top['segment'].items()) or 'all segments'} was {round(v, 1)}% in the {name} window ({win[0]}..{win[1]})."})
+                               "text": f"{KPIS[kp]['label']} for {', '.join(f'{k}={x}' for k, x in top['segment'].items()) or 'all segments'} was {round(display_rate(kp, v), 1)}% in the {name} window ({win[0]}..{win[1]})."})
         return claims
 
 

@@ -19,14 +19,15 @@ DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 def parse_question(inp: dict) -> dict:
     q = {"query": inp.get("query", ""), "kpi": inp.get("kpi"), "period": inp.get("period"), "baseline": inp.get("baseline"), "dataset": inp.get("dataset")}
-    if not q["kpi"] and re.search(r"on[- ]time", q["query"], re.I):
-        q["kpi"] = "on_time_rate"
+    from .kpis import detect, KPIS
+    if not q["kpi"]:
+        q["kpi"] = detect(q["query"])
     if not (q["period"] and q["baseline"]):
         d = DATE.findall(q["query"])
         if len(d) == 4:
             q["baseline"], q["period"] = d[:2], d[2:]
-    if q["kpi"] != "on_time_rate" or not q["period"] or not q["baseline"]:
-        raise ValueError("Day-1 build supports KPI on_time_rate with explicit baseline and period dates (YYYY-MM-DD)")
+    if q["kpi"] not in KPIS or not q["period"] or not q["baseline"]:
+        raise ValueError(f"supported KPIs: {sorted(KPIS)}, with explicit baseline and period dates (YYYY-MM-DD)")
     return q
 
 
@@ -69,7 +70,8 @@ def run(inp: dict, run_id: str | None = None) -> dict:
     ctx = LLMCtx(live=prov != "sample")
     tr.log("orchestrator", "start", provider=prov)
     q = parse_question(inp)
-    db = get_backend(inp.get("dataset"))
+    from .kpis import KpiLens
+    db = KpiLens(get_backend(inp.get("dataset")), q["kpi"])
     try:
         bridge = Bridge()
         bridge.call("reset")
