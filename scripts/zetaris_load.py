@@ -74,7 +74,7 @@ def zsql(cur, sql, dry, ok_if=("already exist", "exists")):
             return None
     except Exception as e:
         if any(k in str(e).lower() for k in ok_if):
-            print("   (already exists, kept)")
+            print("   (tolerated: " + str(e).splitlines()[0][:100] + ")")
             return None
         raise
 
@@ -129,7 +129,7 @@ def main(argv=None) -> int:
         host = os.environ.get("VA_REST_HOST_FROM_ZETARIS", "host.docker.internal")
         port = os.environ.get("VA_REST_PORT", "8765")
         for v in rest_views:
-            zsql(cur, f"DROP LIGHTNING DATABASE TABLE {RESTDB}.{v}_raw", a.dry_run, ok_if=("not exist", "not found", "no such"))
+            zsql(cur, f"DROP LIGHTNING DATABASE TABLE {RESTDB}.{v}_raw", a.dry_run, ok_if=("not exist", "doesn't exist", "does not exist", "not found", "no such"))
             zsql(cur, f'CREATE LIGHTNING REST TABLE {v}_raw FROM {RESTDB} REQUEST(endpoint "http://{host}:{port}/{v}", '
                       f'method "get", response_type "json", http_encoding "URLENCODED") HEADER () BODY ()', a.dry_run)
 
