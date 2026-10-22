@@ -24,7 +24,7 @@ Doc abbreviations as in `ARCH_COMPLIANCE_AUDIT.md`: OR, SR, DQ, AUP, SSE (strong
 | Agent | Model | Role and authority |
 |---|---|---|
 | Planner | `nemotron-3.5-super-vl-120b-a12b` (S2) | Writes 3–5 competing hypotheses and SQL plans into H-MEM. Revises the plan when the Evaluator sends work back |
-| Retriever | deterministic + Zetaris | Runs SQL across the 5 views plus BM25 over ticket text. Broadens the query on zero rows or a timeout (max 2) |
+| Retriever (Agentic, v6.3) | `nemotron-3.5-lightning-30b-a3b` (S1) tool loop + Zetaris | Per hypothesis: a mandatory seed tool, then up to 2 model steps that judge sufficiency and pick the next whitelisted tool (`segment_stats`, `drill_down`, `promotions_overlap`, `text_search`). No free-form SQL: tools render fixed Zetaris templates with validated args. Text search is hybrid BM25 + `nvidia/nemotron-3-embed-1b` fused by RRF. Caps 2 steps/hyp, 8 calls/round, 8000 tokens/round; any failure → deterministic policy. Every call is traced and written to H-MEM. Broadens the query on zero rows or a timeout (max 2) |
 | **S1 Relevance Filter** | `nemotron-3.5-lightning-30b-a3b`, thinking off (S1) | Scores each chunk/row group in parallel and drops irrelevant ones. **Consolidates** SQL metrics and text chunks into one evidence context in H-MEM. This is Alonso's S1+S2 pattern from arq1/arq2 and v4 |
 | Evidence Evaluator | `nemotron-3.5-lightning-30b-a3b`, thinking off (S1 verifier) | Marks each piece of evidence as supports / refutes / gap. **Runs its own Zetaris query** to confirm every number (SSE §5 "What was unique"). Sends work back to the Planner |
 | **Cause Analyst** | `nemotron-3.5-super-vl-120b-a12b` (S2) | Connects findings across views, ranks causes, estimates each cause's contribution with a deterministic decomposition, and picks `top_cause_label` from the fixed taxonomy |
@@ -147,7 +147,7 @@ Models are a cost/latency choice per role (System 1 = a small model with thinkin
 | 0:45–1:25 | **Highlight: the trap** | The Planner favours the promotion (its dates match). The Evaluator runs its own Zetaris query, the promoted SKUs/regions don't overlap with the loss, it **refutes it with row IDs** → Planner revises → requery → carrier-SLA evidence |
 | 1:25–1:55 | Decision memo (the Claim Gate passes it) | Ranked causes, the discarded promotion alternative with its row, the confidence breakdown, a click from a claim to its Zetaris row, the what-if ESTIMATE badge. Export to PDF |
 | 1:55–2:25 | Eval table | `eval/RESULTS.md` (test split, demo scenario excluded): v6.1 vs plain RAG with the same schema, k/18 with Wilson CI, unsupported-claim rate, trap avoidance, negative controls, time. Measured only, losses included |
-| 2:25–2:50 | Trace lines + sponsors | 4–5 JSONL lines (`needs_revision`, `query_zetaris`, `retry_count:1`). Meterless: the H-MEM ledger + the Markovian projected-vs-actual tokens (S1 savings). Nemotron Super = S2, small Nemotron = S1, routed through Nightshift (or the NVIDIA fallback, stated honestly). Built in Cursor |
+| 2:25–2:50 | Trace lines + sponsors | 4–5 JSONL lines (`needs_revision`, `query_zetaris`, `retry_count:1`). Meterless: the H-MEM ledger + the Markovian projected-vs-actual tokens (S1 savings). Nemotron Super = S2, small Nemotron = S1, called on the NVIDIA endpoint (Nightshift was not available; a labelled local simulator exists) |
 | 2:50–3:00 | Close | "Every claim has a row behind it." Repo URL |
 
 ---
@@ -197,7 +197,7 @@ Add to `PRE_EXISTING_WORK.md`:
 - Architecture sketches `diagrams/arq1.jpg`, `arq2.jpg` (the S1/S2 pattern) and `architecture-ata.svg`.
 - Diagrams v2–v5, v6 and **v6.1**, plus their generators (`diagrams/gen*.py`, including `gen_v6_1.py`). Design only, made before 22 Oct 00:00 UTC.
 - The **"noul" relevance-judge concept** from an earlier personal design sketch. Concept only, not used as a dependency unless declared.
-- The **VeriAgent verifier logic** (github.com/AlonsoAlviraa/VeriAgent, concept "verify before you answer"), re-implemented in Cursor and not copied. If any file is copied, list it.
+- The **VeriAgent verifier logic** (github.com/AlonsoAlviraa/VeriAgent, concept "verify before you answer"), re-implemented during the build window and not copied. If any file is copied, list it.
 - The repo skeleton (19 Oct), the Meterless bridge test, and the connectivity scaffold (as already listed).
 - The seeded data generator is written **during** the build, so it's not pre-existing. If it gets drafted before 02:00, declare it.
 

@@ -5,33 +5,35 @@
   "team": [
     {
       "name": "Alonso Alvira Ballano",
-      "hackos_email": "TODO",
+      "hackos_email": "",
       "github_username": "AlonsoAlviraa",
       "role": "Solo builder",
       "primary_contact": true
     }
   ],
   "repository_url": "https://github.com/AlonsoAlviraa/veriagent-why",
-  "demo_video_url": "TODO",
-  "slide_deck_url": "TODO",
+  "demo_video_url": "",
+  "slide_deck_url": "",
   "colab_links": [],
   "sponsor_technology": {
-    "zetaris": "Data layer: five views (v_orders, v_returns, v_tickets, v_logistics, v_promotions) queried by the Retriever and re-queried by the Evidence Evaluator and Claim Gate. REST backend implemented, not yet tested live; SAMPLE_MODE uses a DuckDB snapshot with the same views.",
+    "zetaris": "Default data layer: five views (v_orders, v_returns, v_tickets, v_logistics, v_promotions) queried over JDBC (Zetaris Lightning) by the Retriever and re-queried by the Evidence Evaluator and Claim Gate. When Zetaris is not configured the same SQL runs on a local DuckDB snapshot (SAMPLE_MODE, the explicit fallback), which is logged and shown in the memo.",
     "meterless": {
       "engines_used": [
         "H-MEM",
         "Markovian"
       ],
-      "where": "H-MEM stores hypotheses, evidence and support/refute edges (trust ledger exported per run); Markovian drives the Evaluator->Planner investigation rounds. Nightshift as primary model provider: pending availability."
+      "where": "H-MEM stores hypotheses, retrieval calls, evidence and support/refute edges (trust ledger exported per run); Markovian drives the Evaluator->Planner investigation rounds. Open-source reference engines vendored (Apache-2.0) and run via a node bridge; a missing node is logged and can be made fatal with METERLESS_REQUIRED=1. Meterless Nightshift was not available; a labelled local Nightshift-compatible simulator is included."
     },
-    "nvidia": "Nemotron 3.5 Super VL (S2 reasoning) and Nemotron 3.5 Lightning (S1 filter/verifier) via the provider switch; wired, not yet called live.",
-    "cursor": "Development environment for the whole build.",
+    "nvidia": "Nemotron 3.5 Super VL (S2: Planner, Cause Analyst, Writer), Nemotron 3.5 Lightning (S1: agentic retriever, relevance filter, Evidence Evaluator) and nemotron-3-embed-1b embeddings via the NVIDIA endpoint; live dev-split results in eval/RESULTS_dev_nvidia.md.",
     "unique": "The Evidence Evaluator re-queries the data itself and can send the Planner back; a deterministic Claim Gate blocks any claim or model-written number that the data does not support."
   },
   "models": [
     "nvidia/nemotron-3.5-super-vl-120b-a12b",
-    "nvidia/nemotron-3.5-lightning-30b-a3b"
+    "nvidia/nemotron-3.5-lightning-30b-a3b",
+    "nvidia/nemotron-3-embed-1b"
   ],
   "pre_existing_components": "See docs/PRE_EXISTING_WORK.md",
-  "sample_mode": true
+  "sample_mode": "fallback when Zetaris is not configured (SAMPLE_MODE=true forces it)",
+  "data": "Synthetic only (scripts/make_data.py, seeded); no real customer data.",
+  "ai_usage": "Code written during the build window by AI coding agents (Grok Bot) under the author's direction; see README 'AI and Model Usage'."
 }

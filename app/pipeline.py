@@ -1,7 +1,7 @@
 """Orchestrator: Planner -> Retriever -> S1 Filter -> Evidence Evaluator (loop to Planner, max 3)
 -> Cause Analyst -> Writer -> Claim Gate (loop to Cause Analyst, max 2) -> memo + confidence."""
 from __future__ import annotations
-import re, time, uuid
+import re, sys, time, uuid
 from .adapters.zetaris import get_backend
 from .agents.core import Planner, Retriever, S1Filter, EvidenceEvaluator, CauseAnalyst, Writer, ClaimGate
 from .confidence import confidence
@@ -12,10 +12,21 @@ from .agents.core import LLMCtx
 from .agents import llm_steps
 from .checks.claims import check_narrative
 from .trace import Tracer
+from .retrieval.agentic import AgenticRetriever
+from . import embeddings
 from .memo import render_memo
 
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
+
+
+def _rel(path):
+    """Artifact path for output: relative to the repo when inside it, else absolute (e.g. VA_LOG_DIR)."""
+    from app.config import ROOT
+    try:
+        return str(path.resolve().relative_to(ROOT.resolve()))
+    except ValueError:
+        return str(path.resolve())
 
 def parse_question(inp: dict) -> dict:
     q = {"query": inp.get("query", ""), "kpi": inp.get("kpi"), "period": inp.get("period"), "baseline": inp.get("baseline"), "dataset": inp.get("dataset")}
@@ -76,9 +87,20 @@ def run(inp: dict, run_id: str | None = None) -> dict:
         bridge = Bridge()
         bridge.call("reset")
     except Exception as e:
+        from .config import meterless_required
+        if meterless_required():
+            raise RuntimeError(f"METERLESS_REQUIRED=1 but the Meterless bridge is unavailable: {e}") from e
         bridge = None
-        tr.log("orchestrator", "meterless_unavailable", error=str(e))
+        tr.log("orchestrator", "meterless_unavailable", error=str(e), fallback="local in-process graph (NOT Meterless)")
+        print(f"WARNING: Meterless bridge unavailable ({e}); using a local in-process fallback, NOT Meterless H-MEM/Markovian. "
+              "Set METERLESS_REQUIRED=1 to fail instead.", file=sys.stderr)
+    from .config import sample_mode, sample_mode_reason
+    if sample_mode() or db.name.startswith("sample"):
+        why = sample_mode_reason() if sample_mode() else "Zetaris not configured: automatic fallback"
+        tr.log("orchestrator", "data_fallback", data=db.name, reason=why, note="SAMPLE MODE: no Zetaris; synthetic DuckDB snapshot, same SQL")
+        print(f"NOTE: SAMPLE MODE ({why}): no Zetaris; data is the SYNTHETIC DuckDB snapshot (same view names and SQL).", file=sys.stderr)
     tr.log("orchestrator", "backend", data=db.name, meterless="bridge" if bridge else "local-fallback")
+    tr.backends = ({"data": db.name, "meterless": "meterless-bridge (vendored engines via node)" if bridge else "local-fallback (NOT Meterless)", "llm_provider": prov})
     from . import llm
     llm.set_deadline(t0 + TIMEOUTS["run_s"])  # model calls past the 8-min cap fail fast -> deterministic fallback
     try:
@@ -90,8 +112,11 @@ def run(inp: dict, run_id: str | None = None) -> dict:
 
 
 def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
+    for k in embeddings.STATS:
+        embeddings.STATS[k] = 0
     mem = HMem(bridge)
     planner, retr, s1 = Planner(), Retriever(db), S1Filter()
+    agentic = AgenticRetriever(db, retr, log=lambda ev_, **d: tr.log(retr.name, ev_, **d))
     ev, analyst, writer, gate = EvidenceEvaluator(db, retr), CauseAnalyst(db, q), Writer(db), ClaimGate(db)
     st = {"feedback": None, "verdicts": [], "rounds": [], "done": False}
 
@@ -100,8 +125,8 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
         n0 = len(ctx.calls)
         hyps = planner.plan(q, mem, st["feedback"], ctx, carryover or mem.recall(q["query"]))
         tr.log(planner.name, "hypotheses", round=rnd, hypotheses=[h["id"] for h in hyps], revised=bool(st["feedback"]))
-        chunks = retr.retrieve(hyps, q)
-        tr.log(retr.name, "retrieved", round=rnd, chunks=len(chunks))
+        chunks = agentic.retrieve(hyps, q, mem, ctx, st["feedback"], rnd)
+        tr.log(retr.name, "retrieved", round=rnd, chunks=len(chunks), agentic=dict(agentic.stats))
         kept, proj, act = s1.run(chunks, mem, ctx=ctx, question=q["query"])
         st["rounds"].append({"round": rnd, "s1_projected_tokens": proj, "s1_actual_tokens": act})
         tr.log(s1.name, "filtered", round=rnd, kept=len(kept), dropped=len(chunks) - len(kept), projected_tokens=proj, actual_tokens=act)
@@ -112,6 +137,7 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
         for c in ctx.calls[n0:]:
             tr.log(c["agent"], "model_call", round=rnd, call=c)
         st["feedback"] = res["feedback"]
+        mem.flush()
         summary = "; ".join(f"{v['hyp']}={v['verdict']}" for v in res["verdicts"])
         if not st["feedback"] or time.time() - t0 > TIMEOUTS["run_s"]:
             st["done"] = not st["feedback"]
@@ -195,15 +221,19 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
            "model_calls": ctx.calls, "resolution": "resolved" if status == "success" else "unresolved",
            "unresolved_reasons": reasons if status != "success" else [], "open_hypotheses": open_h,
            "refuted_hypotheses": sorted({v["hyp"] for v in st["verdicts"] if v["verdict"] == "refutes"}),
+           "retrieval": {"mode": "agentic", "stats": agentic.stats, "embed_model": embeddings.model_name(),
+                         "embed_backend": embeddings.backend(), "embed_stats": dict(embeddings.STATS),
+                         "hmem_embedder": mem.embedder, "hmem_embed_stats": mem.embed_stats},
+           "backends": dict(getattr(tr, "backends", {})),
            "evidence_graph": {"backend": mem.backend, "nodes": len(mem.nodes), "edges": len(mem.edges),
                               "graph": {"nodes": list(mem.nodes.values()), "edges": mem.edges},
-                              "hmem_ledger_entries": len(ledger["entries"]), "hmem_ledger_file": f"logs/{lpath.name}"}}
+                              "hmem_ledger_entries": len(ledger["entries"]), "hmem_ledger_file": _rel(lpath)}}
     from . import report
     out["run_report"] = report.build(ctx.calls, provider(), st["rounds"], mk, time.time() - t0, deadline_hit)
     rpath = tr.path.parent / f"report-{run_id}.json"
     rpath.write_text(__import__("json").dumps(out["run_report"], indent=2, default=str))
     tr.log("observability", "run_report", tokens=out["run_report"]["tokens"], model_calls=out["run_report"]["model_calls"],
-           cost=out["run_report"]["cost"], file=f"logs/{rpath.name}")
+           cost=out["run_report"]["cost"], file=_rel(rpath))
     out["memo_md"] = render_memo(out, run_id) + "\n".join(report.to_md(out["run_report"])) + "\n"
     memo_path = tr.path.parent / f"memo-{run_id}.md"
     memo_path.write_text(out["memo_md"])
@@ -215,7 +245,7 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
         pass
     tr.log("orchestrator", "end", status=status, confidence=conf["confidence"])
     return {"run_id": run_id, "status": status, "output": {"summary": out["memo_md"].splitlines()[1],
-            "result": out, "artifacts": [f"logs/{memo_path.name}", f"logs/{lpath.name}", f"logs/{rpath.name}"]
-            + ([f"logs/memo-{run_id}.pdf"] if (tr.path.parent / f"memo-{run_id}.pdf").exists() else [])},
+            "result": out, "artifacts": [_rel(memo_path), _rel(lpath), _rel(rpath)]
+            + ([_rel(tr.path.parent / f"memo-{run_id}.pdf")] if (tr.path.parent / f"memo-{run_id}.pdf").exists() else [])},
             "agents": [{"name": a.name} for a in (planner, retr, s1, ev, analyst, writer, gate)],
-            "trace_id": tr.trace_id, "log_file": f"logs/{tr.path.name}", "execution_time_seconds": round(time.time() - t0, 3)}
+            "trace_id": tr.trace_id, "log_file": _rel(tr.path), "execution_time_seconds": round(time.time() - t0, 3)}

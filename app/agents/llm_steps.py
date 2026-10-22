@@ -65,3 +65,23 @@ def narrative(claims: list[dict], discarded: list[dict]) -> tuple[str, dict]:
     if not r["content"] or not r["content"].strip():
         raise ValueError("empty model response")
     return r["content"].strip(), r
+
+
+def retrieval_step(question: str, hypothesis: str, gap: str, observations: str, tools: dict, values: dict) -> tuple[dict, dict]:
+    """Agentic Retriever step (S1, thinking off). Output schema:
+    {"sufficient": bool, "tool": one of tools | null, "args": {...}, "why": str}. Validated again by the
+    retriever's whitelist; the model never writes SQL."""
+    r = llm.complete([{"role": "system", "content": (
+        "You are the retrieval agent of a KPI root-cause investigation. For ONE hypothesis, decide whether the evidence "
+        "gathered so far is sufficient to test it; if not, choose ONE next tool call that would best confirm or refute it "
+        "(e.g. drill into the most suspicious segment or date range, or search complaint text with a reformulated query). "
+        "You cannot write SQL. Reply with JSON only: {\"sufficient\": true|false, \"tool\": name|null, \"args\": {}, \"why\": \"<15 words\"}.")},
+        {"role": "user", "content": f"Question: {question}\nHypothesis: {hypothesis}\nOpen gap from evaluator: {gap or 'none'}\n"
+                                    f"Tools: {json.dumps(tools)}\nValid values: {json.dumps(values)}\nEvidence so far: {observations[:1800]}"}], "s1", 220)
+    d = _json(r["content"])
+    if not isinstance(d, dict) or "sufficient" not in d:
+        raise ValueError("bad retrieval decision schema")
+    if d.get("tool") is not None and not isinstance(d.get("tool"), str):
+        raise ValueError("tool must be a string")
+    return {"sufficient": bool(d["sufficient"]), "tool": d.get("tool"), "args": d.get("args") if isinstance(d.get("args"), dict) else {},
+            "why": str(d.get("why", ""))[:200]}, r

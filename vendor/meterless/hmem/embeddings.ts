@@ -23,7 +23,16 @@ function fnv1a(str: string): number {
   return h >>> 0;
 }
 
+// VeriAgent Why local change (declared in vendor/README / docs): optional override so a host can
+// supply real embedding vectors through the same text -> number[] contract.
+let embedOverride: ((text: string) => number[] | undefined) | null = null;
+export function setEmbedOverride(fn: ((text: string) => number[] | undefined) | null): void {
+  embedOverride = fn;
+}
+
 export function embed(text: string): number[] {
+  const o = embedOverride?.(text);
+  if (o) return o;
   const vec = new Array<number>(DIM).fill(0);
   for (const token of tokenize(text)) {
     const h = fnv1a(token);
@@ -37,6 +46,7 @@ export function embed(text: string): number[] {
 }
 
 export function cosine(a: number[], b: number[]): number {
+  if (a.length !== b.length) return 0; // VeriAgent Why local change: mixed hash/real vectors never compare
   let dot = 0;
   for (let i = 0; i < a.length; i++) dot += a[i] * b[i];
   return dot; // both vectors are unit-length

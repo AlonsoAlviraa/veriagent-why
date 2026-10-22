@@ -34,6 +34,9 @@ def complete(messages: list[dict], tier: str = "s2", max_tokens: int = 1024) -> 
     if p == "nightshift":
         # Meterless Runtime provider contract: /v1 base, bearer token, meterless-app header, model ids are routing modes.
         base, key = env("NIGHTSHIFT_BASE_URL", "http://127.0.0.1:8088/v1"), env("NIGHTSHIFT_API_KEY")
+        if not key and env("NIGHTSHIFT_API_KEY_FILE"):  # e.g. the local simulator's token file (app/nightshift_sim.py)
+            from pathlib import Path
+            key = Path(env("NIGHTSHIFT_API_KEY_FILE")).expanduser().read_text().strip()
         model = env("NIGHTSHIFT_MODEL_S1" if tier == "s1" else "NIGHTSHIFT_MODEL_S2", "meterless/auto")
         headers.update({"meterless-app": "veriagent-why", "meterless-scope": "user"})
         timeout = 180

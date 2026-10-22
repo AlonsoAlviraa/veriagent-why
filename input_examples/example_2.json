@@ -1,0 +1,10 @@
+{
+  "run_id": "example-002",
+  "input": {
+    "query": "Did the Home week South promotion cause the drop in on-time delivery between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+    "kpi": "on_time_rate",
+    "baseline": ["2026-09-15", "2026-09-30"],
+    "period": ["2026-10-01", "2026-10-14"]
+  },
+  "options": {"sample_mode": true}
+}
