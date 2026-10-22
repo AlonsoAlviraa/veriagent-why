@@ -20,6 +20,7 @@ a.row{font-family:monospace;cursor:pointer;color:#2456c7}pre{background:#f3f4f7;
 <section>
  <div class="card"><h2>Question</h2>
   <label>Question</label><textarea id="q" rows="3">Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?</textarea>
+  <label>KPI</label><select id="k"><option value="on_time_rate">On-time delivery rate</option><option value="return_rate">Return rate</option></select>
   <label>Baseline (start, end)</label><input id="b" value="2026-09-15,2026-09-30">
   <label>Period (start, end)</label><input id="p" value="2026-10-01,2026-10-14">
   <label>Dataset (empty = demo snapshot)</label><input id="d" value="">
@@ -39,7 +40,7 @@ const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"]/g,c=>(
 async function go(){
   const [b0,b1]=$("b").value.split(",").map(s=>s.trim()), [p0,p1]=$("p").value.split(",").map(s=>s.trim());
   DS=$("d").value.trim()||null;
-  const input={query:$("q").value,kpi:"on_time_rate",baseline:[b0,b1],period:[p0,p1]}; if(DS) input.dataset=DS;
+  const input={query:$("q").value,kpi:$("k").value,baseline:[b0,b1],period:[p0,p1]}; if(DS) input.dataset=DS;
   $("trace").innerHTML="";$("memo").innerHTML="";$("conf").innerHTML="";$("graph").innerHTML="…";$("wb").disabled=true;
   const r=await (await fetch("api/runs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({input})})).json();
   RID=r.run_id; $("st").textContent="running "+RID; poll(0);
@@ -84,5 +85,5 @@ function graph(g){
 }
 async function row(id){const r=await fetch(`api/rows/v_logistics/${id}`+(DS?`?dataset=${DS}`:"")); $("rowview").hidden=false; $("rowview").textContent=JSON.stringify(await r.json(),null,2);}
 async function whatif(){const w=await (await fetch(`api/runs/${RID}/whatif`,{method:"POST"})).json();
-  $("whatif").innerHTML=w.available?`<p><span class="badge est">${esc(w.badge)}</span></p><table><tr><th>Observed on-time rate</th><td>${w.observed_on_time_rate}%</td></tr><tr><th>Estimated if ${esc(JSON.stringify(w.neutralised_segment))} at its baseline</th><td>${w.estimated_on_time_rate_if_segment_at_baseline}%</td></tr></table><small>${esc(w.method)}</small>`:`<p><span class="badge est">ESTIMATE</span> not available: ${esc(w.reason)}</p>`;}
+  $("whatif").innerHTML=w.available?`<p><span class="badge est">${esc(w.badge)}</span></p><table><tr><th>Observed ${esc(w.kpi)}</th><td>${w.observed_on_time_rate}%</td></tr><tr><th>Estimated if ${esc(JSON.stringify(w.neutralised_segment))} at its baseline</th><td>${w.estimated_on_time_rate_if_segment_at_baseline}%</td></tr></table><small>${esc(w.method)}</small>`:`<p><span class="badge est">ESTIMATE</span> not available: ${esc(w.reason)}</p>`;}
 </script></body></html>
