@@ -2,7 +2,7 @@
   "run_id": "example-001",
   "status": "success",
   "output": {
-    "summary": "- Question: Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?\n- Baseline 2026-09-15..2026-09-30 vs period 2026-10-01..2026-10-14\n- Resolution: resolved\n- Data: SYNTHETIC labelled sample dataset",
+    "summary": "Top cause: **carrier_sla_breach** in carrier=CarrierB, region=North (estimated share of the excess late shipments vs the baseline late rate: 106%; above 100% means other segments improved).",
     "result": {
       "question": {
         "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
@@ -197,7 +197,7 @@
       "name": "claim_gate"
     }
   ],
-  "trace_id": "10af4d6bbd674732",
+  "trace_id": "1bbc02f6358049ab",
   "log_file": "logs/trace-example-001.jsonl",
-  "execution_time_seconds": 0.125
+  "execution_time_seconds": 0.13
 }

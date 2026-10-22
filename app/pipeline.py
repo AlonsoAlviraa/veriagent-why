@@ -126,7 +126,7 @@ def run(inp: dict, run_id: str | None = None) -> dict:
     memo_path = tr.path.parent / f"memo-{run_id}.md"
     memo_path.write_text(out["memo_md"])
     tr.log("orchestrator", "end", status=status, confidence=conf["confidence"])
-    return {"run_id": run_id, "status": status, "output": {"summary": out["memo_md"].split("\n\n")[1] if "\n\n" in out["memo_md"] else "",
+    return {"run_id": run_id, "status": status, "output": {"summary": out["memo_md"].splitlines()[1],
             "result": out, "artifacts": [str(memo_path.relative_to(tr.path.parents[1]))]},
             "agents": [{"name": a.name} for a in (planner, retr, s1, ev, analyst, writer, gate)],
             "trace_id": tr.trace_id, "log_file": f"logs/{tr.path.name}", "execution_time_seconds": round(time.time() - t0, 3)}
