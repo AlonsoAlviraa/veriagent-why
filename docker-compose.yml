@@ -1,3 +1,21 @@
-# PLACEHOLDER: to be written during the build window.
-# TODO services: agent (run.py / API, port 8000), meterless-bridge (Node, starts automatically, no manual step).
-# Zetaris: TODO (local platform vs official hackathon instance; SAMPLE_MODE fallback when unavailable).
+# api on :8000, ui on :8501 (UI only calls the API). SAMPLE_MODE by default; secrets only via .env (gitignored).
+services:
+  api:
+    build: .
+    command: ["python", "run.py", "--serve"]
+    environment:
+      SAMPLE_MODE: ${SAMPLE_MODE:-true}
+      PORT: "8000"
+    env_file:
+      - path: .env
+        required: false
+    ports: ["8000:8000"]
+    volumes: ["./logs:/app/logs"]
+  ui:
+    build: .
+    command: ["python", "run.py", "--ui"]
+    environment:
+      API_URL: http://api:8000
+      UI_PORT: "8501"
+    ports: ["8501:8501"]
+    depends_on: [api]

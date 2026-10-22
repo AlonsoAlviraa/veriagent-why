@@ -1,0 +1,10 @@
+.env
+.env.*
+.venv/
+.v/
+**/__pycache__/
+logs/*
+!logs/README.md
+data/*.duckdb
+data/eval/
+.git/
