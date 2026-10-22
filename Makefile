@@ -1,5 +1,5 @@
 PY ?= .venv/bin/python
-.PHONY: setup data run api ui test eval-dev eval-test scan clean-check bridge docker
+.PHONY: setup data run api ui test eval-dev eval-test scan clean-check bridge docker smoke-nvidia
 setup:            ## venv + deps
 	python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 data:             ## demo snapshot + eval datasets (synthetic, seeded)
@@ -24,3 +24,6 @@ bridge:           ## rebuild the Meterless bridge bundle
 	./meterless_bridge/build.sh
 docker:
 	docker compose up --build
+
+smoke-nvidia:     ## live NVIDIA smoke test (skips if NVIDIA_API_KEY unset; never prints it)
+	$(PY) scripts/nvidia_smoke.py
