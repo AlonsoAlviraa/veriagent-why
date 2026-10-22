@@ -1,0 +1,29 @@
+name: ci
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Secret scan (tracked files + history)
+        run: python scripts/secret_scan.py
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: Tests (SAMPLE_MODE)
+        run: python -m pytest -q
+      - name: Clean-clone SAMPLE_MODE run with empty .env
+        run: ./scripts/clean_clone_check.sh "$GITHUB_WORKSPACE"
+      - name: Eval dev split (sample provider)
+        run: python eval/build_datasets.py && SAMPLE_MODE=true python eval/eval.py --split dev
