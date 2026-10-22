@@ -4,8 +4,10 @@ Measured by `eval/eval.py` on seeded synthetic data. Metric: exact match of `top
 
 | System | Correct |
 |---|---|
-| VeriAgent Why | 10/10 (Wilson 95% CI 0.72–1.00) |
-| Plain-RAG baseline | 3/10 (Wilson 95% CI 0.11–0.60) |
+| VeriAgent Why | 18/18 (Wilson 95% CI 0.82–1.00) |
+| Plain-RAG baseline | 5/18 (Wilson 95% CI 0.12–0.51) |
+
+Secondary metrics (agent): segment match 10/10, secondary cause detected 1/2, secondary false positives 0/16.
 
 | qid | kind | expected | agent | baseline |
 |---|---|---|---|---|
@@ -19,3 +21,11 @@ Measured by `eval/eval.py` on seeded synthetic data. Metric: exact match of `top
 | q26 | seasonality | seasonality | seasonality | none |
 | q27 | promotion_effect | promotion_effect | promotion_effect | promotion_effect |
 | q28 | promotion_effect | promotion_effect | promotion_effect | promotion_effect |
+| q29 | noisy_breach | carrier_sla_breach | carrier_sla_breach | none |
+| q30 | noisy_breach | carrier_sla_breach | carrier_sla_breach | none |
+| q31 | multi_cause | carrier_sla_breach | carrier_sla_breach | none |
+| q32 | multi_cause | carrier_sla_breach | carrier_sla_breach | none |
+| q33 | noisy_breach_with_date_promo_trap | carrier_sla_breach | carrier_sla_breach | promotion_effect |
+| q34 | noisy_negative_distractor | none | none | none |
+| q35 | noisy_seasonality | seasonality | seasonality | none |
+| q36 | noisy_promotion_effect | promotion_effect | promotion_effect | promotion_effect |
