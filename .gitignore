@@ -17,3 +17,4 @@ logs/*.jsonl
 logs/*.log
 __pycache__/
 .venv/
+data/*.duckdb

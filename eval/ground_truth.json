@@ -1,0 +1,29 @@
+{
+  "_note": "Planted by scripts/make_data.py. Read ONLY by the eval harness, never by agents.",
+  "scenarios": [
+    {
+      "scenario_id": "demo_ontime",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "top_cause_label": "carrier_sla_breach",
+      "segment": {
+        "carrier": "CarrierB",
+        "region": "North"
+      },
+      "trap": {
+        "type": "promotion",
+        "promo_id": "PROMO-HOME-SOUTH",
+        "why_not": "dates match, but category/region do not overlap the late shipments"
+      },
+      "split": "demo (excluded from test)"
+    }
+  ],
+  "seed": 42
+}
