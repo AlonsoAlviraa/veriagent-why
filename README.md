@@ -48,7 +48,7 @@ The open-source Meterless reference engines (github.com/Meterless/Meterless, Apa
 
 ## Evaluation
 See [`eval/README.md`](eval/README.md). Three sets:
-- **dev** (22 questions, clean + noisy + harder cases): used for tuning. Sample provider, no model on either side: agent 21/22, plain-RAG baseline 6/22.
+- **dev** (22 questions, clean + noisy + harder cases): used for tuning. Sample provider, no model on either side: agent 21/22, plain-RAG baseline 6/22. Live NVIDIA Nemotron (22 Oct 2026, dev only): agent 14/22 (Wilson 0.43–0.80), plain-RAG baseline with the same model 11/22 (0.31–0.69). The live agent is **worse than the sample-mode rules**: the model verdicts/plans lost seasonality, promotion_effect and negative-control cases. Details and failure analysis: `eval/RESULTS_dev_nvidia.md`.
 - **test v1** (18): **contaminated** (run twice, the second time after seeing failures); kept only as history in [`eval/RESULTS_HISTORY.md`](eval/RESULTS_HISTORY.md).
 - **test v2** (18, noisy generator, new seeds): **held out and never run**. Reserved for the final Nemotron eval; frozen by `eval/SPLITS_test_v2.sha256`.
 Metric: exact match of `top_cause_label`, k/n with a Wilson 95% interval; segment and secondary-cause detection where defined. Data is synthetic and written by the same author as the agent.
@@ -59,7 +59,7 @@ Live check before the model eval: `make smoke-nvidia` (skips cleanly if `NVIDIA_
 
 ## AI and Model Usage
 Models (product runtime):
-- NVIDIA Nemotron via the provider switch: `nvidia/nemotron-3.5-super-vl-120b-a12b` (S2: Planner, Cause Analyst, Writer) and `nvidia/nemotron-3.5-lightning-30b-a3b` (S1: relevance filter, Evidence Evaluator). **Status: wired and tested only against a mock server; no real model call has been made yet.**
+- NVIDIA Nemotron via the provider switch: `nvidia/nemotron-3.5-super-vl-120b-a12b` (S2: Planner, Cause Analyst, Writer) and `nvidia/nemotron-3.5-lightning-30b-a3b` (S1: relevance filter, Evidence Evaluator). **Status: live on the NVIDIA free endpoint (dev split only, see `eval/RESULTS_dev_nvidia.md`).**
 - Meterless Nightshift as the primary provider (`LLM_PROVIDER=nightshift`, OpenAI-compatible, `meterless/*` routing modes). **Status: not available yet** (no runtime reachable); `nvidia` is the direct fallback, disclosed per call in the trace.
 - SAMPLE_MODE uses no model at all: deterministic rules with real computation.
 - Model output never supplies numbers or confidence: numbers come from SQL, confidence from a formula, and the Claim Gate checks every number in model-written text.

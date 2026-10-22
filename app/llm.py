@@ -6,7 +6,7 @@
 Day-1 status: agents run the deterministic path; live model calls are wired here but not yet used by agents.
 """
 from __future__ import annotations
-import json, urllib.request
+import json, urllib.request, urllib.error
 from .config import env, provider, TIMEOUTS
 
 MODELS = {"s2": env("REASONING_MODEL", "nvidia/nemotron-3.5-super-vl-120b-a12b"),
@@ -34,8 +34,44 @@ def complete(messages: list[dict], tier: str = "s2", max_tokens: int = 1024) -> 
     if key:
         headers["Authorization"] = f"Bearer {key}"
     body = {"model": model, "messages": messages, "max_tokens": max_tokens, "temperature": 0}
+    if p == "nvidia" and (tier == "s1" or env("NVIDIA_S2_THINKING", "off").lower() != "on"):
+        # S1 always runs with thinking off (ARCH v6.1): with thinking on, Nemotron lightning spends the
+        # whole max_tokens budget in reasoning_content and returns empty content (finish_reason=length).
+        # S2 thinking is off by default too: on the free endpoint, super-vl with thinking on exceeded a
+        # 120 s timeout for a short planner prompt, vs ~16 s with it off. NVIDIA_S2_THINKING=on to enable.
+        body["chat_template_kwargs"] = {"enable_thinking": False}
     req = urllib.request.Request(base.rstrip("/") + "/chat/completions", data=json.dumps(body).encode(), headers=headers)
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        out = json.load(r)
-    return {"provider": p, "model": model, "content": out["choices"][0]["message"]["content"],
-            "usage": out.get("usage")}
+    out = _post(req, timeout, p)
+    return {"provider": p, "model": model, "content": clean_content(out["choices"][0]["message"].get("content")),
+            "usage": out.get("usage"), "finish_reason": out["choices"][0].get("finish_reason")}
+
+
+_LAST = [0.0]
+
+
+def _post(req, timeout, p):
+    """POST with a client-side pacer (NVIDIA free tier is rate limited; MODEL_MIN_INTERVAL_S, default
+    1.6 s on nvidia) and up to 3 retries on 429/5xx with backoff (Retry-After honoured)."""
+    import time
+    gap = float(env("MODEL_MIN_INTERVAL_S", "1.6" if p == "nvidia" else "0"))
+    for attempt in range(4):
+        wait = _LAST[0] + gap - time.time()
+        if wait > 0:
+            time.sleep(wait)
+        _LAST[0] = time.time()
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            if (e.code != 429 and e.code < 500) or attempt == 3:
+                raise
+            ra = e.headers.get("Retry-After") if e.headers else None
+            time.sleep(float(ra) if ra and ra.replace(".", "").isdigit() else 2 * 2 ** attempt)
+
+
+def clean_content(text):
+    """Drop any inline <think>...</think> block some templates emit before the answer."""
+    if not text:
+        return text
+    import re
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()

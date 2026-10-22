@@ -22,7 +22,7 @@ def provider() -> str:
 
 
 CAPS = {"evaluator_rounds": 3, "claim_gate_rounds": 2, "retriever_retries": 2}
-TIMEOUTS = {"model_s": 60, "zetaris_s": 20, "run_s": 480}
+TIMEOUTS = {"model_s": int(os.environ.get("MODEL_TIMEOUT_S") or 60), "zetaris_s": 20, "run_s": 480}
 
 
 def load_dotenv(path: Path = ROOT / ".env") -> None:

@@ -20,3 +20,6 @@ Caveats (read before quoting run 2):
 
 ## 22 Oct 2026, later: v1 test retired
 The v1 test split is treated as **contaminated** from now on and will not be run again. A new held-out set, `questions_test_v2.json` (18 noisy questions, seeds 5001+), was written and frozen before the robustness work and is reserved for the final Nemotron eval. See `eval/README.md`.
+
+## 22 Oct 2026, evening: first live Nemotron run (dev only)
+Provider `nvidia` (free endpoint), 22 dev questions: agent 14/22 (0.43–0.80), baseline 11/22 (0.31–0.69); 570 agent model calls ok, 18 timed out (deterministic fallback), 3 baseline errors. Lower than sample mode (21/22); see `RESULTS_dev_nvidia.md` for the failure analysis. test_v2 not run.

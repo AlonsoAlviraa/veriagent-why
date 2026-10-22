@@ -19,7 +19,10 @@ PROMPT = [{"role": "user", "content": 'Reply with JSON only: {"verdict": "suppor
 
 
 def call(model: str, key: str) -> dict:
-    body = json.dumps({"model": model, "messages": PROMPT, "max_tokens": 64, "temperature": 0}).encode()
+    payload = {"model": model, "messages": PROMPT, "max_tokens": 64, "temperature": 0}
+    if model == MODELS[0]:  # S1 / lightning: thinking off, as in app/llm.py
+        payload["chat_template_kwargs"] = {"enable_thinking": False}
+    body = json.dumps(payload).encode()
     req = urllib.request.Request(BASE + "/chat/completions", data=body, headers={
         "Content-Type": "application/json", "Authorization": "Bearer " + key})
     t0 = time.time()
