@@ -118,14 +118,14 @@ def main(argv=None) -> int:
     pg_host = os.environ.get("VA_PG_HOST_FROM_ZETARIS", "host.docker.internal")
     existing = names(zsql(cur, "SHOW DATASOURCES", a.dry_run))
     if DS not in existing:
-        zsql(cur, f'CREATE DATASOURCE {DS} DESCRIBE BY "VeriAgent Why synthetic shop (Postgres)" OPTIONS ('
+        zsql(cur, f'CREATE DATASOURCE {DS} DESCRIBE BY "veriagent_why_shop_postgres" OPTIONS ('
                   f'jdbcdriver "org.postgresql.Driver", jdbcurl "jdbc:postgresql://{pg_host}:{cfg["port"]}/{cfg["dbname"]}", '
                   f'username "{cfg["user"]}", password "{cfg["password"]}", fetchsize "1000")', a.dry_run)
     zsql(cur, f"REGISTER DATASOURCE TABLES (" + ", ".join(f"'{v}'" for v in pg_views) + f") FROM {DS}", a.dry_run)
 
     if rest_views:
         if RESTDB not in names(zsql(cur, "SHOW LIGHTNING DATABASES", a.dry_run)):
-            zsql(cur, f'CREATE LIGHTNING DATABASE {RESTDB} DESCRIBE BY "VeriAgent Why tickets+promotions (REST)"', a.dry_run)
+            zsql(cur, f'CREATE LIGHTNING DATABASE {RESTDB} DESCRIBE BY "veriagent_why_tickets_promotions_rest"', a.dry_run)
         host = os.environ.get("VA_REST_HOST_FROM_ZETARIS", "host.docker.internal")
         port = os.environ.get("VA_REST_PORT", "8765")
         for v in rest_views:
