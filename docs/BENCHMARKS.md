@@ -7,7 +7,7 @@ Status: **harness plus pilot only**. None of the numbers below are final results
 The data is downloaded on demand and is never committed (`data/bench/` and `bench/results/` are gitignored). No login is needed.
 
 ```
-pip install -r requirements-bench.txt
+pip install -r bench/requirements-bench.txt
 python -m bench.download all          # writes data/bench/<bench>/MANIFEST.json with sha256 per file
 ```
 
