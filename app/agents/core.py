@@ -82,9 +82,10 @@ class Retriever:
         b, p = q["baseline"], q["period"]
         return self.db.query(sql, [b[0], b[1], b[0], b[1], p[0], p[1], p[0], p[1]])
 
-    def retrieve(self, hyps: list[dict], q: dict) -> list[dict]:
+    def chunks_for(self, h: dict, q: dict) -> list[dict]:
+        """Deterministic templated retrieval for one hypothesis (also the Agentic Retriever's seed tool)."""
         chunks = []
-        for h in hyps:
+        if True:
             if h["type"] == "segment":
                 for r in self.segment_stats(h["dims"], q):
                     seg = {d: r[d] for d in h["dims"]}
@@ -101,6 +102,10 @@ class Retriever:
                                         "FROM v_promotions WHERE start_date <= ? AND end_date >= ?", [q["period"][1], q["period"][0]]):
                     chunks.append({"hyp": h["id"], "view": "v_promotions", "promo": pr,
                                    "text": f"view v_promotions promotion {pr['promo_id']} category {pr['category']} region {pr['region']} {pr['s']}..{pr['e']}"})
+        return chunks
+
+    def retrieve(self, hyps: list[dict], q: dict) -> list[dict]:
+        chunks = [c for h in hyps for c in self.chunks_for(h, q)]
         tickets = self.db.query("SELECT t.ticket_id, t.text, l.carrier, l.region FROM v_tickets t JOIN v_logistics l USING(order_id) "
                                 "WHERE t.created_date BETWEEN ? AND ?", [q["period"][0], q["period"][1]])
         scores = bm25([t["text"] for t in tickets], "late delayed delivery not delivered missed tracking")

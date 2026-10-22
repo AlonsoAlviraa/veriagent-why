@@ -7,7 +7,7 @@
 VeriAgent Why is a multi-agent system for e-commerce ops/finance analysts that investigates "why did this KPI change?" questions (on-time delivery rate, return rate) over federated data (Zetaris), tests competing hypotheses against evidence, and returns a decision memo where every claim cites source rows, with a deterministic confidence score and explicit limitations.
 
 ## Architecture
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/diagrams/veriagent_why_arch_v6.2.png`](docs/diagrams/veriagent_why_arch_v6.2.png).
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/diagrams/veriagent_why_arch_v6.3.png`](docs/diagrams/veriagent_why_arch_v6.3.png).
 
 Main flow: Planner → Retriever (Zetaris SQL + BM25) → S1 Relevance Filter → Evidence Evaluator (requery loop to the Planner, max 3) → Cause Analyst → Writer → deterministic Claim Gate (loop to the Cause Analyst, max 2) → decision memo. Meterless H-MEM holds the hypothesis/evidence graph; Meterless Markovian handles long investigations.
 
@@ -38,13 +38,13 @@ UI: question and KPI, live trace of rounds (including Evaluator send-backs), H-M
 - Not yet: live Nemotron/Nightshift runs, a live Zetaris instance with the synthetic views loaded, model-based eval.
 
 ## Meterless engines (how they are used)
-The open-source Meterless reference engines (github.com/Meterless/Meterless, Apache-2.0, pinned commit in `vendor/meterless/README.md`) are vendored unmodified and called through `meterless_bridge/` (a JSON-lines bridge run with `node`; prebuilt bundle committed, so SAMPLE_MODE needs no `npm install`).
-- **H-MEM** stores the evidence graph: every hypothesis, evidence node and support/refute edge is an H-MEM record (edges carry `derivedFrom=[evidence, hypothesis]`). The H-MEM trust ledger is exported per run to `logs/hmem-ledger-<run_id>.jsonl`. The Planner recalls H-MEM context when it plans.
+The open-source Meterless reference engines (github.com/Meterless/Meterless, Apache-2.0, pinned commit in `vendor/meterless/README.md`) are vendored with one small declared change (an embedding override hook so H-MEM can use the same real embedder as retrieval; see "Local modifications" in `vendor/meterless/README.md`) and called through `meterless_bridge/` (a JSON-lines bridge run with `node`; prebuilt bundle committed, so SAMPLE_MODE needs no `npm install`).
+- **H-MEM** stores the evidence graph: every hypothesis, every Retriever tool call (`retrieval` node, `retrieved_for` edge), evidence node and support/refute edge is an H-MEM record (edges carry `derivedFrom=[evidence, hypothesis]`). The H-MEM trust ledger is exported per run to `logs/hmem-ledger-<run_id>.jsonl`. The Planner recalls H-MEM context when it plans.
 - **Markovian** drives the Evaluator → Planner rounds: each investigation round is one Markovian chunk, the round summary is the `[STATE_CHECKPOINT]` carryover, and `[TASK_COMPLETE]` ends the loop (max 3 chunks). Its run record (chunks, carryover, estimated tokens) is in the run output and trace.
 - If `node` is missing the pipeline falls back to a local in-process graph and says so in the trace and memo.
 
 ## Model providers
-`LLM_PROVIDER=nightshift|nvidia|sample` (`SAMPLE_MODE=true` forces `sample`). `nightshift`: Meterless Nightshift OpenAI-compatible endpoint (`NIGHTSHIFT_BASE_URL`). `nvidia`: NVIDIA API (`NVIDIA_API_KEY`, read from the environment only, never logged). Models: `REASONING_MODEL` (default `nvidia/nemotron-3.5-super-vl-120b-a12b`, S2: Planner, Cause Analyst, Writer) and `FAST_MODEL` (default `nvidia/nemotron-3.5-lightning-30b-a3b`, S1: relevance filter, Evaluator). Model outputs are validated JSON; any failure (empty reply, HTTP error, invalid JSON or label) falls back to the deterministic path and is logged. Numbers always come from SQL.
+`LLM_PROVIDER=nightshift|nvidia|sample` (`SAMPLE_MODE=true` forces `sample`). `nightshift`: Meterless Nightshift OpenAI-compatible endpoint (`NIGHTSHIFT_BASE_URL`). `nvidia`: NVIDIA API (`NVIDIA_API_KEY`, read from the environment only, never logged). Models: `REASONING_MODEL` (default `nvidia/nemotron-3.5-super-vl-120b-a12b`, S2: Planner, Cause Analyst, Writer) and `FAST_MODEL` (default `nvidia/nemotron-3.5-lightning-30b-a3b`, S1: relevance filter, Evaluator). Embeddings: `nvidia/nemotron-3-embed-1b` on the NVIDIA endpoint when `NVIDIA_API_KEY` is set (passage/query input types, disk cache in `data/emb_cache/`), else a deterministic hash embedder (`EMBED_PROVIDER=hash` forces it; SAMPLE_MODE always uses it). Model outputs are validated JSON; any failure (empty reply, HTTP error, invalid JSON or label) falls back to the deterministic path and is logged. Numbers always come from SQL.
 
 ## Evaluation
 See [`eval/README.md`](eval/README.md). Three sets:
@@ -59,16 +59,18 @@ Live check before the model eval: `make smoke-nvidia` (skips cleanly if `NVIDIA_
 
 ## AI and Model Usage
 Models (product runtime):
-- NVIDIA Nemotron via the provider switch: `nvidia/nemotron-3.5-super-vl-120b-a12b` (S2: Planner, Cause Analyst, Writer) and `nvidia/nemotron-3.5-lightning-30b-a3b` (S1: relevance filter, Evidence Evaluator). **Status: live on the NVIDIA free endpoint (dev split only, see `eval/RESULTS_dev_nvidia.md`).**
+- NVIDIA Nemotron via the provider switch: `nvidia/nemotron-3.5-super-vl-120b-a12b` (S2: Planner, Cause Analyst, Writer) and `nvidia/nemotron-3.5-lightning-30b-a3b` (S1: Agentic Retriever tool loop, relevance filter, Evidence Evaluator). **Status: live on the NVIDIA free endpoint (dev split only, see `eval/RESULTS_dev_nvidia.md`).**
 - Meterless Nightshift as the primary provider (`LLM_PROVIDER=nightshift`, OpenAI-compatible, `meterless/*` routing modes). **Status: not available yet** (no runtime reachable); `nvidia` is the direct fallback, disclosed per call in the trace.
+- Embeddings: `nvidia/nemotron-3-embed-1b` (2048 dims, NVIDIA free endpoint) for hybrid BM25 + dense retrieval (RRF fusion) and for H-MEM records. The originally planned `llama-3.2-nv-embedqa-1b-v2` / `nv-embedqa-e5-v5` return 410 Gone there. Offline: a deterministic hash embedder.
+- Agentic RAG: the Retriever is a bounded tool loop (Lightning 3.5 picks the next whitelisted tool and judges sufficiency; max 2 steps per hypothesis, 8 calls per round). It never writes SQL; tools render fixed Zetaris templates. Any model failure falls back to the deterministic policy.
 - SAMPLE_MODE uses no model at all: deterministic rules with real computation.
 - Model output never supplies numbers or confidence: numbers come from SQL, confidence from a formula, and the Claim Gate checks every number in model-written text.
 
-Agent framework: none; own Python orchestrator (`app/pipeline.py`).
+Agent framework: none; own Python orchestrator (`app/pipeline.py`) and own agentic retriever (`app/retrieval/agentic.py`).
 
 Sponsor technology:
 - Zetaris: data layer behind `app/adapters/zetaris.py` (JDBC backend via JayDeBeApi, federating a Postgres datasource and REST tables into a SchemaStore container — `scripts/zetaris_load.py`, `scripts/zetaris_check.py`, `docs/RUN_WINDOWS.md`; not yet verified live; SAMPLE_MODE uses a DuckDB snapshot with the same five view names and SQL).
-- Meterless: H-MEM (evidence graph + trust ledger) and Markovian (investigation rounds) open-source reference engines, vendored unmodified (Apache-2.0) and run through `meterless_bridge/`; Nightshift as the model provider (pending).
+- Meterless: H-MEM (evidence graph + trust ledger) and Markovian (investigation rounds) open-source reference engines, vendored (Apache-2.0, one declared embedding hook) and run through `meterless_bridge/`; Nightshift as the model provider (pending).
 - NVIDIA: Nemotron models above (pending live use).
 - Cursor: development environment.
 
@@ -76,7 +78,7 @@ Development tools: developed in Cursor; AI-assisted coding was used for scaffold
 
 External libraries: DuckDB, FastAPI, Uvicorn, httpx, fpdf2, pytest; esbuild (build-time only, for the bridge bundle); Meterless engines (vendored).
 Data: synthetic, generated by `scripts/make_data.py` (seeded); no real customer data.
-Open-source code materially adapted: Meterless reference engines (vendored unmodified, see `vendor/meterless/README.md`).
+Open-source code materially adapted: Meterless reference engines (vendored with one declared change, see `vendor/meterless/README.md`).
 
 ## Pre-existing work
 Everything below was prepared before the build window opened and is also declared in the submission form. Full detail: [`docs/PRE_EXISTING_WORK.md`](docs/PRE_EXISTING_WORK.md).

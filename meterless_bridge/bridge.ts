@@ -4,7 +4,12 @@
 // Deterministic: injected counter clock. No network.
 import { HMEM } from "../vendor/meterless/hmem/index.ts";
 import { Markovian, resetRunSeq } from "../vendor/meterless/markovian/index.ts";
+import { setEmbedOverride } from "../vendor/meterless/hmem/embeddings.ts";
 import * as readline from "node:readline";
+
+// Real embeddings supplied by the Python host (NVIDIA) keyed by exact text; absent -> vendored hash embedder.
+const vecs = new Map<string, number[]>();
+setEmbedOverride((text) => vecs.get(text));
 
 let t = 1_790_000_000_000;
 const clock = () => (t += 1000);
@@ -16,13 +21,15 @@ async function handle(msg: any): Promise<unknown> {
   const a = msg.args ?? {};
   switch (msg.op) {
     case "reset":
-      t = 1_790_000_000_000; resetRunSeq(); hmem = new HMEM({ clock, actor: "veriagent-why" }); return { ok: true };
+      t = 1_790_000_000_000; resetRunSeq(); vecs.clear(); hmem = new HMEM({ clock, actor: "veriagent-why" }); return { ok: true };
     case "hmem.add": {
+      if (Array.isArray(a.embedding)) vecs.set(a.content, a.embedding);
       const r = hmem.add({ content: a.content, type: "factual", layer: a.layer ?? "working", tags: a.tags ?? [],
         confidence: a.confidence ?? 0.8, source: a.source, derivedFrom: a.derivedFrom, missionId: a.missionId });
       return { id: r.id };
     }
     case "hmem.query": {
+      if (Array.isArray(a.queryEmbedding)) vecs.set(a.query, a.queryEmbedding);
       const q = hmem.query(a.query, { topN: a.topN ?? 5, threshold: a.threshold ?? 0.1 });
       return { context: q.context, ids: (q as any).memories?.map((m: any) => m.id ?? m.memory?.id) ?? [] };
     }
