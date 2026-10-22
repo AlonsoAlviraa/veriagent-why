@@ -7,7 +7,12 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--input")
     ap.add_argument("--serve", action="store_true")
+    ap.add_argument("--ui", action="store_true", help="serve the web UI (separate port, UI_PORT default 8501)")
     a = ap.parse_args()
+    if a.ui:
+        import os, uvicorn
+        uvicorn.run("app.ui:ui", host="0.0.0.0", port=int(os.environ.get("UI_PORT") or 8501))
+        return
     if a.serve:
         import os, uvicorn
         uvicorn.run("app.api:app", host="0.0.0.0", port=int(os.environ.get("PORT") or 8000))
