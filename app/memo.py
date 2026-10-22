@@ -15,6 +15,7 @@ def render_memo(o: dict, run_id: str) -> str:
         head = f"Top cause: **{a['top_cause_label']}** in {seg(top['segment'])} {why}"
     else:
         head = "No cause could be confirmed. Resolution: unresolved."
+    sc = a.get("secondary_cause")
     L = [f"# Decision memo: why did the {k['label'].lower()} {'rise' if k['invert'] else 'drop'}? (run {run_id})", head, "",
          f"- Question: {q['query']}", f"- Baseline {q['baseline'][0]}..{q['baseline'][1]} vs period {q['period'][0]}..{q['period'][1]}",
          f"- Resolution: {o['resolution']}", f"- Data: SYNTHETIC labelled sample dataset", ""]
@@ -22,6 +23,14 @@ def render_memo(o: dict, run_id: str) -> str:
         L += ["## Summary (model-written, numbers checked by the Claim Gate)", o["narrative"], ""]
     L += ["## Findings (each verified by the Claim Gate)"]
     L += [f"- {cl['text']} Rows: {', '.join(cl['row_ids'])}" for cl in o["claims"]] or ["- none"]
+    if sc:
+        L += ["", "## Secondary cause", f"- {sc['label']} in {seg(sc['segment'])}: estimated share of the excess {k['bad']} {round(100*sc['raw_share_of_excess_late'])}%."]
+    if o.get("unresolved_reasons"):
+        L += ["", "## Why this is unresolved", *[f"- {r}" for r in o["unresolved_reasons"]]]
+        if o.get("refuted_hypotheses"):
+            L += [f"- Refuted: {', '.join(o['refuted_hypotheses'])}"]
+        if o.get("open_hypotheses"):
+            L += [f"- Still open: {', '.join(o['open_hypotheses'])}"]
     L += ["", "## Discarded alternatives"]
     L += [f"- Promotion {d['promo_id']}: dates overlap the period, but its shipments account for "
           f"{round(100*d['share_of_excess_late'])}% of the excess {k['bad']} ({d['promo_late']} of {d['promo_shipments']}). Refuted."

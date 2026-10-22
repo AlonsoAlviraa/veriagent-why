@@ -153,14 +153,35 @@ class EvidenceEvaluator:
         for h in hyps:
             if h["type"] == "segment":
                 rows = self.r.segment_stats(h["dims"], q)  # own re-query, not the Retriever's chunks
-                best = max(rows, key=lambda r: r["late_p"] - r["n_p"] * base_rate)
-                share = (best["late_p"] - best["n_p"] * base_rate) / total_excess if total_excess > 0 else 0
+                def z_rise(r):  # two-proportion z statistic for the segment's rise (baseline vs period)
+                    n1, n2 = r["n_b"], r["n_p"]
+                    if not n1 or not n2:
+                        return 0.0
+                    p1, p2 = r["late_b"] / n1, r["late_p"] / n2
+                    pp = (r["late_b"] + r["late_p"]) / (n1 + n2)
+                    se = (pp * (1 - pp) * (1 / n1 + 1 / n2)) ** 0.5
+                    return (p2 - p1) / se if se else 0.0
+                Z_SECONDARY = 3.0  # chosen on dev: 2.0 -> 2 FP, 2.5 -> 1 FP, 3.0 -> 0 FP (1/2 multi-cause detected)
+                def excess(r):  # change vs the segment's OWN baseline rate, so always-bad segments are not blamed
+                    own = r["late_b"] / r["n_b"] if r["n_b"] >= 10 else base_rate
+                    return r["late_p"] - r["n_p"] * own
+                ranked = sorted(rows, key=lambda r: -excess(r))
+                best = ranked[0]
+                share = excess(best) / total_excess if total_excess > 0 else 0
                 rb = 100 * best["late_b"] / best["n_b"] if best["n_b"] else 0
                 rp = 100 * best["late_p"] / best["n_p"] if best["n_p"] else 0
                 seg = {d: best[d] for d in h["dims"]}
-                v = "supports" if share >= 0.5 and rp - rb >= 5 else "refutes"
+                v = "supports" if share >= 0.5 and rp - rb >= 5 and excess(best) >= MIN_EXCESS else "refutes"
+                sec = []
+                for r in ranked[1:4]:
+                    rb2 = 100 * r["late_b"] / r["n_b"] if r["n_b"] else 0
+                    rp2 = 100 * r["late_p"] / r["n_p"] if r["n_p"] else 0
+                    sh2 = excess(r) / total_excess if total_excess > 0 else 0
+                    if v == "supports" and sh2 >= 0.15 and rp2 - rb2 >= 5 and excess(r) >= MIN_EXCESS and z_rise(r) >= Z_SECONDARY:
+                        sec.append({"segment": {d: r[d] for d in h["dims"]}, "share_of_excess_late": round(sh2, 3),
+                                    "late_rate_baseline": round(rb2, 2), "late_rate_period": round(rp2, 2)})
                 verdicts.append({"hyp": h["id"], "verdict": v, "segment": seg, "share_of_excess_late": round(share, 3),
-                                 "late_rate_baseline": round(rb, 2), "late_rate_period": round(rp, 2)})
+                                 "late_rate_baseline": round(rb, 2), "late_rate_period": round(rp, 2), "secondary_segments": sec})
                 if v == "supports":
                     supported.append(h)
             elif h["type"] == "seasonal":
@@ -255,7 +276,17 @@ class CauseAnalyst:
         if top and ctx:
             lab = ctx.attempt(self.name, llm_steps.label, causes) or lab
             top["label"] = lab
+        secondary = None
+        if top and top["label"] == "carrier_sla_breach":
+            v = next((v for v in all_verdicts if v["hyp"] == top["hyp"]), {})
+            if v.get("secondary_segments"):
+                s2 = v["secondary_segments"][0]
+                secondary = {"label": "carrier_sla_breach", "segment": s2["segment"], "estimated_contribution": min(1.0, s2["share_of_excess_late"]),
+                             "raw_share_of_excess_late": s2["share_of_excess_late"]}
+        ambiguous = bool(secondary and top.get("raw_share_of_excess_late") is not None
+                         and top["raw_share_of_excess_late"] - secondary["raw_share_of_excess_late"] < 0.1)
         return {"causes": causes, "top_cause": top, "top_cause_label": lab, "cross_checks": cross,
+                "secondary_cause": secondary, "ambiguous": ambiguous,
                 "discarded": discarded, "blocked": sorted(blocked)}
 
 

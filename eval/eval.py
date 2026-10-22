@@ -58,21 +58,32 @@ def main() -> None:
         b = run_baseline(q["input"], r["token_report"]["s1_filter"]["actual_total"])
         rows.append({"qid": q["qid"], "kind": q["kind"], "expected": q["expected_label"],
                      "agent": r["analysis"]["top_cause_label"], "agent_status": res["status"], "agent_confidence": r["confidence"]["confidence"],
+                     "agent_segment": (r["analysis"]["top_cause"] or {}).get("segment"), "expected_segment": q.get("expected_segment"),
+                     "agent_secondary": (r["analysis"].get("secondary_cause") or {}).get("segment"),
+                     "expected_secondary": (q.get("expected_secondary") or {}).get("segment"), "resolution": r["resolution"],
                      "baseline": b["label"], "baseline_context_tokens": b["context_tokens"],
                      "agent_s2_context_tokens": r["token_report"]["s1_filter"]["actual_total"], "log": res["log_file"], "secs": round(time.time() - t0, 2)})
         print(json.dumps(rows[-1]))
     n = len(rows)
     ka = sum(x["agent"] == x["expected"] for x in rows); kb = sum(x["baseline"] == x["expected"] for x in rows)
-    out = {"split": a.split, "provider": provider(), "n": n, "agent_k": ka, "agent_wilson95": wilson(ka, n),
+    seg_rows = [x for x in rows if x["expected_segment"]]
+    ks = sum(x["agent_segment"] == x["expected_segment"] for x in seg_rows)
+    sec_rows = [x for x in rows if x["expected_secondary"]]
+    k2 = sum(x["agent_secondary"] == x["expected_secondary"] for x in sec_rows)
+    fp2 = sum(1 for x in rows if not x["expected_secondary"] and x["agent_secondary"])
+    out = {"secondary_metrics": {"segment_match": f"{ks}/{len(seg_rows)}", "secondary_detected": f"{k2}/{len(sec_rows)}",
+                                 "secondary_false_positives": f"{fp2}/{len(rows) - len(sec_rows)}"}, "split": a.split, "provider": provider(), "n": n, "agent_k": ka, "agent_wilson95": wilson(ka, n),
            "baseline_k": kb, "baseline_wilson95": wilson(kb, n), "rows": rows}
     (R / "eval" / f"results_{a.split}_{provider()}.json").write_text(json.dumps(out, indent=2) + "\n")
     f = lambda k, ci: f"{k}/{n} (Wilson 95% CI {ci[0]:.2f}–{ci[1]:.2f})"
     md = [f"# Eval results: {a.split} split, provider `{provider()}`", "",
           "Measured by `eval/eval.py` on seeded synthetic data. Metric: exact match of `top_cause_label`.", "",
           f"| System | Correct |", "|---|---|", f"| VeriAgent Why | {f(ka, out['agent_wilson95'])} |", f"| Plain-RAG baseline | {f(kb, out['baseline_wilson95'])} |", "",
+          f"Secondary metrics (agent): segment match {ks}/{len(seg_rows)}, secondary cause detected {k2}/{len(sec_rows)}, secondary false positives {fp2}/{len(rows) - len(sec_rows)}.", "",
           "| qid | kind | expected | agent | baseline |", "|---|---|---|---|---|"]
     md += [f"| {x['qid']} | {x['kind']} | {x['expected']} | {x['agent']} | {x['baseline']} |" for x in rows]
     (R / "eval" / f"RESULTS_{a.split}_{provider()}.md").write_text("\n".join(md) + "\n")
+    print("secondary:", out["secondary_metrics"])
     print(f"agent {ka}/{n} {out['agent_wilson95']}  baseline {kb}/{n} {out['baseline_wilson95']}")
 
 

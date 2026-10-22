@@ -103,6 +103,7 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
         st["rounds"].append({"round": rnd, "s1_projected_tokens": proj, "s1_actual_tokens": act})
         tr.log(s1.name, "filtered", round=rnd, kept=len(kept), dropped=len(chunks) - len(kept), projected_tokens=proj, actual_tokens=act)
         res = ev.evaluate(hyps, kept, q, mem, ctx)
+        st["moved"] = res.get("kpi_moved_materially", True)
         st["verdicts"] += res["verdicts"]
         tr.log(ev.name, "verdicts", round=rnd, verdicts=res["verdicts"], feedback=res["feedback"])
         for c in ctx.calls[n0:]:
@@ -158,8 +159,16 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
         else:
             tr.log(gate.name, "send_back_to_cause_analyst", blocked=sorted(blocked))
     passed = {r["claim_id"] for r in results if r["passed"]}
-    if not analysis["top_cause"]:
+    if not analysis["top_cause"] or analysis.get("ambiguous"):
         status = "partial"
+    reasons = []
+    if not st["verdicts"] or not any(v["verdict"] == "supports" for v in st["verdicts"]):
+        reasons.append("no hypothesis was supported by the data" + ("" if st.get("moved", True) else "; the KPI did not move materially"))
+    if analysis.get("ambiguous"):
+        reasons.append("top and secondary causes explain similar shares; not separable with this data")
+    if st["feedback"]:
+        reasons.append("investigation round cap reached with an open gap: " + st["feedback"]["gap"])
+    open_h = sorted({v["hyp"] for v in st["verdicts"] if v["verdict"] == "gap"})
     top = analysis["top_cause"]
     sup = len(mem.edges_to(top["hyp"], "supports")) if top else 0
     ref = len(mem.edges_to(top["hyp"], "refutes")) if top else 0
@@ -176,6 +185,8 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
            "token_report": {"s1_filter": {"unit": "whitespace tokens (approx.)", "rounds": st["rounds"], "projected_total": proj,
                                           "actual_total": act, "avoided_by_s1": proj - act}, "markovian": mk},
            "model_calls": ctx.calls, "resolution": "resolved" if status == "success" else "unresolved",
+           "unresolved_reasons": reasons if status != "success" else [], "open_hypotheses": open_h,
+           "refuted_hypotheses": sorted({v["hyp"] for v in st["verdicts"] if v["verdict"] == "refutes"}),
            "evidence_graph": {"backend": mem.backend, "nodes": len(mem.nodes), "edges": len(mem.edges),
                               "graph": {"nodes": list(mem.nodes.values()), "edges": mem.edges},
                               "hmem_ledger_entries": len(ledger["entries"]), "hmem_ledger_file": f"logs/{lpath.name}"}}
