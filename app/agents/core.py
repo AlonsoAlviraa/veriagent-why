@@ -44,6 +44,8 @@ class Planner:
                      "text": f"On-time drop concentrated in one {d}"} for d in DIMS]
             hyps.append({"id": "H_promo", "type": "promotion", "dims": [],
                          "text": "A promotion active in the period caused the drop"})
+            hyps.append({"id": "H_seasonal", "type": "seasonal", "dims": [],
+                         "text": "A broad rise across almost all carrier x region segments (calendar/seasonal pattern), not one segment"})
             chosen = ctx.attempt(self.name, llm_steps.plan, q["query"], memory_context) if ctx else None
             if chosen:
                 hyps = [h for h in hyps if h["id"] in chosen]
@@ -79,6 +81,11 @@ class Retriever:
                     txt = (f"view v_logistics segment {seg} late shipments on time delivery "
                            f"baseline n={r['n_b']} late={r['late_b']} period n={r['n_p']} late={r['late_p']}")
                     chunks.append({"hyp": h["id"], "view": "v_logistics", "segment": seg, "stats": r, "text": txt})
+            elif h["type"] == "seasonal":
+                cells = self.segment_stats(DIMS, q)
+                txt = "view v_logistics all carrier x region segments late shipments on time delivery " + " ".join(
+                    f"{c['carrier']}/{c['region']} {c['late_b']}/{c['n_b']}->{c['late_p']}/{c['n_p']}" for c in cells)
+                chunks.append({"hyp": h["id"], "view": "v_logistics_cells", "cells": cells, "text": txt})
             elif h["type"] == "promotion":
                 for pr in self.db.query("SELECT promo_id, category, region, CAST(start_date AS VARCHAR) s, CAST(end_date AS VARCHAR) e "
                                         "FROM v_promotions WHERE start_date <= ? AND end_date >= ?", [q["period"][1], q["period"][0]]):
@@ -99,7 +106,7 @@ class S1Filter:
     name = "s1_filter"
     TERMS = set(tok("late on time delivery shipments promotion complaints"))
 
-    KEYS = {"v_logistics": TERMS, "v_promotions": {"promotion"}, "v_tickets": {"late", "delivery"}}
+    KEYS = {"v_logistics": TERMS, "v_logistics_cells": {"late", "segments"}, "v_promotions": {"promotion"}, "v_tickets": {"late", "delivery"}}
 
     def score(self, c: dict) -> float:
         keys = self.KEYS[c["view"]]
@@ -152,6 +159,17 @@ class EvidenceEvaluator:
                                  "late_rate_baseline": round(rb, 2), "late_rate_period": round(rp, 2)})
                 if v == "supports":
                     supported.append(h)
+            elif h["type"] == "seasonal":
+                cells = [c for c in self.r.segment_stats(DIMS, q) if c["n_b"] >= 10 and c["n_p"] >= 10]  # own re-query
+                rises = [100 * (c["late_p"] / c["n_p"] - c["late_b"] / c["n_b"]) for c in cells]
+                frac = sum(x >= 3 for x in rises) / len(cells) if cells else 0
+                mx = max(((c["late_p"] - c["n_p"] * base_rate) / total_excess for c in cells), default=0) if total_excess > 0 else 1
+                v = "supports" if total_excess > 0 and frac >= 0.75 and mx < 0.5 else "refutes"
+                verdicts.append({"hyp": h["id"], "verdict": v, "seasonal": True, "segment": {}, "cells": len(cells),
+                                 "share_of_cells_rising_3pp": round(frac, 3), "max_cell_share_of_excess": round(mx, 3),
+                                 "share_of_excess_late": 1.0 if v == "supports" else 0.0})
+                if v == "supports":
+                    supported.append(h)
             else:
                 promos = [c["promo"] for c in kept if c["view"] == "v_promotions"]
                 for pr in promos:
@@ -189,8 +207,21 @@ class CauseAnalyst:
     """Ranks causes with a deterministic decomposition and picks top_cause_label from the taxonomy."""
     name = "cause_analyst"
 
+    def __init__(self, db=None, q: dict | None = None):
+        self.db, self.q = db, q
+
+    def promo_share_in_cell(self, cell: dict, promo_id: str) -> float | None:
+        """Share of the cell's late shipments in the period that are promotion orders (cross-view check)."""
+        if not (self.db and self.q):
+            return None
+        r = self.db.query("SELECT SUM(CASE WHEN NOT l.on_time THEN 1 ELSE 0 END) late, "
+                          "SUM(CASE WHEN NOT l.on_time AND o.promo_id = ? THEN 1 ELSE 0 END) late_promo "
+                          "FROM v_logistics l JOIN v_orders o USING(order_id) WHERE l.carrier=? AND l.region=? AND l.ship_date BETWEEN ? AND ?",
+                          [promo_id, cell["carrier"], cell["region"], *self.q["period"]])[0]
+        return (r["late_promo"] or 0) / r["late"] if r["late"] else None
+
     def analyse(self, all_verdicts: list[dict], blocked: set[str], ctx: "LLMCtx | None" = None) -> dict:
-        seg = [v for v in all_verdicts if v["verdict"] == "supports" and "segment" in v]
+        seg = [v for v in all_verdicts if v["verdict"] == "supports" and "segment" in v and not v.get("seasonal")]
         seg.sort(key=lambda v: (-len(v["segment"]), -v["share_of_excess_late"]))
         causes = [{"segment": v["segment"], "hyp": v["hyp"], "estimated_contribution": min(1.0, v["share_of_excess_late"]),
                    "raw_share_of_excess_late": v["share_of_excess_late"],
@@ -199,14 +230,28 @@ class CauseAnalyst:
             if v["verdict"] == "supports" and "promo_id" in v:
                 causes.append({"segment": v["promo_segment"], "hyp": v["hyp"], "estimated_contribution": min(1.0, v["share_of_excess_late"]),
                                "raw_share_of_excess_late": v["share_of_excess_late"], "label": "promotion_effect", "promo_id": v["promo_id"]})
-        causes.sort(key=lambda c: (-len(c["segment"]), -c["estimated_contribution"]))
+        cross = []
+        promo_c = [c for c in causes if c["label"] == "promotion_effect"]
+        for c in [c for c in causes if c["label"] == "carrier_sla_breach" and "region" in c["segment"]]:
+            for p in promo_c:
+                sh = self.promo_share_in_cell(c["segment"], p["promo_id"])
+                cross.append({"carrier_cause": c["segment"], "promo_id": p["promo_id"], "promo_share_of_cell_late": sh})
+                if sh is not None and sh >= 0.5:
+                    c["explained_by"] = p["promo_id"]
+        causes = [c for c in causes if not c.get("explained_by")] + [c for c in causes if c.get("explained_by")]
+        if not causes:
+            causes = [{"segment": {}, "hyp": v["hyp"], "estimated_contribution": 1.0, "raw_share_of_excess_late": None,
+                       "label": "seasonality"} for v in all_verdicts if v.get("seasonal") and v["verdict"] == "supports"][:1]
+        head = [c for c in causes if not c.get("explained_by")]
+        head.sort(key=lambda c: (-len(c["segment"]), -(c["raw_share_of_excess_late"] or 0)))
+        causes = head + [c for c in causes if c.get("explained_by")]
         discarded = [v for v in all_verdicts if v["verdict"] == "refutes" and "promo_id" in v]
         top = causes[0] if causes else None
         lab = top["label"] if top else "none"
         if top and ctx:
             lab = ctx.attempt(self.name, llm_steps.label, causes) or lab
             top["label"] = lab
-        return {"causes": causes, "top_cause": top, "top_cause_label": lab,
+        return {"causes": causes, "top_cause": top, "top_cause_label": lab, "cross_checks": cross,
                 "discarded": discarded, "blocked": sorted(blocked)}
 
 
@@ -222,7 +267,7 @@ class Writer:
         top = analysis["top_cause"]
         if top:
             from ..checks.claims import SEG_COLS, FROM
-            w = "AND ".join(f"{SEG_COLS[c]} = ? " for c in top["segment"])
+            w = "AND ".join(f"{SEG_COLS[c]} = ? " for c in top["segment"]) or "TRUE "
             rows = self.db.query(f"SELECT l.shipment_id FROM {FROM} WHERE {w} AND l.ship_date BETWEEN ? AND ? AND NOT l.on_time ORDER BY l.shipment_id LIMIT 5",
                                  [*top["segment"].values(), *q["period"]])
             ids = [r["shipment_id"] for r in rows]
@@ -236,7 +281,7 @@ class Writer:
                     f"SELECT l.shipment_id FROM {FROM} WHERE {w} AND l.ship_date BETWEEN ? AND ? ORDER BY l.shipment_id LIMIT 5", [*top["segment"].values(), *win])]
                 claims.append({"id": cid, "metric": "on_time_rate", "segment": top["segment"], "window": win,
                                "value": round(v, 2), "row_ids": rid,
-                               "text": f"On-time rate for {', '.join(f'{k}={x}' for k, x in top['segment'].items())} was {round(v, 1)}% in the {name} window ({win[0]}..{win[1]})."})
+                               "text": f"On-time rate for {', '.join(f'{k}={x}' for k, x in top['segment'].items()) or 'all segments'} was {round(v, 1)}% in the {name} window ({win[0]}..{win[1]})."})
         return claims
 
 

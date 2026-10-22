@@ -32,7 +32,7 @@ def parse_question(inp: dict) -> dict:
 
 def view_agreement(db, seg: dict, q: dict) -> tuple[int, int, dict]:
     from .checks.claims import SEG_COLS
-    w = " AND ".join(f"{SEG_COLS[c]} = ?" for c in seg)
+    w = " AND ".join(f"{SEG_COLS[c]} = ?" for c in seg) or "TRUE"
     vals = list(seg.values())
     det = {}
     def rate(sql, win):
@@ -87,7 +87,7 @@ def run(inp: dict, run_id: str | None = None) -> dict:
 def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
     mem = HMem(bridge)
     planner, retr, s1 = Planner(), Retriever(db), S1Filter()
-    ev, analyst, writer, gate = EvidenceEvaluator(db, retr), CauseAnalyst(), Writer(db), ClaimGate(db)
+    ev, analyst, writer, gate = EvidenceEvaluator(db, retr), CauseAnalyst(db, q), Writer(db), ClaimGate(db)
     st = {"feedback": None, "verdicts": [], "rounds": [], "done": False}
 
     def investigate_round(step: int, carryover: str) -> str:

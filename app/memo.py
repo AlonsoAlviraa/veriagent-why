@@ -5,10 +5,14 @@ from __future__ import annotations
 def render_memo(o: dict, run_id: str) -> str:
     a, q, c = o["analysis"], o["question"], o["confidence"]
     top = a["top_cause"]
-    seg = (lambda d: ", ".join(f"{k}={v}" for k, v in d.items()))
-    head = (f"Top cause: **{a['top_cause_label']}** in {seg(top['segment'])} "
-            f"(estimated share of the excess late shipments vs the baseline late rate: {round(100*top['raw_share_of_excess_late'])}%; above 100% means other segments improved)." if top
-            else "No cause could be confirmed. Resolution: unresolved.")
+    seg = (lambda d: ", ".join(f"{k}={v}" for k, v in d.items()) or "all segments")
+    if top:
+        share = top.get("raw_share_of_excess_late")
+        why = (f"(estimated share of the excess late shipments vs the baseline late rate: {round(100*share)}%; above 100% means other segments improved)."
+               if share is not None else "(broad rise across segments; no single segment explains it).")
+        head = f"Top cause: **{a['top_cause_label']}** in {seg(top['segment'])} {why}"
+    else:
+        head = "No cause could be confirmed. Resolution: unresolved."
     L = [f"# Decision memo: why did on-time delivery drop? (run {run_id})", head, "",
          f"- Question: {q['query']}", f"- Baseline {q['baseline'][0]}..{q['baseline'][1]} vs period {q['period'][0]}..{q['period'][1]}",
          f"- Resolution: {o['resolution']}", f"- Data: SYNTHETIC labelled sample dataset", ""]

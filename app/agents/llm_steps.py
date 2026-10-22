@@ -8,7 +8,8 @@ from .. import llm
 
 TAXONOMY = ["carrier_sla_breach", "supplier_cost_increase", "promotion_effect", "seasonality", "stockout", "none"]
 HYP_CATALOG = {"H_carrier": "On-time drop concentrated in one carrier", "H_region": "On-time drop concentrated in one region",
-               "H_promo": "A promotion active in the period caused the drop"}
+               "H_promo": "A promotion active in the period caused the drop",
+               "H_seasonal": "A broad rise across almost all segments (calendar/seasonal pattern)"}
 
 
 def _json(text: str | None):
