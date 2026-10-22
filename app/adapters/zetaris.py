@@ -14,11 +14,18 @@ SNAPSHOT = ROOT / "data" / "snapshot.duckdb"
 class SampleBackend:
     name = "sample-duckdb"
 
-    def __init__(self):
+    def __init__(self, dataset: str | None = None):
         import duckdb
-        if not SNAPSHOT.exists():
+        path = SNAPSHOT
+        if dataset:
+            if not dataset.replace("-", "").replace("_", "").isalnum():
+                raise ValueError("invalid dataset id")
+            path = ROOT / "data" / "eval" / f"{dataset}.duckdb"
+            if not path.exists():
+                raise ValueError(f"dataset {dataset} not built; run python eval/build_datasets.py")
+        elif not path.exists():
             subprocess.run([sys.executable, str(ROOT / "scripts" / "make_data.py")], check=True, capture_output=True)
-        self.con = duckdb.connect(str(SNAPSHOT), read_only=True)
+        self.con = duckdb.connect(str(path), read_only=True)
 
     def query(self, sql: str, params: list | None = None) -> list[dict]:
         cur = self.con.execute(sql, params or [])
@@ -37,7 +44,7 @@ class ZetarisBackend:
         raise NotImplementedError("TODO: Zetaris REST SQL call (Day 2)")
 
 
-def get_backend():
+def get_backend(dataset: str | None = None):
     if sample_mode() or env("ZETARIS_BACKEND", "sample") == "sample":
-        return SampleBackend()
+        return SampleBackend(dataset)
     return ZetarisBackend()

@@ -20,3 +20,4 @@ __pycache__/
 data/*.duckdb
 logs/memo-*.md
 logs/hmem-ledger-*.jsonl
+data/eval/

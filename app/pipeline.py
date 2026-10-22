@@ -31,16 +31,17 @@ def parse_question(inp: dict) -> dict:
 
 
 def view_agreement(db, seg: dict, q: dict) -> tuple[int, int, dict]:
-    w = " AND ".join(f"l.{c} = ?" for c in seg)
+    from .checks.claims import SEG_COLS
+    w = " AND ".join(f"{SEG_COLS[c]} = ?" for c in seg)
     vals = list(seg.values())
     det = {}
     def rate(sql, win):
         r = db.query(sql, [*vals, *win])[0]
         return (r["k"] or 0) / r["n"] if r["n"] else None
     checks = {
-        "v_logistics": f"SELECT COUNT(*) n, SUM(CASE WHEN NOT l.on_time THEN 1 ELSE 0 END) k FROM v_logistics l WHERE {w} AND l.ship_date BETWEEN ? AND ?",
-        "v_tickets": f"SELECT COUNT(*) n, COUNT(t.ticket_id) k FROM v_logistics l LEFT JOIN v_tickets t USING(order_id) WHERE {w} AND l.ship_date BETWEEN ? AND ?",
-        "v_returns": f"SELECT COUNT(*) n, SUM(CASE WHEN r.reason='late_delivery' THEN 1 ELSE 0 END) k FROM v_logistics l LEFT JOIN v_returns r USING(order_id) WHERE {w} AND l.ship_date BETWEEN ? AND ?",
+        "v_logistics": f"SELECT COUNT(*) n, SUM(CASE WHEN NOT l.on_time THEN 1 ELSE 0 END) k FROM v_logistics l JOIN v_orders o USING(order_id) WHERE {w} AND l.ship_date BETWEEN ? AND ?",
+        "v_tickets": f"SELECT COUNT(*) n, COUNT(t.ticket_id) k FROM v_logistics l JOIN v_orders o USING(order_id) LEFT JOIN v_tickets t USING(order_id) WHERE {w} AND l.ship_date BETWEEN ? AND ?",
+        "v_returns": f"SELECT COUNT(*) n, SUM(CASE WHEN r.reason='late_delivery' THEN 1 ELSE 0 END) k FROM v_logistics l JOIN v_orders o USING(order_id) LEFT JOIN v_returns r USING(order_id) WHERE {w} AND l.ship_date BETWEEN ? AND ?",
     }
     agree = relevant = 0
     for v, sql in checks.items():
@@ -68,7 +69,7 @@ def run(inp: dict, run_id: str | None = None) -> dict:
     ctx = LLMCtx(live=prov != "sample")
     tr.log("orchestrator", "start", provider=prov)
     q = parse_question(inp)
-    db = get_backend()
+    db = get_backend(inp.get("dataset"))
     try:
         bridge = Bridge()
         bridge.call("reset")

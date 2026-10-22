@@ -31,7 +31,17 @@ PROMO = {"promo_id": "PROMO-HOME-SOUTH", "name": "Home week South", "start_date"
          "end_date": PERIOD[1], "category": "home", "region": "South", "discount_pct": 20.0}
 
 
-def generate(seed: int = 42) -> dict[str, list[dict]]:
+DEMO_SCENARIO = {"breach": {"carrier": "CarrierB", "region": "North", "p": 0.55},
+                 "promo": {"category": "home", "region": "South", "causes_late": False}, "seasonal_p": None}
+
+
+def generate(seed: int = 42, scenario: dict | None = None) -> dict[str, list[dict]]:
+    sc = DEMO_SCENARIO if scenario is None else scenario
+    pr = sc.get("promo")
+    promo_row = None
+    if pr:
+        promo_row = {"promo_id": f"PROMO-{pr['category'].upper()}-{pr['region'].upper()}", "name": f"{pr['category'].title()} week {pr['region']}",
+                     "start_date": PERIOD[0], "end_date": PERIOD[1], "category": pr["category"], "region": pr["region"], "discount_pct": 20.0}
     rng = random.Random(seed)
     orders, logi, returns, tickets = [], [], [], []
     d, n = BASELINE[0], 0
@@ -42,8 +52,8 @@ def generate(seed: int = 42) -> dict[str, list[dict]]:
             region, cat, carrier = rng.choice(REGIONS), rng.choice(CATEGORIES), rng.choice(CARRIERS)
             promo = None
             demand_boost = False
-            if in_period and cat == "home" and region == "South":
-                promo, demand_boost = PROMO["promo_id"], True
+            if in_period and pr and cat == pr["category"] and region == pr["region"]:
+                promo, demand_boost = promo_row["promo_id"], True
             qty = rng.randint(1, 3) + (1 if demand_boost else 0)
             price = round(rng.uniform(15, 120), 2)
             disc = 0.8 if promo else 1.0
@@ -53,8 +63,13 @@ def generate(seed: int = 42) -> dict[str, list[dict]]:
                            "revenue": round(qty * price * disc, 2), "cost": round(qty * price * 0.6, 2),
                            "promo_id": promo})
             p_late = 0.06
-            if in_period and carrier == "CarrierB" and region == "North":
-                p_late = 0.55  # planted SLA breach
+            b = sc.get("breach")
+            if in_period and b and carrier == b["carrier"] and region == b["region"]:
+                p_late = b["p"]  # planted SLA breach
+            if in_period and sc.get("seasonal_p"):
+                p_late = sc["seasonal_p"]  # planted uniform (calendar) rise across all segments
+            if in_period and promo and pr.get("causes_late"):
+                p_late = 0.5  # planted promotion effect: demand overload on promo orders
             late = rng.random() < p_late
             promised = 3
             actual = promised + (rng.randint(2, 5) if late else rng.randint(-1, 0))
@@ -70,7 +85,7 @@ def generate(seed: int = 42) -> dict[str, list[dict]]:
                                 "return_date": d + timedelta(days=actual + rng.randint(1, 5)),
                                 "reason": "late_delivery" if late and rng.random() < 0.7 else rng.choice(["size", "damaged", "changed_mind"])})
         d += timedelta(days=1)
-    return {"orders": orders, "logistics": logi, "returns": returns, "tickets": tickets, "promotions": [PROMO]}
+    return {"orders": orders, "logistics": logi, "returns": returns, "tickets": tickets, "promotions": [promo_row] if promo_row else []}
 
 
 GROUND_TRUTH = {
@@ -99,7 +114,7 @@ def write_duckdb(tables: dict, out: Path) -> None:
     for t, sch in schemas.items():
         con.execute(f"CREATE TABLE t_{t} ({sch})")
         cols = [c.split()[0] for c in sch.split(", ")]
-        con.executemany(f"INSERT INTO t_{t} VALUES ({','.join('?'*len(cols))})", [[r[c] for c in cols] for r in tables[t]])
+        if tables[t]: con.executemany(f"INSERT INTO t_{t} VALUES ({','.join('?'*len(cols))})", [[r[c] for c in cols] for r in tables[t]])
         con.execute(f"CREATE VIEW v_{t} AS SELECT * FROM t_{t}")
     con.close()
 

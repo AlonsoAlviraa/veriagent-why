@@ -162,6 +162,7 @@ class EvidenceEvaluator:
                     share = ((r["late"] or 0) - exp) / total_excess if total_excess > 0 else 0
                     v = "supports" if share >= 0.5 else "refutes"
                     verdicts.append({"hyp": h["id"], "verdict": v, "promo_id": pr["promo_id"], "dates_overlap": True,
+                                     "promo_segment": {"category": pr["category"], "region": pr["region"]},
                                      "share_of_excess_late": round(share, 3), "promo_shipments": r["n"], "promo_late": r["late"]})
                 if not promos:
                     verdicts.append({"hyp": h["id"], "verdict": "gap", "reason": "no promotion overlaps the period"})
@@ -178,8 +179,8 @@ class EvidenceEvaluator:
                 mem.add_edge(e, v["hyp"], v["verdict"])
         feedback = None
         seg_sup = [h for h in supported if h["type"] == "segment"]
-        if len(seg_sup) >= 2 and all(len(h["dims"]) == 1 for h in seg_sup):
-            feedback = {"gap": "two single-dimension hypotheses both supported", "drill": sorted(d for h in seg_sup for d in h["dims"])}
+        if seg_sup and all(len(h["dims"]) == 1 for h in seg_sup):
+            feedback = {"gap": "single-dimension segment supported; drill down to carrier x region to locate the cause", "drill": sorted(DIMS)}
         return {"verdicts": verdicts, "feedback": feedback, "base_rate_pp": round(100 * base_rate, 2),
                 "total_excess_late": round(total_excess, 1), "totals": tot}
 
@@ -194,6 +195,11 @@ class CauseAnalyst:
         causes = [{"segment": v["segment"], "hyp": v["hyp"], "estimated_contribution": min(1.0, v["share_of_excess_late"]),
                    "raw_share_of_excess_late": v["share_of_excess_late"],
                    "label": "carrier_sla_breach" if "carrier" in v["segment"] else "none"} for v in seg]
+        for v in all_verdicts:
+            if v["verdict"] == "supports" and "promo_id" in v:
+                causes.append({"segment": v["promo_segment"], "hyp": v["hyp"], "estimated_contribution": min(1.0, v["share_of_excess_late"]),
+                               "raw_share_of_excess_late": v["share_of_excess_late"], "label": "promotion_effect", "promo_id": v["promo_id"]})
+        causes.sort(key=lambda c: (-len(c["segment"]), -c["estimated_contribution"]))
         discarded = [v for v in all_verdicts if v["verdict"] == "refutes" and "promo_id" in v]
         top = causes[0] if causes else None
         lab = top["label"] if top else "none"
@@ -215,8 +221,9 @@ class Writer:
         claims = []
         top = analysis["top_cause"]
         if top:
-            w = "AND ".join(f"{c} = ? " for c in top["segment"])
-            rows = self.db.query(f"SELECT shipment_id FROM v_logistics WHERE {w} AND ship_date BETWEEN ? AND ? AND NOT on_time ORDER BY shipment_id LIMIT 5",
+            from ..checks.claims import SEG_COLS, FROM
+            w = "AND ".join(f"{SEG_COLS[c]} = ? " for c in top["segment"])
+            rows = self.db.query(f"SELECT l.shipment_id FROM {FROM} WHERE {w} AND l.ship_date BETWEEN ? AND ? AND NOT l.on_time ORDER BY l.shipment_id LIMIT 5",
                                  [*top["segment"].values(), *q["period"]])
             ids = [r["shipment_id"] for r in rows]
             from ..checks.claims import metric_value
@@ -226,7 +233,7 @@ class Writer:
                 if cid in blocked or v is None:
                     continue
                 rid = ids if name == "period" else [r["shipment_id"] for r in self.db.query(
-                    f"SELECT shipment_id FROM v_logistics WHERE {w} AND ship_date BETWEEN ? AND ? ORDER BY shipment_id LIMIT 5", [*top["segment"].values(), *win])]
+                    f"SELECT l.shipment_id FROM {FROM} WHERE {w} AND l.ship_date BETWEEN ? AND ? ORDER BY l.shipment_id LIMIT 5", [*top["segment"].values(), *win])]
                 claims.append({"id": cid, "metric": "on_time_rate", "segment": top["segment"], "window": win,
                                "value": round(v, 2), "row_ids": rid,
                                "text": f"On-time rate for {', '.join(f'{k}={x}' for k, x in top['segment'].items())} was {round(v, 1)}% in the {name} window ({win[0]}..{win[1]})."})

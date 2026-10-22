@@ -8,20 +8,21 @@ from __future__ import annotations
 
 RATE_TOL_PP = 0.5
 AMOUNT_TOL = 0.01
-SEG_COLS = {"carrier", "region"}
+SEG_COLS = {"carrier": "l.carrier", "region": "l.region", "category": "o.category"}
+FROM = "v_logistics l JOIN v_orders o USING(order_id)"
 
 
 def metric_value(db, metric: str, segment: dict, window: list[str]) -> float | None:
-    where, params = ["ship_date BETWEEN ? AND ?"], [window[0], window[1]]
+    where, params = ["l.ship_date BETWEEN ? AND ?"], [window[0], window[1]]
     for c, v in segment.items():
         if c not in SEG_COLS:
             raise ValueError(f"unsupported segment column {c}")
-        where.append(f"{c} = ?"); params.append(v)
+        where.append(f"{SEG_COLS[c]} = ?"); params.append(v)
     w = " AND ".join(where)
     if metric == "on_time_rate":
-        r = db.query(f"SELECT AVG(CASE WHEN on_time THEN 100.0 ELSE 0 END) AS v FROM v_logistics WHERE {w}", params)
+        r = db.query(f"SELECT AVG(CASE WHEN l.on_time THEN 100.0 ELSE 0 END) AS v FROM {FROM} WHERE {w}", params)
     elif metric == "late_count":
-        r = db.query(f"SELECT SUM(CASE WHEN on_time THEN 0 ELSE 1 END) AS v FROM v_logistics WHERE {w}", params)
+        r = db.query(f"SELECT SUM(CASE WHEN l.on_time THEN 0 ELSE 1 END) AS v FROM {FROM} WHERE {w}", params)
     else:
         raise ValueError(f"unsupported metric {metric}")
     v = r[0]["v"] if r else None
@@ -35,7 +36,7 @@ def check_claim(db, claim: dict) -> dict:
         reasons.append("no cited rows")
     else:
         ph = ",".join("?" * len(ids))
-        rows = db.query(f"SELECT shipment_id, carrier, region, CAST(ship_date AS VARCHAR) AS d FROM v_logistics WHERE shipment_id IN ({ph})", ids)
+        rows = db.query(f"SELECT l.shipment_id, l.carrier, l.region, o.category, CAST(l.ship_date AS VARCHAR) AS d FROM {FROM} WHERE l.shipment_id IN ({ph})", ids)
         found = {r["shipment_id"]: r for r in rows}
         missing = [i for i in ids if i not in found]
         if missing:
