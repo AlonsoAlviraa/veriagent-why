@@ -1,5 +1,5 @@
 PY ?= .venv/bin/python
-.PHONY: setup data run api ui test eval-dev eval-test scan clean-check bridge docker smoke-nvidia
+.PHONY: setup data run api ui test eval-dev eval-test scan clean-check bridge docker smoke-nvidia nightshift-sim
 setup:            ## venv + deps
 	python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 data:             ## demo snapshot + eval datasets (synthetic, seeded)
@@ -27,3 +27,5 @@ docker:
 
 smoke-nvidia:     ## live NVIDIA smoke test (skips if NVIDIA_API_KEY unset; never prints it)
 	$(PY) scripts/nvidia_smoke.py
+nightshift-sim:   ## local Nightshift-compatible SIMULATOR on 127.0.0.1:8088 (not Meterless Nightshift)
+	$(PY) -m app.nightshift_sim

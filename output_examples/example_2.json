@@ -1,0 +1,518 @@
+{
+  "run_id": "example-002",
+  "status": "success",
+  "output": {
+    "summary": "Top cause: **carrier_sla_breach** in carrier=CarrierB, region=North (estimated share of the excess late shipments vs the baseline rate: 104%; above 100% means other segments improved).",
+    "result": {
+      "question": {
+        "query": "Did the Home week South promotion cause the drop in on-time delivery between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+        "kpi": "on_time_rate",
+        "period": [
+          "2026-10-01",
+          "2026-10-14"
+        ],
+        "baseline": [
+          "2026-09-15",
+          "2026-09-30"
+        ],
+        "dataset": null
+      },
+      "analysis": {
+        "causes": [
+          {
+            "segment": {
+              "carrier": "CarrierB",
+              "region": "North"
+            },
+            "hyp": "H_carrier_x_region",
+            "estimated_contribution": 1.0,
+            "raw_share_of_excess_late": 1.045,
+            "label": "carrier_sla_breach"
+          },
+          {
+            "segment": {
+              "region": "North"
+            },
+            "hyp": "H_region",
+            "estimated_contribution": 1.0,
+            "raw_share_of_excess_late": 1.096,
+            "label": "none"
+          },
+          {
+            "segment": {
+              "carrier": "CarrierB"
+            },
+            "hyp": "H_carrier",
+            "estimated_contribution": 1.0,
+            "raw_share_of_excess_late": 1.081,
+            "label": "carrier_sla_breach"
+          }
+        ],
+        "top_cause": {
+          "segment": {
+            "carrier": "CarrierB",
+            "region": "North"
+          },
+          "hyp": "H_carrier_x_region",
+          "estimated_contribution": 1.0,
+          "raw_share_of_excess_late": 1.045,
+          "label": "carrier_sla_breach"
+        },
+        "top_cause_label": "carrier_sla_breach",
+        "cross_checks": [],
+        "secondary_cause": null,
+        "ambiguous": false,
+        "discarded": [
+          {
+            "hyp": "H_promo",
+            "verdict": "refutes",
+            "promo_id": "PROMO-HOME-SOUTH",
+            "dates_overlap": true,
+            "promo_segment": {
+              "category": "home",
+              "region": "South"
+            },
+            "share_of_excess_late": -0.001,
+            "promo_shipments": 49,
+            "promo_late": 3
+          }
+        ],
+        "blocked": []
+      },
+      "claims": [
+        {
+          "id": "C_ontime_period",
+          "metric": "on_time_rate",
+          "segment": {
+            "carrier": "CarrierB",
+            "region": "North"
+          },
+          "window": [
+            "2026-10-01",
+            "2026-10-14"
+          ],
+          "value": 44.16,
+          "row_ids": [
+            "S000977",
+            "S000979",
+            "S001028",
+            "S001040",
+            "S001068"
+          ],
+          "text": "On-time rate for carrier=CarrierB, region=North was 44.2% in the period window (2026-10-01..2026-10-14)."
+        },
+        {
+          "id": "C_ontime_baseline",
+          "metric": "on_time_rate",
+          "segment": {
+            "carrier": "CarrierB",
+            "region": "North"
+          },
+          "window": [
+            "2026-09-15",
+            "2026-09-30"
+          ],
+          "value": 93.02,
+          "row_ids": [
+            "S000014",
+            "S000021",
+            "S000024",
+            "S000032",
+            "S000045"
+          ],
+          "text": "On-time rate for carrier=CarrierB, region=North was 93.0% in the baseline window (2026-09-15..2026-09-30)."
+        }
+      ],
+      "narrative": null,
+      "blocked_claims": [],
+      "confidence": {
+        "confidence": 100,
+        "C": 1.0,
+        "A": 1.0,
+        "R": 0.0,
+        "caps": [],
+        "formula": "round(100*(0.45*C + 0.35*A + 0.20*(1-R)))",
+        "views": {
+          "v_logistics": {
+            "baseline_rate": 0.0698,
+            "period_rate": 0.5584,
+            "agrees": true
+          },
+          "v_tickets": {
+            "baseline_rate": 0.0233,
+            "period_rate": 0.2597,
+            "agrees": true
+          },
+          "v_returns": {
+            "baseline_rate": 0.0,
+            "period_rate": 0.013,
+            "agrees": true
+          },
+          "v_promotions": "no promotion overlaps the top-cause segment",
+          "v_orders": "not used for direction in this build"
+        }
+      },
+      "token_report": {
+        "s1_filter": {
+          "unit": "whitespace tokens (approx.)",
+          "rounds": [
+            {
+              "round": 1,
+              "s1_projected_tokens": 361,
+              "s1_actual_tokens": 297
+            },
+            {
+              "round": 2,
+              "s1_projected_tokens": 420,
+              "s1_actual_tokens": 276
+            }
+          ],
+          "projected_total": 781,
+          "actual_total": 573,
+          "avoided_by_s1": 208
+        },
+        "markovian": {
+          "id": "run-1",
+          "status": "completed",
+          "chunks": [
+            {
+              "id": 1,
+              "tokens": 21,
+              "carryover_chars": 0
+            },
+            {
+              "id": 2,
+              "tokens": 10,
+              "carryover_chars": 295
+            }
+          ],
+          "totalTokensUsed": 31,
+          "totalTokensSaved": 0,
+          "efficiencyPercent": 0,
+          "tokenLabel": "estimated",
+          "chunkConfig": {
+            "chunkSize": 4000,
+            "maxChunks": 3,
+            "carryoverTokens": 640,
+            "overlapTokens": 0
+          }
+        }
+      },
+      "model_calls": [],
+      "resolution": "resolved",
+      "unresolved_reasons": [],
+      "open_hypotheses": [],
+      "refuted_hypotheses": [
+        "H_promo",
+        "H_seasonal"
+      ],
+      "retrieval": {
+        "mode": "agentic",
+        "stats": {
+          "tool_calls": 7,
+          "model_steps": 0,
+          "fallback_steps": 0,
+          "rejected": 0,
+          "tokens": 0
+        },
+        "embed_model": "hash-fnv1a-64",
+        "embed_backend": "hash",
+        "embed_stats": {
+          "calls": 0,
+          "texts": 0,
+          "cache_hits": 0,
+          "tokens": 0,
+          "errors": 0
+        },
+        "hmem_embedder": "hash-fnv1a-64 (vendored H-MEM mock)",
+        "hmem_embed_stats": {
+          "embedded": 0,
+          "failed": 0
+        }
+      },
+      "backends": {
+        "data": "sample-duckdb [on_time_rate]",
+        "meterless": "meterless-bridge (vendored engines via node)",
+        "llm_provider": "sample"
+      },
+      "evidence_graph": {
+        "backend": "meterless-hmem (vendored reference, via bridge)",
+        "nodes": 23,
+        "edges": 14,
+        "graph": {
+          "nodes": [
+            {
+              "id": "H_carrier",
+              "kind": "hypothesis",
+              "text": "On-time drop concentrated in one carrier"
+            },
+            {
+              "id": "H_region",
+              "kind": "hypothesis",
+              "text": "On-time drop concentrated in one region"
+            },
+            {
+              "id": "H_promo",
+              "kind": "hypothesis",
+              "text": "A promotion active in the period caused the drop"
+            },
+            {
+              "id": "H_seasonal",
+              "kind": "hypothesis",
+              "text": "A broad rise across almost all carrier x region segments (calendar/seasonal pattern), not one segment"
+            },
+            {
+              "id": "R4",
+              "kind": "retrieval",
+              "tool": "segment_stats",
+              "text": "segment_stats {'dims': ['carrier']} for H_carrier: 3 chunks, 3 rows"
+            },
+            {
+              "id": "R5",
+              "kind": "retrieval",
+              "tool": "segment_stats",
+              "text": "segment_stats {'dims': ['region']} for H_region: 4 chunks, 4 rows"
+            },
+            {
+              "id": "R6",
+              "kind": "retrieval",
+              "tool": "promotions_overlap",
+              "text": "promotions_overlap {} for H_promo: 1 chunks, 1 rows"
+            },
+            {
+              "id": "R7",
+              "kind": "retrieval",
+              "tool": "segment_stats",
+              "text": "segment_stats {'dims': ['carrier', 'region']} for H_seasonal: 1 chunks, 12 rows"
+            },
+            {
+              "id": "R8",
+              "kind": "retrieval",
+              "tool": "text_search",
+              "text": "text_search {'query': 'late delayed delivery not delivered missed tracking', 'segment': {}} for H_tickets: 1 chunks, 30 rows"
+            },
+            {
+              "id": "E9",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierB'} late shipments on time delivery baseline n=306 late=19 period n=275 late=56"
+            },
+            {
+              "id": "E10",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'region': 'North'} late shipments on time delivery baseline n=256 late=13 period n=188 late=49"
+            },
+            {
+              "id": "E11",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'region': 'South'} late shipments on time delivery baseline n=240 late=12 period n=210 late=11"
+            },
+            {
+              "id": "E12",
+              "kind": "evidence",
+              "view": "v_promotions",
+              "text": "view v_promotions promotion PROMO-HOME-SOUTH category home region South 2026-10-01..2026-10-14"
+            },
+            {
+              "id": "E13",
+              "kind": "evidence",
+              "view": "v_logistics_cells",
+              "text": "view v_logistics all carrier x region segments late shipments on time delivery CarrierA/East 6/83->6/85 CarrierA/North 3/79->4/57 CarrierA/South 4/87->1/64 CarrierA/West 10/92->7/82 CarrierB/East 6/82"
+            },
+            {
+              "id": "E14",
+              "kind": "evidence",
+              "view": "v_tickets",
+              "text": "view v_tickets late delivery complaints query 'late delayed delivery not delivered missed tracking' My parcel is late, tracking has not moved Courier missed the delivery window My parcel is late, trac"
+            },
+            {
+              "id": "H_carrier_x_region",
+              "kind": "hypothesis",
+              "text": "Late shipments concentrated in one carrier x region segment"
+            },
+            {
+              "id": "R16",
+              "kind": "retrieval",
+              "tool": "segment_stats",
+              "text": "segment_stats {'dims': ['carrier', 'region']} for H_carrier_x_region: 12 chunks, 12 rows"
+            },
+            {
+              "id": "R17",
+              "kind": "retrieval",
+              "tool": "text_search",
+              "text": "text_search {'query': 'late delayed delivery not delivered missed tracking', 'segment': {}} for H_tickets: 1 chunks, 30 rows"
+            },
+            {
+              "id": "E18",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierA', 'region': 'North'} late shipments on time delivery baseline n=79 late=3 period n=57 late=4"
+            },
+            {
+              "id": "E19",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'North'} late shipments on time delivery baseline n=86 late=6 period n=77 late=43"
+            },
+            {
+              "id": "E20",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'South'} late shipments on time delivery baseline n=71 late=4 period n=62 late=6"
+            },
+            {
+              "id": "E21",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'West'} late shipments on time delivery baseline n=67 late=3 period n=64 late=4"
+            },
+            {
+              "id": "E22",
+              "kind": "evidence",
+              "view": "v_tickets",
+              "text": "view v_tickets late delivery complaints query 'late delayed delivery not delivered missed tracking' My parcel is late, tracking has not moved Courier missed the delivery window My parcel is late, trac"
+            }
+          ],
+          "edges": [
+            {
+              "src": "R4",
+              "dst": "H_carrier",
+              "rel": "retrieved_for"
+            },
+            {
+              "src": "R5",
+              "dst": "H_region",
+              "rel": "retrieved_for"
+            },
+            {
+              "src": "R6",
+              "dst": "H_promo",
+              "rel": "retrieved_for"
+            },
+            {
+              "src": "R7",
+              "dst": "H_seasonal",
+              "rel": "retrieved_for"
+            },
+            {
+              "src": "E9",
+              "dst": "H_carrier",
+              "rel": "supports"
+            },
+            {
+              "src": "E10",
+              "dst": "H_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E11",
+              "dst": "H_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E12",
+              "dst": "H_promo",
+              "rel": "refutes"
+            },
+            {
+              "src": "E13",
+              "dst": "H_seasonal",
+              "rel": "refutes"
+            },
+            {
+              "src": "R16",
+              "dst": "H_carrier_x_region",
+              "rel": "retrieved_for"
+            },
+            {
+              "src": "E18",
+              "dst": "H_carrier_x_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E19",
+              "dst": "H_carrier_x_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E20",
+              "dst": "H_carrier_x_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E21",
+              "dst": "H_carrier_x_region",
+              "rel": "supports"
+            }
+          ]
+        },
+        "hmem_ledger_entries": 37,
+        "hmem_ledger_file": "logs/hmem-ledger-example-002.jsonl"
+      },
+      "run_report": {
+        "provider": "sample",
+        "wall_clock_s": 0.242,
+        "deadline_hit": false,
+        "model_calls": {
+          "ok": 0,
+          "failed": 0
+        },
+        "tokens": {
+          "prompt": 0,
+          "completion": 0,
+          "total": 0,
+          "source": "provider usage field"
+        },
+        "by_agent_model": [],
+        "cost": "0 EUR (sample provider: no model called)",
+        "s1_filter": {
+          "projected": 781,
+          "actual": 573,
+          "avoided": 208,
+          "unit": "whitespace tokens (approx.)"
+        },
+        "markovian": {
+          "status": "completed",
+          "totalTokensUsed": 31,
+          "totalTokensSaved": 0,
+          "tokenLabel": "estimated"
+        }
+      },
+      "memo_md": "# Decision memo: why did the on-time rate drop? (run example-002)\nTop cause: **carrier_sla_breach** in carrier=CarrierB, region=North (estimated share of the excess late shipments vs the baseline rate: 104%; above 100% means other segments improved).\n\n- Question: Did the Home week South promotion cause the drop in on-time delivery between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?\n- Baseline 2026-09-15..2026-09-30 vs period 2026-10-01..2026-10-14\n- Resolution: resolved\n- Data: SYNTHETIC labelled dataset (generated by scripts/make_data.py; planted causes)\n- Backends: data=sample-duckdb [on_time_rate], meterless=meterless-bridge (vendored engines via node), model provider=sample\n- SAMPLE MODE: no Zetaris; local DuckDB snapshot with the same views and SQL\n\n## Findings (each verified by the Claim Gate)\n- On-time rate for carrier=CarrierB, region=North was 44.2% in the period window (2026-10-01..2026-10-14). Rows: S000977, S000979, S001028, S001040, S001068\n- On-time rate for carrier=CarrierB, region=North was 93.0% in the baseline window (2026-09-15..2026-09-30). Rows: S000014, S000021, S000024, S000032, S000045\n\n## Discarded alternatives\n- Promotion PROMO-HOME-SOUTH: dates overlap the period, but its shipments account for 0% of the excess late shipments (3 of 49). Refuted.\n\n## Confidence: 100/100\n- Formula: round(100*(0.45*C + 0.35*A + 0.20*(1-R))); C=1.0, A=1.0, R=0.0; caps: none\n\n## Recommended actions\n- Review the SLA performance of CarrierB in North and consider rerouting.\n\n## Limitations\n- Synthetic data. Sample provider: deterministic rules, no language model.\n- Evidence graph: meterless-hmem (vendored reference, via bridge); Markovian status: completed.\n\n## Run report (tokens, cost, latency)\n- Provider: sample (wall clock and latencies: report JSON)\n- Model calls: 0 ok, 0 fell back; tokens 0 (prompt 0, completion 0)\n- Cost: 0 EUR (sample provider: no model called)\n- S1 filter: 781 projected vs 573 sent (208 avoided, whitespace tokens (approx.))\n"
+    },
+    "artifacts": [
+      "logs/memo-example-002.md",
+      "logs/hmem-ledger-example-002.jsonl",
+      "logs/report-example-002.json",
+      "logs/memo-example-002.pdf"
+    ]
+  },
+  "agents": [
+    {
+      "name": "planner"
+    },
+    {
+      "name": "retriever"
+    },
+    {
+      "name": "s1_filter"
+    },
+    {
+      "name": "evidence_evaluator"
+    },
+    {
+      "name": "cause_analyst"
+    },
+    {
+      "name": "writer"
+    },
+    {
+      "name": "claim_gate"
+    }
+  ],
+  "trace_id": "a5cbffe7059d4753",
+  "log_file": "logs/trace-example-002.jsonl",
+  "execution_time_seconds": 0.387
+}

@@ -5,10 +5,9 @@ import json, threading, time, uuid
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, PlainTextResponse
 from .pipeline import run
-from .config import ROOT
+from .config import ROOT, log_dir
 
 app = FastAPI(title="VeriAgent Why")
-LOGS = ROOT / "logs"
 STATE: dict[str, dict] = {}
 
 
@@ -54,14 +53,14 @@ def start(req: dict):
 
 @app.get("/runs/{run_id}/trace")
 def trace(run_id: str, since: int = 0):
-    p = LOGS / f"trace-{_rid(run_id)}.jsonl"
+    p = log_dir() / f"trace-{_rid(run_id)}.jsonl"
     lines = p.read_text().splitlines() if p.exists() else []
     return {"status": STATE.get(run_id, {}).get("status", "unknown"), "events": [json.loads(l) for l in lines[since:]], "next": len(lines)}
 
 
 @app.get("/runs/{run_id}")
 def result(run_id: str):
-    p = LOGS / f"result-{_rid(run_id)}.json"
+    p = log_dir() / f"result-{_rid(run_id)}.json"
     if not p.exists():
         raise HTTPException(404, "not found")
     return json.loads(p.read_text())
@@ -78,7 +77,7 @@ def whatif_ep(run_id: str):
 
 @app.get("/memo/{run_id}.md", response_class=PlainTextResponse)
 def memo(run_id: str):
-    p = LOGS / f"memo-{_rid(run_id)}.md"
+    p = log_dir() / f"memo-{_rid(run_id)}.md"
     if not p.exists():
         raise HTTPException(404, "not found")
     return p.read_text()
@@ -86,7 +85,7 @@ def memo(run_id: str):
 
 @app.get("/memo/{run_id}.pdf")
 def memo_pdf(run_id: str):
-    p = LOGS / f"memo-{_rid(run_id)}.pdf"
+    p = log_dir() / f"memo-{_rid(run_id)}.pdf"
     if not p.exists():
         raise HTTPException(404, "not found")
     return FileResponse(p, media_type="application/pdf", filename=f"memo-{run_id}.pdf")

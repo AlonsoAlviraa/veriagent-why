@@ -1,13 +1,11 @@
 # logs/
-Written at runtime to stdout and to this folder. Never contains secrets (mask keys: `sk-...redacted`).
+Written at runtime (to `logs/`, or to `VA_LOG_DIR` if set). Runtime files are gitignored; only `logs/examples/` is committed. Logs never contain secrets.
 
-## Per-run trace: `trace-<run_id>.jsonl`
-One JSON object per line (recommended format, technical-execution guide §8):
-```json
-{"timestamp":"2026-10-24T18:42:11Z","run_id":"demo-001","agent_name":"Planner","action":"delegate_task","input_summary":"...","output_summary":"...","target_agent":"Retriever","confidence":0.91,"retry_count":0,"status":"success"}
-```
-It should show: which agents ran and what each was asked; handoffs; critique/validation; refinement loops; retries, fallbacks, recovery; calls to Zetaris and Meterless; final synthesis; errors and what happened next.
+## Per-run files
+- `trace-<run_id>.jsonl`: one JSON object per step: agent, action, input/output summary, target agent, retries, status. Includes Zetaris/DuckDB queries, Meterless calls, `data_fallback` (SAMPLE MODE) and `meterless_unavailable` events.
+- `hmem-ledger-<run_id>.jsonl`: Meterless H-MEM trust ledger (record creation, reads, support/refute edges).
+- `memo-<run_id>.md` / `.pdf`, `result-<run_id>.json`, `report-<run_id>.json`.
+- The Markovian run record (chunks, carryover, estimated tokens) is inside the result JSON and the trace.
 
-## Meterless engine evidence (TODO)
-- `hmem-audit-<run_id>.jsonl`: H-MEM trust ledger (create/read/update/delete, promote/demote/merge, conflicts) plus retrieval traces
-- `markovian-<run_id>.jsonl`: per-chunk telemetry plus a projected-vs-actual token savings report
+## Committed examples
+`logs/examples/` holds the trace, memo and H-MEM ledger for the three examples in `input_examples/` (SAMPLE_MODE, synthetic data).
