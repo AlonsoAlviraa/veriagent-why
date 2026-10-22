@@ -1,1 +1,4 @@
-# TODO: pinned dependencies (installed at build time, never at runtime)
+duckdb==2.0.0
+fastapi==0.159.1
+uvicorn==0.54.0
+pytest==9.1.1
