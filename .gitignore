@@ -18,3 +18,4 @@ logs/*.log
 __pycache__/
 .venv/
 data/*.duckdb
+logs/memo-*.md
