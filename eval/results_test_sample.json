@@ -2,10 +2,10 @@
   "split": "test",
   "provider": "sample",
   "n": 18,
-  "agent_k": 14,
+  "agent_k": 18,
   "agent_wilson95": [
-    0.5478497354769452,
-    0.90999218086618
+    0.8241154494176252,
+    1.0
   ],
   "baseline_k": 6,
   "baseline_wilson95": [
@@ -21,10 +21,10 @@
       "agent_status": "success",
       "agent_confidence": 88,
       "baseline": "none",
-      "baseline_context_tokens": 518,
-      "agent_s2_context_tokens": 518,
+      "baseline_context_tokens": 551,
+      "agent_s2_context_tokens": 554,
       "log": "logs/trace-eval-q07.jsonl",
-      "secs": 0.32
+      "secs": 0.29
     },
     {
       "qid": "q08",
@@ -34,10 +34,10 @@
       "agent_status": "success",
       "agent_confidence": 100,
       "baseline": "none",
-      "baseline_context_tokens": 502,
-      "agent_s2_context_tokens": 506,
+      "baseline_context_tokens": 535,
+      "agent_s2_context_tokens": 542,
       "log": "logs/trace-eval-q08.jsonl",
-      "secs": 0.25
+      "secs": 0.23
     },
     {
       "qid": "q09",
@@ -47,10 +47,10 @@
       "agent_status": "success",
       "agent_confidence": 100,
       "baseline": "none",
-      "baseline_context_tokens": 578,
-      "agent_s2_context_tokens": 588,
+      "baseline_context_tokens": 622,
+      "agent_s2_context_tokens": 624,
       "log": "logs/trace-eval-q09.jsonl",
-      "secs": 0.25
+      "secs": 0.22
     },
     {
       "qid": "q10",
@@ -60,10 +60,10 @@
       "agent_status": "success",
       "agent_confidence": 100,
       "baseline": "none",
-      "baseline_context_tokens": 517,
-      "agent_s2_context_tokens": 522,
+      "baseline_context_tokens": 550,
+      "agent_s2_context_tokens": 558,
       "log": "logs/trace-eval-q10.jsonl",
-      "secs": 0.23
+      "secs": 0.25
     },
     {
       "qid": "q11",
@@ -73,10 +73,10 @@
       "agent_status": "success",
       "agent_confidence": 100,
       "baseline": "none",
-      "baseline_context_tokens": 598,
-      "agent_s2_context_tokens": 598,
+      "baseline_context_tokens": 631,
+      "agent_s2_context_tokens": 634,
       "log": "logs/trace-eval-q11.jsonl",
-      "secs": 0.25
+      "secs": 0.23
     },
     {
       "qid": "q12",
@@ -86,8 +86,8 @@
       "agent_status": "success",
       "agent_confidence": 100,
       "baseline": "none",
-      "baseline_context_tokens": 454,
-      "agent_s2_context_tokens": 460,
+      "baseline_context_tokens": 487,
+      "agent_s2_context_tokens": 496,
       "log": "logs/trace-eval-q12.jsonl",
       "secs": 0.24
     },
@@ -99,10 +99,10 @@
       "agent_status": "success",
       "agent_confidence": 88,
       "baseline": "promotion_effect",
-      "baseline_context_tokens": 501,
-      "agent_s2_context_tokens": 505,
+      "baseline_context_tokens": 534,
+      "agent_s2_context_tokens": 541,
       "log": "logs/trace-eval-q13.jsonl",
-      "secs": 0.25
+      "secs": 0.24
     },
     {
       "qid": "q14",
@@ -112,10 +112,10 @@
       "agent_status": "success",
       "agent_confidence": 100,
       "baseline": "promotion_effect",
-      "baseline_context_tokens": 565,
-      "agent_s2_context_tokens": 565,
+      "baseline_context_tokens": 598,
+      "agent_s2_context_tokens": 601,
       "log": "logs/trace-eval-q14.jsonl",
-      "secs": 0.23
+      "secs": 0.24
     },
     {
       "qid": "q15",
@@ -125,47 +125,47 @@
       "agent_status": "success",
       "agent_confidence": 100,
       "baseline": "promotion_effect",
-      "baseline_context_tokens": 568,
-      "agent_s2_context_tokens": 573,
+      "baseline_context_tokens": 601,
+      "agent_s2_context_tokens": 609,
       "log": "logs/trace-eval-q15.jsonl",
-      "secs": 0.23
+      "secs": 0.25
     },
     {
       "qid": "q16",
       "kind": "seasonality",
       "expected": "seasonality",
-      "agent": "none",
-      "agent_status": "partial",
-      "agent_confidence": 20,
+      "agent": "seasonality",
+      "agent_status": "success",
+      "agent_confidence": 100,
       "baseline": "none",
-      "baseline_context_tokens": 327,
-      "agent_s2_context_tokens": 335,
+      "baseline_context_tokens": 366,
+      "agent_s2_context_tokens": 371,
       "log": "logs/trace-eval-q16.jsonl",
-      "secs": 0.19
+      "secs": 0.24
     },
     {
       "qid": "q17",
       "kind": "seasonality",
       "expected": "seasonality",
-      "agent": "none",
-      "agent_status": "partial",
-      "agent_confidence": 20,
+      "agent": "seasonality",
+      "agent_status": "success",
+      "agent_confidence": 100,
       "baseline": "none",
-      "baseline_context_tokens": 314,
-      "agent_s2_context_tokens": 325,
+      "baseline_context_tokens": 353,
+      "agent_s2_context_tokens": 361,
       "log": "logs/trace-eval-q17.jsonl",
-      "secs": 0.24
+      "secs": 0.23
     },
     {
       "qid": "q18",
       "kind": "seasonality",
       "expected": "seasonality",
-      "agent": "none",
-      "agent_status": "partial",
-      "agent_confidence": 20,
+      "agent": "seasonality",
+      "agent_status": "success",
+      "agent_confidence": 100,
       "baseline": "none",
-      "baseline_context_tokens": 317,
-      "agent_s2_context_tokens": 317,
+      "baseline_context_tokens": 343,
+      "agent_s2_context_tokens": 353,
       "log": "logs/trace-eval-q18.jsonl",
       "secs": 0.24
     },
@@ -173,14 +173,14 @@
       "qid": "q19",
       "kind": "promotion_effect",
       "expected": "promotion_effect",
-      "agent": "carrier_sla_breach",
+      "agent": "promotion_effect",
       "agent_status": "success",
       "agent_confidence": 91,
       "baseline": "promotion_effect",
-      "baseline_context_tokens": 553,
-      "agent_s2_context_tokens": 559,
+      "baseline_context_tokens": 586,
+      "agent_s2_context_tokens": 595,
       "log": "logs/trace-eval-q19.jsonl",
-      "secs": 0.24
+      "secs": 0.23
     },
     {
       "qid": "q20",
@@ -190,8 +190,8 @@
       "agent_status": "success",
       "agent_confidence": 91,
       "baseline": "promotion_effect",
-      "baseline_context_tokens": 587,
-      "agent_s2_context_tokens": 587,
+      "baseline_context_tokens": 620,
+      "agent_s2_context_tokens": 623,
       "log": "logs/trace-eval-q20.jsonl",
       "secs": 0.23
     },
@@ -203,8 +203,8 @@
       "agent_status": "success",
       "agent_confidence": 91,
       "baseline": "promotion_effect",
-      "baseline_context_tokens": 611,
-      "agent_s2_context_tokens": 613,
+      "baseline_context_tokens": 644,
+      "agent_s2_context_tokens": 649,
       "log": "logs/trace-eval-q21.jsonl",
       "secs": 0.24
     },
@@ -216,10 +216,10 @@
       "agent_status": "partial",
       "agent_confidence": 20,
       "baseline": "none",
-      "baseline_context_tokens": 248,
-      "agent_s2_context_tokens": 248,
+      "baseline_context_tokens": 283,
+      "agent_s2_context_tokens": 284,
       "log": "logs/trace-eval-q22.jsonl",
-      "secs": 0.21
+      "secs": 0.19
     },
     {
       "qid": "q23",
@@ -229,10 +229,10 @@
       "agent_status": "partial",
       "agent_confidence": 20,
       "baseline": "none",
-      "baseline_context_tokens": 229,
-      "agent_s2_context_tokens": 231,
+      "baseline_context_tokens": 263,
+      "agent_s2_context_tokens": 267,
       "log": "logs/trace-eval-q23.jsonl",
-      "secs": 0.31
+      "secs": 0.2
     },
     {
       "qid": "q24",
@@ -242,8 +242,8 @@
       "agent_status": "partial",
       "agent_confidence": 20,
       "baseline": "none",
-      "baseline_context_tokens": 186,
-      "agent_s2_context_tokens": 196,
+      "baseline_context_tokens": 225,
+      "agent_s2_context_tokens": 232,
       "log": "logs/trace-eval-q24.jsonl",
       "secs": 0.19
     }

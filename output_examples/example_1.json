@@ -2,7 +2,7 @@
   "run_id": "example-001",
   "status": "success",
   "output": {
-    "summary": "Top cause: **carrier_sla_breach** in carrier=CarrierB, region=North (estimated share of the excess late shipments vs the baseline late rate: 106%; above 100% means other segments improved).",
+    "summary": "Top cause: **carrier_sla_breach** in carrier=CarrierB, region=North (estimated share of the excess late shipments vs the baseline rate: 106%; above 100% means other segments improved).",
     "result": {
       "question": {
         "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
@@ -14,7 +14,8 @@
         "baseline": [
           "2026-09-15",
           "2026-09-30"
-        ]
+        ],
+        "dataset": null
       },
       "analysis": {
         "causes": [
@@ -58,6 +59,7 @@
           "label": "carrier_sla_breach"
         },
         "top_cause_label": "carrier_sla_breach",
+        "cross_checks": [],
         "discarded": [
           {
             "hyp": "H_promo",
@@ -154,8 +156,8 @@
           "rounds": [
             {
               "round": 1,
-              "s1_projected_tokens": 327,
-              "s1_actual_tokens": 263
+              "s1_projected_tokens": 363,
+              "s1_actual_tokens": 299
             },
             {
               "round": 2,
@@ -163,8 +165,8 @@
               "s1_actual_tokens": 278
             }
           ],
-          "projected_total": 749,
-          "actual_total": 541,
+          "projected_total": 785,
+          "actual_total": 577,
           "avoided_by_s1": 208
         },
         "markovian": {
@@ -173,16 +175,16 @@
           "chunks": [
             {
               "id": 1,
-              "tokens": 16,
+              "tokens": 21,
               "carryover_chars": 0
             },
             {
               "id": 2,
               "tokens": 10,
-              "carryover_chars": 236
+              "carryover_chars": 256
             }
           ],
-          "totalTokensUsed": 26,
+          "totalTokensUsed": 31,
           "totalTokensSaved": 0,
           "efficiencyPercent": 0,
           "tokenLabel": "estimated",
@@ -198,12 +200,154 @@
       "resolution": "resolved",
       "evidence_graph": {
         "backend": "meterless-hmem (vendored reference, via bridge)",
-        "nodes": 14,
-        "edges": 8,
-        "hmem_ledger_entries": 22,
+        "nodes": 16,
+        "edges": 9,
+        "graph": {
+          "nodes": [
+            {
+              "id": "H_carrier",
+              "kind": "hypothesis",
+              "text": "On-time drop concentrated in one carrier"
+            },
+            {
+              "id": "H_region",
+              "kind": "hypothesis",
+              "text": "On-time drop concentrated in one region"
+            },
+            {
+              "id": "H_promo",
+              "kind": "hypothesis",
+              "text": "A promotion active in the period caused the drop"
+            },
+            {
+              "id": "H_seasonal",
+              "kind": "hypothesis",
+              "text": "A broad rise across almost all carrier x region segments (calendar/seasonal pattern), not one segment"
+            },
+            {
+              "id": "E4",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierB'} late shipments on time delivery baseline n=306 late=19 period n=275 late=56"
+            },
+            {
+              "id": "E5",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'region': 'North'} late shipments on time delivery baseline n=256 late=13 period n=188 late=49"
+            },
+            {
+              "id": "E6",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'region': 'South'} late shipments on time delivery baseline n=240 late=12 period n=210 late=11"
+            },
+            {
+              "id": "E7",
+              "kind": "evidence",
+              "view": "v_promotions",
+              "text": "view v_promotions promotion PROMO-HOME-SOUTH category home region South 2026-10-01..2026-10-14"
+            },
+            {
+              "id": "E8",
+              "kind": "evidence",
+              "view": "v_logistics_cells",
+              "text": "view v_logistics all carrier x region segments late shipments on time delivery CarrierA/East 6/83->6/85 CarrierA/North 3/79->4/57 CarrierA/South 4/87->1/64 CarrierA/West 10/92->7/82 CarrierB/East 6/82"
+            },
+            {
+              "id": "E9",
+              "kind": "evidence",
+              "view": "v_tickets",
+              "text": "view v_tickets late delivery complaints My parcel is late, tracking has not moved My parcel is late, tracking has not moved My parcel is late, tracking has not moved My parcel is late, tracking has no"
+            },
+            {
+              "id": "H_carrier_x_region",
+              "kind": "hypothesis",
+              "text": "Late shipments concentrated in one carrier x region segment"
+            },
+            {
+              "id": "E11",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierA', 'region': 'North'} late shipments on time delivery baseline n=79 late=3 period n=57 late=4"
+            },
+            {
+              "id": "E12",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'North'} late shipments on time delivery baseline n=86 late=6 period n=77 late=43"
+            },
+            {
+              "id": "E13",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'South'} late shipments on time delivery baseline n=71 late=4 period n=62 late=6"
+            },
+            {
+              "id": "E14",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'West'} late shipments on time delivery baseline n=67 late=3 period n=64 late=4"
+            },
+            {
+              "id": "E15",
+              "kind": "evidence",
+              "view": "v_tickets",
+              "text": "view v_tickets late delivery complaints My parcel is late, tracking has not moved My parcel is late, tracking has not moved My parcel is late, tracking has not moved My parcel is late, tracking has no"
+            }
+          ],
+          "edges": [
+            {
+              "src": "E4",
+              "dst": "H_carrier",
+              "rel": "supports"
+            },
+            {
+              "src": "E5",
+              "dst": "H_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E6",
+              "dst": "H_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E7",
+              "dst": "H_promo",
+              "rel": "refutes"
+            },
+            {
+              "src": "E8",
+              "dst": "H_seasonal",
+              "rel": "refutes"
+            },
+            {
+              "src": "E11",
+              "dst": "H_carrier_x_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E12",
+              "dst": "H_carrier_x_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E13",
+              "dst": "H_carrier_x_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E14",
+              "dst": "H_carrier_x_region",
+              "rel": "supports"
+            }
+          ]
+        },
+        "hmem_ledger_entries": 25,
         "hmem_ledger_file": "logs/hmem-ledger-example-001.jsonl"
       },
-      "memo_md": "# Decision memo: why did on-time delivery drop? (run example-001)\nTop cause: **carrier_sla_breach** in carrier=CarrierB, region=North (estimated share of the excess late shipments vs the baseline late rate: 106%; above 100% means other segments improved).\n\n- Question: Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?\n- Baseline 2026-09-15..2026-09-30 vs period 2026-10-01..2026-10-14\n- Resolution: resolved\n- Data: SYNTHETIC labelled sample dataset\n\n## Findings (each verified by the Claim Gate)\n- On-time rate for carrier=CarrierB, region=North was 44.2% in the period window (2026-10-01..2026-10-14). Rows: S000977, S000979, S001028, S001040, S001068\n- On-time rate for carrier=CarrierB, region=North was 93.0% in the baseline window (2026-09-15..2026-09-30). Rows: S000014, S000021, S000024, S000032, S000045\n\n## Discarded alternatives\n- Promotion PROMO-HOME-SOUTH: dates overlap the period, but its shipments account for 0% of the excess late shipments (3 late of 49). Refuted.\n\n## Confidence: 100/100\n- Formula: round(100*(0.45*C + 0.35*A + 0.20*(1-R))); C=1.0, A=1.0, R=0.0; caps: none\n\n## Recommended actions\n- Review the SLA performance of CarrierB in North and consider rerouting.\n\n## Limitations\n- Synthetic data. Sample provider: deterministic rules, no language model.\n- Evidence graph: meterless-hmem (vendored reference, via bridge); Markovian status: completed.\n"
+      "memo_md": "# Decision memo: why did the on-time rate drop? (run example-001)\nTop cause: **carrier_sla_breach** in carrier=CarrierB, region=North (estimated share of the excess late shipments vs the baseline rate: 106%; above 100% means other segments improved).\n\n- Question: Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?\n- Baseline 2026-09-15..2026-09-30 vs period 2026-10-01..2026-10-14\n- Resolution: resolved\n- Data: SYNTHETIC labelled sample dataset\n\n## Findings (each verified by the Claim Gate)\n- On-time rate for carrier=CarrierB, region=North was 44.2% in the period window (2026-10-01..2026-10-14). Rows: S000977, S000979, S001028, S001040, S001068\n- On-time rate for carrier=CarrierB, region=North was 93.0% in the baseline window (2026-09-15..2026-09-30). Rows: S000014, S000021, S000024, S000032, S000045\n\n## Discarded alternatives\n- Promotion PROMO-HOME-SOUTH: dates overlap the period, but its shipments account for 0% of the excess late shipments (3 of 49). Refuted.\n\n## Confidence: 100/100\n- Formula: round(100*(0.45*C + 0.35*A + 0.20*(1-R))); C=1.0, A=1.0, R=0.0; caps: none\n\n## Recommended actions\n- Review the SLA performance of CarrierB in North and consider rerouting.\n\n## Limitations\n- Synthetic data. Sample provider: deterministic rules, no language model.\n- Evidence graph: meterless-hmem (vendored reference, via bridge); Markovian status: completed.\n"
     },
     "artifacts": [
       "logs/memo-example-001.md",
@@ -233,7 +377,7 @@
       "name": "claim_gate"
     }
   ],
-  "trace_id": "b2b7ca43dca140d3",
+  "trace_id": "12b3830eabda4127",
   "log_file": "logs/trace-example-001.jsonl",
-  "execution_time_seconds": 0.315
+  "execution_time_seconds": 0.367
 }

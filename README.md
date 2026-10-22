@@ -4,7 +4,7 @@
 
 > **Status: skeleton.** The build window opened on 22 Oct 2026 at 02:00 Madrid time (00:00 UTC). This first commit contains only the declared pre-existing skeleton and design documents; all implementation code is written in Cursor during the build window.
 
-VeriAgent Why is a multi-agent system that investigates "why did this metric change?" questions over federated data (Zetaris), tests competing hypotheses against evidence, and returns a decision memo where every claim cites source rows, with a deterministic confidence score and explicit limitations.
+VeriAgent Why is a multi-agent system for e-commerce ops/finance analysts that investigates "why did this KPI change?" questions (on-time delivery rate, return rate) over federated data (Zetaris), tests competing hypotheses against evidence, and returns a decision memo where every claim cites source rows, with a deterministic confidence score and explicit limitations.
 
 ## Architecture
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/diagrams/veriagent_why_arch_v6.2.png`](docs/diagrams/veriagent_why_arch_v6.2.png).
@@ -19,19 +19,23 @@ cp .env.example .env   # fill in your own values locally
 ```
 ## Run (SAMPLE_MODE, offline, no credentials)
 ```bash
-python -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt
-python scripts/make_data.py            # builds data/snapshot.duckdb (synthetic, seeded); also built on demand
-python run.py --input input_examples/example_1.json
-python -m pytest -q
-python run.py --serve                  # POST http://localhost:8000/run
+make setup          # venv + requirements
+make run            # one demo investigation (SAMPLE_MODE)
+make test           # pytest
+make api            # API on :8000 (POST /run, POST /runs, GET /runs/{id}/trace, /memo/{id}.md|.pdf)
+make ui             # web UI on :8501 (separate port; only calls the API)
+make data eval-dev  # build eval datasets, run the dev split
+make scan clean-check
+docker compose up --build   # api :8000 + ui :8501
 ```
-`SAMPLE_MODE` defaults to `true` when unset. In sample mode the agents use their deterministic path (no language model), with real SQL over the synthetic views. Each run writes `logs/trace-<run_id>.jsonl` and `logs/memo-<run_id>.md`. `output_examples/example_1.json` is the saved output of the command above.
+`SAMPLE_MODE` defaults to `true` when unset: no model calls, real SQL over the synthetic views, Meterless engines via `node`. Each run writes `logs/trace-<run_id>.jsonl`, `logs/hmem-ledger-<run_id>.jsonl`, `logs/memo-<run_id>.md` and `.pdf`.
+
+UI: question and KPI, live trace of rounds (including Evaluator send-backs), H-MEM evidence graph (supports/refutes edges), memo with clickable row-ID citations, confidence breakdown (C, A, R, caps, per-view agreement), PDF/Markdown export, and a what-if that is always labelled ESTIMATE.
 
 ## Current status (22 Oct 2026)
-- Working: seeded synthetic data generator; full agent pipeline in SAMPLE_MODE with both loops; deterministic Claim Gate (also checks every number in model-written prose) and confidence; Meterless H-MEM evidence graph and Markovian round loop; JSONL traces; Markdown memo; FastAPI `POST /run`; eval harness with a plain-RAG baseline; 21 tests.
-- Wired but not yet run against a real model: LLM calls in Planner, S1 filter, Evidence Evaluator, Cause Analyst and Writer via the provider switch (tested only against a local mock OpenAI-compatible server).
-- Not yet: Zetaris backend (sample DuckDB backend in use; Zetaris REST is a TODO), UI, PDF memo, seasonality hypothesis.
+- Working in SAMPLE_MODE: KPIs `on_time_rate` and `return_rate`; hypothesis families carrier/region segments (with drill-down), promotion, and seasonality (broad rise); promotion-vs-carrier cross-view check; materiality guard; Claim Gate; deterministic confidence; Meterless H-MEM + Markovian; API, UI, PDF; eval harness; CI.
+- Implemented but untested against real services: LLM calls (tested only with a mock OpenAI-compatible server), Zetaris JDBC backend + loader (tested only with a fake JDBC connection over the DuckDB snapshot; see docs/RUN_WINDOWS.md for the live run).
+- Not yet: live Nemotron/Nightshift runs, a live Zetaris instance with the synthetic views loaded, model-based eval.
 
 ## Meterless engines (how they are used)
 The open-source Meterless reference engines (github.com/Meterless/Meterless, Apache-2.0, pinned commit in `vendor/meterless/README.md`) are vendored unmodified and called through `meterless_bridge/` (a JSON-lines bridge run with `node`; prebuilt bundle committed, so SAMPLE_MODE needs no `npm install`).
@@ -43,20 +47,36 @@ The open-source Meterless reference engines (github.com/Meterless/Meterless, Apa
 `LLM_PROVIDER=nightshift|nvidia|sample` (`SAMPLE_MODE=true` forces `sample`). `nightshift`: Meterless Nightshift OpenAI-compatible endpoint (`NIGHTSHIFT_BASE_URL`). `nvidia`: NVIDIA API (`NVIDIA_API_KEY`, read from the environment only, never logged). Models: `REASONING_MODEL` (default `nvidia/nemotron-3.5-super-vl-120b-a12b`, S2: Planner, Cause Analyst, Writer) and `FAST_MODEL` (default `nvidia/nemotron-3.5-lightning-30b-a3b`, S1: relevance filter, Evaluator). Model outputs are validated JSON; any failure (empty reply, HTTP error, invalid JSON or label) falls back to the deterministic path and is logged. Numbers always come from SQL.
 
 ## Evaluation
-`python eval/make_questions.py` (already run; test split frozen in `eval/SPLITS.sha256`), `python eval/build_datasets.py`, `python eval/eval.py --split dev`, `python eval/eval.py --split test --freeze`.
-24 questions on seeded synthetic datasets (6 dev, 18 test). Trap types `promotion_effect` and `seasonality` are test-only; negative controls in both splits; the demo scenario is in neither. Baseline: plain RAG (BM25 over serialised rows, same data, same question, same token budget, same model in live mode). Metric: exact match of `top_cause_label`, reported as k/n with a Wilson 95% interval.
-Results so far: `eval/RESULTS_test_sample.md` (sample provider, no model on either side). The model-based comparison has not been run yet.
+See [`eval/README.md`](eval/README.md). Three sets:
+- **dev** (22 questions, clean + noisy + harder cases): used for tuning. Sample provider, no model on either side: agent 21/22, plain-RAG baseline 6/22. Live NVIDIA Nemotron (22 Oct 2026, dev only): agent 14/22 (Wilson 0.43–0.80), plain-RAG baseline with the same model 11/22 (0.31–0.69). The live agent is **worse than the sample-mode rules**: the model verdicts/plans lost seasonality, promotion_effect and negative-control cases. Details and failure analysis: `eval/RESULTS_dev_nvidia.md`.
+- **test v1** (18): **contaminated** (run twice, the second time after seeing failures); kept only as history in [`eval/RESULTS_HISTORY.md`](eval/RESULTS_HISTORY.md).
+- **test v2** (18, noisy generator, new seeds): **held out and never run**. Reserved for the final Nemotron eval; frozen by `eval/SPLITS_test_v2.sha256`.
+Metric: exact match of `top_cause_label`, k/n with a Wilson 95% interval; segment and secondary-cause detection where defined. Data is synthetic and written by the same author as the agent.
+Live check before the model eval: `make smoke-nvidia` (skips cleanly if `NVIDIA_API_KEY` is unset; never prints it).
 
 ## Confidence (deterministic)
 `conf = round(100 × (0.45·C + 0.35·A + 0.20·(1−R)))`, where C = share of all proposed claims that passed the Claim Gate, A = share of views with relevant rows that agree with the top cause (A = 0 and cap 50 if none), R = refuting ÷ (supporting + refuting) edges for the top cause. Partial runs are capped at 40. See `app/confidence.py`.
 
 ## AI and Model Usage
-Placeholder, to be completed as the build progresses.
-- **Cursor:** development environment; AI-assisted coding, reviewed and tested by the author.
-- **NVIDIA Nemotron:** planned reasoning and fast-filter models via the NVIDIA API (exact model IDs TBD).
-- **Meterless:** Nightshift as the primary OpenAI-compatible model provider, plus the H-MEM, Markovian and World Model engines (JSONL traces).
-- **Zetaris:** federated data layer queried for evidence.
-- Data: synthetic, clearly labelled sample data (to be added).
+Models (product runtime):
+- NVIDIA Nemotron via the provider switch: `nvidia/nemotron-3.5-super-vl-120b-a12b` (S2: Planner, Cause Analyst, Writer) and `nvidia/nemotron-3.5-lightning-30b-a3b` (S1: relevance filter, Evidence Evaluator). **Status: live on the NVIDIA free endpoint (dev split only, see `eval/RESULTS_dev_nvidia.md`).**
+- Meterless Nightshift as the primary provider (`LLM_PROVIDER=nightshift`, OpenAI-compatible, `meterless/*` routing modes). **Status: not available yet** (no runtime reachable); `nvidia` is the direct fallback, disclosed per call in the trace.
+- SAMPLE_MODE uses no model at all: deterministic rules with real computation.
+- Model output never supplies numbers or confidence: numbers come from SQL, confidence from a formula, and the Claim Gate checks every number in model-written text.
+
+Agent framework: none; own Python orchestrator (`app/pipeline.py`).
+
+Sponsor technology:
+- Zetaris: data layer behind `app/adapters/zetaris.py` (JDBC backend via JayDeBeApi, federating a Postgres datasource and REST tables into a SchemaStore container — `scripts/zetaris_load.py`, `scripts/zetaris_check.py`, `docs/RUN_WINDOWS.md`; not yet verified live; SAMPLE_MODE uses a DuckDB snapshot with the same five view names and SQL).
+- Meterless: H-MEM (evidence graph + trust ledger) and Markovian (investigation rounds) open-source reference engines, vendored unmodified (Apache-2.0) and run through `meterless_bridge/`; Nightshift as the model provider (pending).
+- NVIDIA: Nemotron models above (pending live use).
+- Cursor: development environment.
+
+Development tools: developed in Cursor; AI-assisted coding was used for scaffolding, implementation, tests and documentation. Generated code was reviewed and tested by the author.
+
+External libraries: DuckDB, FastAPI, Uvicorn, httpx, fpdf2, pytest; esbuild (build-time only, for the bridge bundle); Meterless engines (vendored).
+Data: synthetic, generated by `scripts/make_data.py` (seeded); no real customer data.
+Open-source code materially adapted: Meterless reference engines (vendored unmodified, see `vendor/meterless/README.md`).
 
 ## Pre-existing work
 Everything below was prepared before the build window opened and is also declared in the submission form. Full detail: [`docs/PRE_EXISTING_WORK.md`](docs/PRE_EXISTING_WORK.md).

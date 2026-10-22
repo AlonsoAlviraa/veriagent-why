@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>VeriAgent Why</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{font-family:system-ui,sans-serif;margin:0;background:#f6f7f9;color:#1d2330}
+header{background:#1d2330;color:#fff;padding:12px 20px}header small{opacity:.7}
+main{display:grid;grid-template-columns:360px 1fr;gap:16px;padding:16px}
+.card{background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 3px #0001;margin-bottom:16px}
+h2{font-size:15px;margin:0 0 10px}label{font-size:12px;display:block;margin-top:8px}
+input,textarea{width:100%;box-sizing:border-box;padding:6px;font:inherit}button{margin-top:10px;padding:7px 12px;cursor:pointer}
+.ev{font-size:12px;border-left:3px solid #ccd;padding:3px 8px;margin:3px 0}.ev b{color:#335}
+.send_back_to_planner,.send_back_to_cause_analyst{border-color:#e08a00;background:#fff6e5}
+.badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:700}
+.est{background:#ffe08a;color:#6b4c00}.syn{background:#fde2e2;color:#8a1010}
+table{border-collapse:collapse;font-size:13px}td,th{border-bottom:1px solid #eee;padding:4px 8px;text-align:left}
+a.row{font-family:monospace;cursor:pointer;color:#2456c7}pre{background:#f3f4f7;padding:8px;font-size:12px;overflow:auto}
+</style></head><body>
+<header><b>VeriAgent Why</b> <small>The Agent That Can Explain Why · <span class="badge syn">SYNTHETIC DATA</span></small></header>
+<main>
+<section>
+ <div class="card"><h2>Question</h2>
+  <label>Question</label><textarea id="q" rows="3">Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?</textarea>
+  <label>KPI</label><select id="k"><option value="on_time_rate">On-time delivery rate</option><option value="return_rate">Return rate</option></select>
+  <label>Baseline (start, end)</label><input id="b" value="2026-09-15,2026-09-30">
+  <label>Period (start, end)</label><input id="p" value="2026-10-01,2026-10-14">
+  <label>Dataset (empty = demo snapshot)</label><input id="d" value="">
+  <button onclick="go()">Investigate</button> <span id="st"></span></div>
+ <div class="card"><h2>Live trace</h2><div id="trace"></div></div>
+</section>
+<section>
+ <div class="card"><h2>Evidence graph (Meterless H-MEM)</h2><div id="graph">Run a question to see the graph.</div></div>
+ <div class="card"><h2>Decision memo</h2><div id="memo"></div><pre id="rowview" hidden></pre></div>
+ <div class="card"><h2>Confidence breakdown</h2><div id="conf"></div></div>
+ <div class="card"><h2>What-if <span class="badge est">ESTIMATE</span></h2><div id="whatif"><button onclick="whatif()" disabled id="wb">Neutralise the top cause</button></div></div>
+</section></main>
+<script>
+let RID=null, DS=null;
+if(new URLSearchParams(location.search).has("auto")) setTimeout(()=>go(),100);
+const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+async function go(){
+  const [b0,b1]=$("b").value.split(",").map(s=>s.trim()), [p0,p1]=$("p").value.split(",").map(s=>s.trim());
+  DS=$("d").value.trim()||null;
+  const input={query:$("q").value,kpi:$("k").value,baseline:[b0,b1],period:[p0,p1]}; if(DS) input.dataset=DS;
+  $("trace").innerHTML="";$("memo").innerHTML="";$("conf").innerHTML="";$("graph").innerHTML="…";$("wb").disabled=true;
+  const r=await (await fetch("api/runs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({input})})).json();
+  RID=r.run_id; $("st").textContent="running "+RID; poll(0);
+}
+async function poll(since){
+  const t=await (await fetch(`api/runs/${RID}/trace?since=${since}`)).json();
+  for(const e of t.events){ $("trace").insertAdjacentHTML("beforeend",`<div class="ev ${e.event}"><b>${esc(e.agent)}</b> ${esc(e.event)} ${esc(summ(e))}</div>`); }
+  if(t.status==="running"||t.status==="unknown") return setTimeout(()=>poll(t.next),400);
+  $("st").textContent=t.status; if(t.status!=="error") show();
+}
+function summ(e){const d=e.data||{};
+  if(e.event==="hypotheses")return `round ${d.round}: ${d.hypotheses.join(", ")}`;
+  if(e.event==="filtered")return `kept ${d.kept}, dropped ${d.dropped} (tokens ${d.projected_tokens}→${d.actual_tokens})`;
+  if(e.event==="verdicts")return d.verdicts.map(v=>`${v.hyp}=${v.verdict}`).join("; ");
+  if(e.event==="checked")return `passed ${d.passed.length}, blocked ${d.blocked.length}`;
+  if(e.event==="ranked")return d.top_cause_label; if(e.event==="end")return `confidence ${d.confidence}`;
+  if(e.event==="send_back_to_planner")return d.reason; return "";}
+async function show(){
+  const r=await (await fetch(`api/runs/${RID}`)).json();
+  graph(r.evidence_graph.graph);
+  const cl=r.claims.map(c=>`<li>${esc(c.text)}<br>rows: ${c.row_ids.map(i=>`<a class="row" onclick="row('${i}')">${i}</a>`).join(" ")}</li>`).join("");
+  const disc=r.analysis.discarded.map(d=>`<li>Promotion ${esc(d.promo_id)}: dates overlap, ${Math.round(100*d.share_of_excess_late)}% of excess late shipments → refuted</li>`).join("")||"<li>none</li>";
+  $("memo").innerHTML=`<p><b>${esc(r.analysis.top_cause_label)}</b> · resolution: ${esc(r.resolution)} · <a href="api/memo/${RID}.pdf">PDF</a> · <a href="api/memo/${RID}.md">Markdown</a></p>`+
+    (r.narrative?`<p>${esc(r.narrative)}</p>`:"")+`<h3>Findings (Claim Gate approved)</h3><ul>${cl||"<li>none</li>"}</ul><h3>Discarded alternatives</h3><ul>${disc}</ul>`+
+    (r.blocked_claims.length?`<h3>Blocked claims</h3><ul>${r.blocked_claims.map(b=>`<li>${esc(b)}</li>`).join("")}</ul>`:"");
+  const c=r.confidence, views=Object.entries(c.views||{}).map(([k,v])=>`<tr><td>${k}</td><td>${esc(typeof v==="string"?v:JSON.stringify(v))}</td></tr>`).join("");
+  $("conf").innerHTML=`<p style="font-size:28px;margin:0">${c.confidence}/100</p><p><code>${esc(c.formula)}</code></p>
+   <table><tr><th>C coverage</th><td>${c.C}</td></tr><tr><th>A agreement</th><td>${c.A}</td></tr><tr><th>R refutation</th><td>${c.R}</td></tr><tr><th>caps</th><td>${c.caps.join(", ")||"none"}</td></tr></table>
+   <h3>Views</h3><table>${views}</table>`;
+  $("wb").disabled=false;
+}
+function graph(g){
+  const H=g.nodes.filter(n=>n.kind==="hypothesis"), E=g.nodes.filter(n=>n.kind==="evidence"), pos={};
+  const rowH=34, h=Math.max(H.length,E.length)*rowH+20;
+  H.forEach((n,i)=>pos[n.id]=[560,20+i*rowH]); E.forEach((n,i)=>pos[n.id]=[20,20+i*rowH]);
+  const col={supports:"#1a8a3a",refutes:"#c0392b",gap:"#999"};
+  let s=`<svg width="100%" viewBox="0 0 820 ${h}" style="font-size:11px">`;
+  for(const e of g.edges){const a=pos[e.src],b=pos[e.dst]; if(a&&b) s+=`<line x1="${a[0]+240}" y1="${a[1]+10}" x2="${b[0]}" y2="${b[1]+10}" stroke="${col[e.rel]||"#999"}" stroke-width="1.5"><title>${e.rel}</title></line>`;}
+  for(const n of E){const[x,y]=pos[n.id]; s+=`<rect x="${x}" y="${y}" width="240" height="22" rx="4" fill="#eef2fb"/><text x="${x+5}" y="${y+15}">${esc(n.id)} · ${esc(n.view||"")}</text>`;}
+  for(const n of H){const[x,y]=pos[n.id]; s+=`<rect x="${x}" y="${y}" width="240" height="22" rx="4" fill="#fdf1dc"/><text x="${x+5}" y="${y+15}">${esc(n.id)}</text>`;}
+  $("graph").innerHTML=s+`</svg><small><span style="color:#1a8a3a">supports</span> · <span style="color:#c0392b">refutes</span> · <span style="color:#999">gap</span></small>`;
+}
+async function row(id){const r=await fetch(`api/rows/v_logistics/${id}`+(DS?`?dataset=${DS}`:"")); $("rowview").hidden=false; $("rowview").textContent=JSON.stringify(await r.json(),null,2);}
+async function whatif(){const w=await (await fetch(`api/runs/${RID}/whatif`,{method:"POST"})).json();
+  $("whatif").innerHTML=w.available?`<p><span class="badge est">${esc(w.badge)}</span></p><table><tr><th>Observed ${esc(w.kpi)}</th><td>${w.observed_on_time_rate}%</td></tr><tr><th>Estimated if ${esc(JSON.stringify(w.neutralised_segment))} at its baseline</th><td>${w.estimated_on_time_rate_if_segment_at_baseline}%</td></tr></table><small>${esc(w.method)}</small>`:`<p><span class="badge est">ESTIMATE</span> not available: ${esc(w.reason)}</p>`;}
+</script></body></html>

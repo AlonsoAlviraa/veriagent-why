@@ -48,8 +48,11 @@ def run_baseline(inp: dict, token_budget: int = TOKEN_BUDGET) -> dict:
             break
         ctx.append(docs[i]); used += n
     if provider() != "sample":
-        r = llm.complete([{"role": "system", "content": f"Answer from the rows only. Reply with JSON only: {{\"label\": one of {TAXONOMY}, \"row_ids\": [ids]}}."},
-                          {"role": "user", "content": inp["query"] + "\nRows:\n" + "\n".join(d[1] for d in ctx)}], "s2", 300)
+        try:
+            r = llm.complete([{"role": "system", "content": f"Answer from the rows only. Reply with JSON only: {{\"label\": one of {TAXONOMY}, \"row_ids\": [ids]}}."},
+                              {"role": "user", "content": inp["query"] + "\nRows:\n" + "\n".join(d[1] for d in ctx)}], "s2", 300)
+        except Exception as e:  # counted as wrong ("error"), never silently replaced by rules
+            return {"label": "error", "context_tokens": used, "provider": provider(), "error": type(e).__name__}
         try:
             lab = _json(r["content"]).get("label")
         except Exception:

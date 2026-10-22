@@ -8,7 +8,8 @@ from .. import llm
 
 TAXONOMY = ["carrier_sla_breach", "supplier_cost_increase", "promotion_effect", "seasonality", "stockout", "none"]
 HYP_CATALOG = {"H_carrier": "On-time drop concentrated in one carrier", "H_region": "On-time drop concentrated in one region",
-               "H_promo": "A promotion active in the period caused the drop"}
+               "H_promo": "A promotion active in the period caused the drop",
+               "H_seasonal": "A broad rise across almost all segments (calendar/seasonal pattern)"}
 
 
 def _json(text: str | None):
@@ -21,7 +22,7 @@ def _json(text: str | None):
 
 
 def plan(question: str, memory_context: str) -> tuple[list[str], dict]:
-    r = llm.complete([{"role": "system", "content": "You plan a KPI-drop investigation. Reply with JSON only: {\"hypotheses\": [ids]} choosing 2-3 ids from the catalog."},
+    r = llm.complete([{"role": "system", "content": "You plan a KPI-drop investigation. Reply with JSON only: {\"hypotheses\": [ids]} choosing 3-5 competing ids from the catalog, most likely first."},
                       {"role": "user", "content": f"Question: {question}\nCatalog: {json.dumps(HYP_CATALOG)}\nMemory: {memory_context[:1500]}"}], "s2", 300)
     ids = [h for h in _json(r["content"]).get("hypotheses", []) if h in HYP_CATALOG]
     if not ids:

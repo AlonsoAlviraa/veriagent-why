@@ -28,11 +28,23 @@ def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--split", choices=["dev", "test"], required=True)
+    ap.add_argument("--split", choices=["dev", "test", "test_v2"], required=True)
     ap.add_argument("--freeze", action="store_true")
+    ap.add_argument("--final-v2", action="store_true", help="required for test_v2: the reserved final Nemotron eval")
     a = ap.parse_args()
-    qs = json.loads((R / "eval" / "questions.json").read_text())
+    if a.split == "test_v2":
+        qs = json.loads((R / "eval" / "questions_test_v2.json").read_text())
+        h = hashlib.sha256(json.dumps(qs, sort_keys=True).encode()).hexdigest()
+        if h != (R / "eval" / "SPLITS_test_v2.sha256").read_text().split()[0]:
+            sys.exit("test_v2 hash mismatch: the reserved test set was modified")
+        if not a.final_v2:
+            sys.exit("test_v2 is reserved for the final Nemotron eval; pass --final-v2 only for that run")
+        if provider() == "sample":
+            sys.exit("test_v2 must be run with a live model provider (LLM_PROVIDER=nvidia|nightshift, SAMPLE_MODE=false)")
+    else:
+        qs = json.loads((R / "eval" / "questions.json").read_text())
     if a.split == "test":
+        print("WARNING: the v1 test split is contaminated (see eval/RESULTS_HISTORY.md); use dev or the reserved test_v2")
         h = hashlib.sha256(json.dumps([q for q in qs if q["split"] == "test"], sort_keys=True).encode()).hexdigest()
         if h != (R / "eval" / "SPLITS.sha256").read_text().split()[0]:
             sys.exit("test split hash mismatch: the frozen test set was modified")
@@ -46,21 +58,36 @@ def main() -> None:
         b = run_baseline(q["input"], r["token_report"]["s1_filter"]["actual_total"])
         rows.append({"qid": q["qid"], "kind": q["kind"], "expected": q["expected_label"],
                      "agent": r["analysis"]["top_cause_label"], "agent_status": res["status"], "agent_confidence": r["confidence"]["confidence"],
+                     "agent_segment": (r["analysis"]["top_cause"] or {}).get("segment"), "expected_segment": q.get("expected_segment"),
+                     "agent_secondary": (r["analysis"].get("secondary_cause") or {}).get("segment"),
+                     "expected_secondary": (q.get("expected_secondary") or {}).get("segment"), "resolution": r["resolution"],
                      "baseline": b["label"], "baseline_context_tokens": b["context_tokens"],
                      "agent_s2_context_tokens": r["token_report"]["s1_filter"]["actual_total"], "log": res["log_file"], "secs": round(time.time() - t0, 2)})
+        calls = [json.loads(l)["data"]["call"] for l in (R / res["log_file"]).read_text().splitlines() if '"model_call"' in l]
+        rows[-1]["llm_calls_ok"] = sum(1 for c in calls if c.get("ok")); rows[-1]["llm_calls_failed"] = sum(1 for c in calls if not c.get("ok"))
         print(json.dumps(rows[-1]))
     n = len(rows)
     ka = sum(x["agent"] == x["expected"] for x in rows); kb = sum(x["baseline"] == x["expected"] for x in rows)
-    out = {"split": a.split, "provider": provider(), "n": n, "agent_k": ka, "agent_wilson95": wilson(ka, n),
+    seg_rows = [x for x in rows if x["expected_segment"]]
+    ks = sum(x["agent_segment"] == x["expected_segment"] for x in seg_rows)
+    sec_rows = [x for x in rows if x["expected_secondary"]]
+    k2 = sum(x["agent_secondary"] == x["expected_secondary"] for x in sec_rows)
+    fp2 = sum(1 for x in rows if not x["expected_secondary"] and x["agent_secondary"])
+    llm_ok, llm_fail = sum(x.get("llm_calls_ok", 0) for x in rows), sum(x.get("llm_calls_failed", 0) for x in rows)
+    out = {"llm_calls": {"ok": llm_ok, "failed_fell_back_to_rules": llm_fail}, "baseline_errors": sum(x["baseline"] == "error" for x in rows), "secondary_metrics": {"segment_match": f"{ks}/{len(seg_rows)}", "secondary_detected": f"{k2}/{len(sec_rows)}",
+                                 "secondary_false_positives": f"{fp2}/{len(rows) - len(sec_rows)}"}, "split": a.split, "provider": provider(), "n": n, "agent_k": ka, "agent_wilson95": wilson(ka, n),
            "baseline_k": kb, "baseline_wilson95": wilson(kb, n), "rows": rows}
     (R / "eval" / f"results_{a.split}_{provider()}.json").write_text(json.dumps(out, indent=2) + "\n")
     f = lambda k, ci: f"{k}/{n} (Wilson 95% CI {ci[0]:.2f}–{ci[1]:.2f})"
     md = [f"# Eval results: {a.split} split, provider `{provider()}`", "",
           "Measured by `eval/eval.py` on seeded synthetic data. Metric: exact match of `top_cause_label`.", "",
           f"| System | Correct |", "|---|---|", f"| VeriAgent Why | {f(ka, out['agent_wilson95'])} |", f"| Plain-RAG baseline | {f(kb, out['baseline_wilson95'])} |", "",
+          f"Secondary metrics (agent): segment match {ks}/{len(seg_rows)}, secondary cause detected {k2}/{len(sec_rows)}, secondary false positives {fp2}/{len(rows) - len(sec_rows)}.", "",
+          f"Agent model calls: {llm_ok} ok, {llm_fail} failed (those steps fell back to the deterministic rules). Baseline model errors (scored wrong): {out['baseline_errors']}.", "",
           "| qid | kind | expected | agent | baseline |", "|---|---|---|---|---|"]
     md += [f"| {x['qid']} | {x['kind']} | {x['expected']} | {x['agent']} | {x['baseline']} |" for x in rows]
     (R / "eval" / f"RESULTS_{a.split}_{provider()}.md").write_text("\n".join(md) + "\n")
+    print("secondary:", out["secondary_metrics"])
     print(f"agent {ka}/{n} {out['agent_wilson95']}  baseline {kb}/{n} {out['baseline_wilson95']}")
 
 

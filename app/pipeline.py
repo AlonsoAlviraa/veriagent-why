@@ -18,21 +18,22 @@ DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
 def parse_question(inp: dict) -> dict:
-    q = {"query": inp.get("query", ""), "kpi": inp.get("kpi"), "period": inp.get("period"), "baseline": inp.get("baseline")}
-    if not q["kpi"] and re.search(r"on[- ]time", q["query"], re.I):
-        q["kpi"] = "on_time_rate"
+    q = {"query": inp.get("query", ""), "kpi": inp.get("kpi"), "period": inp.get("period"), "baseline": inp.get("baseline"), "dataset": inp.get("dataset")}
+    from .kpis import detect, KPIS
+    if not q["kpi"]:
+        q["kpi"] = detect(q["query"])
     if not (q["period"] and q["baseline"]):
         d = DATE.findall(q["query"])
         if len(d) == 4:
             q["baseline"], q["period"] = d[:2], d[2:]
-    if q["kpi"] != "on_time_rate" or not q["period"] or not q["baseline"]:
-        raise ValueError("Day-1 build supports KPI on_time_rate with explicit baseline and period dates (YYYY-MM-DD)")
+    if q["kpi"] not in KPIS or not q["period"] or not q["baseline"]:
+        raise ValueError(f"supported KPIs: {sorted(KPIS)}, with explicit baseline and period dates (YYYY-MM-DD)")
     return q
 
 
 def view_agreement(db, seg: dict, q: dict) -> tuple[int, int, dict]:
     from .checks.claims import SEG_COLS
-    w = " AND ".join(f"{SEG_COLS[c]} = ?" for c in seg)
+    w = " AND ".join(f"{SEG_COLS[c]} = ?" for c in seg) or "TRUE"
     vals = list(seg.values())
     det = {}
     def rate(sql, win):
@@ -69,7 +70,8 @@ def run(inp: dict, run_id: str | None = None) -> dict:
     ctx = LLMCtx(live=prov != "sample")
     tr.log("orchestrator", "start", provider=prov)
     q = parse_question(inp)
-    db = get_backend(inp.get("dataset"))
+    from .kpis import KpiLens
+    db = KpiLens(get_backend(inp.get("dataset")), q["kpi"])
     try:
         bridge = Bridge()
         bridge.call("reset")
@@ -77,9 +79,12 @@ def run(inp: dict, run_id: str | None = None) -> dict:
         bridge = None
         tr.log("orchestrator", "meterless_unavailable", error=str(e))
     tr.log("orchestrator", "backend", data=db.name, meterless="bridge" if bridge else "local-fallback")
+    from . import llm
+    llm.set_deadline(t0 + TIMEOUTS["run_s"])  # model calls past the 8-min cap fail fast -> deterministic fallback
     try:
         return _run(inp, q, db, bridge, tr, ctx, t0, run_id)
     finally:
+        llm.set_deadline(None)
         if bridge:
             bridge.close()
 
@@ -87,7 +92,7 @@ def run(inp: dict, run_id: str | None = None) -> dict:
 def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
     mem = HMem(bridge)
     planner, retr, s1 = Planner(), Retriever(db), S1Filter()
-    ev, analyst, writer, gate = EvidenceEvaluator(db, retr), CauseAnalyst(), Writer(db), ClaimGate(db)
+    ev, analyst, writer, gate = EvidenceEvaluator(db, retr), CauseAnalyst(db, q), Writer(db), ClaimGate(db)
     st = {"feedback": None, "verdicts": [], "rounds": [], "done": False}
 
     def investigate_round(step: int, carryover: str) -> str:
@@ -101,6 +106,7 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
         st["rounds"].append({"round": rnd, "s1_projected_tokens": proj, "s1_actual_tokens": act})
         tr.log(s1.name, "filtered", round=rnd, kept=len(kept), dropped=len(chunks) - len(kept), projected_tokens=proj, actual_tokens=act)
         res = ev.evaluate(hyps, kept, q, mem, ctx)
+        st["moved"] = res.get("kpi_moved_materially", True)
         st["verdicts"] += res["verdicts"]
         tr.log(ev.name, "verdicts", round=rnd, verdicts=res["verdicts"], feedback=res["feedback"])
         for c in ctx.calls[n0:]:
@@ -156,8 +162,21 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
         else:
             tr.log(gate.name, "send_back_to_cause_analyst", blocked=sorted(blocked))
     passed = {r["claim_id"] for r in results if r["passed"]}
-    if not analysis["top_cause"]:
+    if not analysis["top_cause"] or analysis.get("ambiguous"):
         status = "partial"
+    reasons = []
+    if not st["verdicts"] or not any(v["verdict"] == "supports" for v in st["verdicts"]):
+        reasons.append("no hypothesis was supported by the data" + ("" if st.get("moved", True) else "; the KPI did not move materially"))
+    if analysis.get("ambiguous"):
+        reasons.append("top and secondary causes explain similar shares; not separable with this data")
+    deadline_hit = time.time() - t0 > TIMEOUTS["run_s"]
+    if deadline_hit:
+        status = "partial"
+        reasons.append(f"run timeout: exceeded {TIMEOUTS['run_s']} s; remaining model steps used deterministic fallbacks")
+        tr.log("orchestrator", "deadline_hit", run_s=TIMEOUTS["run_s"])
+    if st["feedback"]:
+        reasons.append("investigation round cap reached with an open gap: " + st["feedback"]["gap"])
+    open_h = sorted({v["hyp"] for v in st["verdicts"] if v["verdict"] == "gap"})
     top = analysis["top_cause"]
     sup = len(mem.edges_to(top["hyp"], "supports")) if top else 0
     ref = len(mem.edges_to(top["hyp"], "refutes")) if top else 0
@@ -174,13 +193,29 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
            "token_report": {"s1_filter": {"unit": "whitespace tokens (approx.)", "rounds": st["rounds"], "projected_total": proj,
                                           "actual_total": act, "avoided_by_s1": proj - act}, "markovian": mk},
            "model_calls": ctx.calls, "resolution": "resolved" if status == "success" else "unresolved",
+           "unresolved_reasons": reasons if status != "success" else [], "open_hypotheses": open_h,
+           "refuted_hypotheses": sorted({v["hyp"] for v in st["verdicts"] if v["verdict"] == "refutes"}),
            "evidence_graph": {"backend": mem.backend, "nodes": len(mem.nodes), "edges": len(mem.edges),
+                              "graph": {"nodes": list(mem.nodes.values()), "edges": mem.edges},
                               "hmem_ledger_entries": len(ledger["entries"]), "hmem_ledger_file": f"logs/{lpath.name}"}}
-    out["memo_md"] = render_memo(out, run_id)
+    from . import report
+    out["run_report"] = report.build(ctx.calls, provider(), st["rounds"], mk, time.time() - t0, deadline_hit)
+    rpath = tr.path.parent / f"report-{run_id}.json"
+    rpath.write_text(__import__("json").dumps(out["run_report"], indent=2, default=str))
+    tr.log("observability", "run_report", tokens=out["run_report"]["tokens"], model_calls=out["run_report"]["model_calls"],
+           cost=out["run_report"]["cost"], file=f"logs/{rpath.name}")
+    out["memo_md"] = render_memo(out, run_id) + "\n".join(report.to_md(out["run_report"])) + "\n"
     memo_path = tr.path.parent / f"memo-{run_id}.md"
     memo_path.write_text(out["memo_md"])
+    (tr.path.parent / f"result-{run_id}.json").write_text(__import__("json").dumps(out, default=str))
+    try:
+        from .pdf import memo_pdf
+        memo_pdf(out["memo_md"], tr.path.parent / f"memo-{run_id}.pdf")
+    except ImportError:
+        pass
     tr.log("orchestrator", "end", status=status, confidence=conf["confidence"])
     return {"run_id": run_id, "status": status, "output": {"summary": out["memo_md"].splitlines()[1],
-            "result": out, "artifacts": [f"logs/{memo_path.name}", f"logs/{lpath.name}"]},
+            "result": out, "artifacts": [f"logs/{memo_path.name}", f"logs/{lpath.name}", f"logs/{rpath.name}"]
+            + ([f"logs/memo-{run_id}.pdf"] if (tr.path.parent / f"memo-{run_id}.pdf").exists() else [])},
             "agents": [{"name": a.name} for a in (planner, retr, s1, ev, analyst, writer, gate)],
             "trace_id": tr.trace_id, "log_file": f"logs/{tr.path.name}", "execution_time_seconds": round(time.time() - t0, 3)}

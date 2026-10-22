@@ -43,11 +43,16 @@ def generate(seed: int = 42, scenario: dict | None = None) -> dict[str, list[dic
         promo_row = {"promo_id": f"PROMO-{pr['category'].upper()}-{pr['region'].upper()}", "name": f"{pr['category'].title()} week {pr['region']}",
                      "start_date": PERIOD[0], "end_date": PERIOD[1], "category": pr["category"], "region": pr["region"], "discount_pct": 20.0}
     rng = random.Random(seed)
+    nz = sc.get("noise")  # noisy variant; uses its own RNG so non-noisy scenarios stay byte-identical
+    nrng = random.Random(seed * 7919 + 1)
+    base_late = {c: (round(nrng.uniform(0.04, 0.10), 3) if nz else 0.06) for c in CARRIERS}
     orders, logi, returns, tickets = [], [], [], []
     d, n = BASELINE[0], 0
     while d <= PERIOD[1]:
         in_period = d >= PERIOD[0]
-        for _ in range(rng.randint(55, 65)):
+        day_mult = nrng.uniform(0.7, 1.3) if nz else 1.0
+        extra = nrng.randint(-15, 15) if nz else 0
+        for _ in range(rng.randint(55, 65) + extra):
             n += 1
             region, cat, carrier = rng.choice(REGIONS), rng.choice(CATEGORIES), rng.choice(CARRIERS)
             promo = None
@@ -62,7 +67,14 @@ def generate(seed: int = 42, scenario: dict | None = None) -> dict[str, list[dic
                            "sku": f"SKU-{cat[:3].upper()}-{rng.randint(1, 40):03d}", "qty": qty,
                            "revenue": round(qty * price * disc, 2), "cost": round(qty * price * 0.6, 2),
                            "promo_id": promo})
-            p_late = 0.06
+            p_late = base_late[carrier] * day_mult
+            if nz and nz.get("distractor_static") and (carrier, region) == tuple(nz["distractor_static"]["cell"]):
+                p_late = nz["distractor_static"]["p"]  # always-bad segment, no change between windows
+            if nz and nz.get("distractor_bump") and in_period and (carrier, region) == tuple(nz["distractor_bump"]["cell"]):
+                p_late = nz["distractor_bump"]["p"]  # small real bump elsewhere
+            b2 = nz.get("breach2") if nz else None
+            if in_period and b2 and carrier == b2["carrier"] and region == b2["region"]:
+                p_late = b2["p"]  # secondary planted cause
             b = sc.get("breach")
             if in_period and b and carrier == b["carrier"] and region == b["region"]:
                 p_late = b["p"]  # planted SLA breach
@@ -76,11 +88,13 @@ def generate(seed: int = 42, scenario: dict | None = None) -> dict[str, list[dic
             logi.append({"shipment_id": f"S{n:06d}", "order_id": oid, "carrier": carrier, "region": region,
                          "ship_date": d, "promised_days": promised, "actual_days": actual,
                          "on_time": actual <= promised})
-            if rng.random() < (0.35 if late else 0.03):
+            keep_t = not (nz and nrng.random() < nz.get("drop_tickets", 0))
+            keep_r = not (nz and nrng.random() < nz.get("drop_returns", 0))
+            if rng.random() < (0.35 if late else 0.03) and keep_t:
                 tickets.append({"ticket_id": f"T{len(tickets)+1:06d}", "order_id": oid,
                                 "created_date": d + timedelta(days=actual),
                                 "text": rng.choice(LATE_TEXT if late else OTHER_TEXT)})
-            if rng.random() < (0.12 if late else 0.05):
+            if rng.random() < (0.12 if late else 0.05) and keep_r:
                 returns.append({"return_id": f"R{len(returns)+1:06d}", "order_id": oid,
                                 "return_date": d + timedelta(days=actual + rng.randint(1, 5)),
                                 "reason": "late_delivery" if late and rng.random() < 0.7 else rng.choice(["size", "damaged", "changed_mind"])})
@@ -114,7 +128,14 @@ def write_duckdb(tables: dict, out: Path) -> None:
     for t, sch in schemas.items():
         con.execute(f"CREATE TABLE t_{t} ({sch})")
         cols = [c.split()[0] for c in sch.split(", ")]
-        if tables[t]: con.executemany(f"INSERT INTO t_{t} VALUES ({','.join('?'*len(cols))})", [[r[c] for c in cols] for r in tables[t]])
+        if tables[t]:  # bulk load via a temporary CSV (executemany was ~85 s for 24 datasets)
+            import csv, tempfile
+            with tempfile.NamedTemporaryFile("w", suffix=".csv", newline="", delete=False) as f:
+                w = csv.writer(f)
+                for r in tables[t]:
+                    w.writerow(["" if r[c] is None else r[c] for c in cols])
+            con.execute(f"COPY t_{t} FROM '{f.name}' (HEADER false, NULLSTR '')")
+            Path(f.name).unlink()
         con.execute(f"CREATE VIEW v_{t} AS SELECT * FROM t_{t}")
     con.close()
 

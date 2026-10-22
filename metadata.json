@@ -1,32 +1,37 @@
 {
-  "_note": "Skeleton. The sponsor overviews ask to describe sponsor usage in README.md and metadata.json, but no schema is published. Fields mirror the submission form. Fill in during the build.",
   "project_name": "VeriAgent Why",
-  "description": "TODO",
+  "description": "Multi-agent KPI-drop investigator: competing hypotheses tested against Zetaris views, a deterministic Claim Gate, an evidence graph in Meterless H-MEM, and a decision memo with row-level citations and a formula-based confidence.",
   "track": "The Agent That Can Explain Why",
   "team": [
     {
       "name": "Alonso Alvira Ballano",
       "hackos_email": "TODO",
-      "github_username": "TODO",
-      "role": "TODO",
+      "github_username": "AlonsoAlviraa",
+      "role": "Solo builder",
       "primary_contact": true
     }
   ],
-  "repository_url": "TODO",
+  "repository_url": "https://github.com/AlonsoAlviraa/veriagent-why",
   "demo_video_url": "TODO",
   "slide_deck_url": "TODO",
   "colab_links": [],
   "sponsor_technology": {
-    "zetaris": "TODO: where it sits in the build and what it does",
+    "zetaris": "Data layer: five views (v_orders, v_returns, v_tickets, v_logistics, v_promotions) queried by the Retriever and re-queried by the Evidence Evaluator and Claim Gate. REST backend implemented, not yet tested live; SAMPLE_MODE uses a DuckDB snapshot with the same views.",
     "meterless": {
-      "engines_used": ["TODO: e.g. H-MEM", "TODO: e.g. Markovian"],
-      "where": "TODO"
+      "engines_used": [
+        "H-MEM",
+        "Markovian"
+      ],
+      "where": "H-MEM stores hypotheses, evidence and support/refute edges (trust ledger exported per run); Markovian drives the Evaluator->Planner investigation rounds. Nightshift as primary model provider: pending availability."
     },
-    "nvidia": "TODO: where NVIDIA sits in the build (models used)",
-    "cursor": "TODO: how Cursor was used during development",
-    "unique": "TODO"
+    "nvidia": "Nemotron 3.5 Super VL (S2 reasoning) and Nemotron 3.5 Lightning (S1 filter/verifier) via the provider switch; wired, not yet called live.",
+    "cursor": "Development environment for the whole build.",
+    "unique": "The Evidence Evaluator re-queries the data itself and can send the Planner back; a deterministic Claim Gate blocks any claim or model-written number that the data does not support."
   },
-  "models": ["TODO"],
+  "models": [
+    "nvidia/nemotron-3.5-super-vl-120b-a12b",
+    "nvidia/nemotron-3.5-lightning-30b-a3b"
+  ],
   "pre_existing_components": "See docs/PRE_EXISTING_WORK.md",
   "sample_mode": true
 }
