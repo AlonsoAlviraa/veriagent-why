@@ -4,6 +4,8 @@ import argparse, json, sys
 
 
 def main() -> None:
+    from app.config import load_dotenv
+    load_dotenv()
     ap = argparse.ArgumentParser()
     ap.add_argument("--input")
     ap.add_argument("--serve", action="store_true")

@@ -34,7 +34,7 @@ UI: question and KPI, live trace of rounds (including Evaluator send-backs), H-M
 
 ## Current status (22 Oct 2026)
 - Working in SAMPLE_MODE: KPIs `on_time_rate` and `return_rate`; hypothesis families carrier/region segments (with drill-down), promotion, and seasonality (broad rise); promotion-vs-carrier cross-view check; materiality guard; Claim Gate; deterministic confidence; Meterless H-MEM + Markovian; API, UI, PDF; eval harness; CI.
-- Implemented but untested against real services: LLM calls (tested only with a mock OpenAI-compatible server), Zetaris REST backend (tested only with a mock of the documented REST shape).
+- Implemented but untested against real services: LLM calls (tested only with a mock OpenAI-compatible server), Zetaris JDBC backend + loader (tested only with a fake JDBC connection over the DuckDB snapshot; see docs/RUN_WINDOWS.md for the live run).
 - Not yet: live Nemotron/Nightshift runs, a live Zetaris instance with the synthetic views loaded, model-based eval.
 
 ## Meterless engines (how they are used)
@@ -67,7 +67,7 @@ Models (product runtime):
 Agent framework: none; own Python orchestrator (`app/pipeline.py`).
 
 Sponsor technology:
-- Zetaris: data layer behind `app/adapters/zetaris.py` (REST backend implemented from the public setup guide, untested live; SAMPLE_MODE uses a DuckDB snapshot with the same five view names and SQL).
+- Zetaris: data layer behind `app/adapters/zetaris.py` (JDBC backend via JayDeBeApi, federating a Postgres datasource and REST tables into a SchemaStore container — `scripts/zetaris_load.py`, `scripts/zetaris_check.py`, `docs/RUN_WINDOWS.md`; not yet verified live; SAMPLE_MODE uses a DuckDB snapshot with the same five view names and SQL).
 - Meterless: H-MEM (evidence graph + trust ledger) and Markovian (investigation rounds) open-source reference engines, vendored unmodified (Apache-2.0) and run through `meterless_bridge/`; Nightshift as the model provider (pending).
 - NVIDIA: Nemotron models above (pending live use).
 - Cursor: development environment.

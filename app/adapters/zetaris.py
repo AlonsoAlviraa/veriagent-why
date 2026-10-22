@@ -1,14 +1,21 @@
-"""Zetaris adapter with two backends behind one interface:
+"""Zetaris adapter with two backends behind one interface (`query(sql, params) -> list[dict]`):
 
-- sample: local DuckDB snapshot built by scripts/make_data.py (same view names, same SQL).
-- zetaris: Zetaris REST SQL endpoint (ZETARIS_BACKEND=zetaris). Implemented from the public setup guide,
-  NOT yet tested against a live instance.
+- sample (default): local DuckDB snapshot built by scripts/make_data.py (same view names, same SQL).
+- zetaris: Zetaris Lightning over JDBC (JayDeBeApi + JPype), ZETARIS_BACKEND=zetaris.
+  Config: ZETARIS_JDBC_URL, ZETARIS_USER, ZETARIS_PASSWORD, ZETARIS_JDBC_JAR (path to the driver jar,
+  kept OUTSIDE the repo). Follows the official getting-started guidance: driver class
+  com.zetaris.lightning.jdbc.LightningDriver, one statement per call, verify with SELECT 1.
+  View names get ZETARIS_VIEW_PREFIX (default "veriagent." = the SchemaStore container that
+  scripts/zetaris_load.py creates).
 """
 from __future__ import annotations
-import subprocess, sys
+import re, subprocess, sys
 from ..config import ROOT, env, sample_mode
 
 SNAPSHOT = ROOT / "data" / "snapshot.duckdb"
+VIEWS = ("v_orders", "v_returns", "v_tickets", "v_logistics", "v_promotions")
+DRIVER_CLASS = "com.zetaris.lightning.jdbc.LightningDriver"
+DEFAULT_JDBC_URL = "jdbc:zetaris:lightning@localhost:10000"
 
 
 class SampleBackend:
@@ -33,65 +40,85 @@ class SampleBackend:
         return [dict(zip(cols, r)) for r in cur.fetchall()]
 
 
-class ZetarisBackend:
-    """Zetaris REST SQL backend. UNTESTED against a live instance (none reachable from the build box).
+def literal(v) -> str:
+    if v is None:
+        return "NULL"
+    if isinstance(v, bool):
+        return "TRUE" if v else "FALSE"
+    if isinstance(v, (int, float)):
+        return repr(v)
+    return "'" + str(v).replace("\\", "\\\\").replace("'", "\\'") + "'"  # Spark SQL string literal
 
-    Written from the hackathon Participant Setup Guide: POST {ZETARIS_REST_URL}/sql-editor/sqls/run with
-    Authorization: Bearer <ZETARIS_API_KEY>, X-Org-ID, a fresh UUID X-Request-ID, and JSON
-    {queryId, sql, source: "SqlEditor", limit}; rows come back under "data".
-    Unknowns (TODO verify on a live instance via /redoc): the field carrying column names, and
-    whether bind parameters exist (we inline escaped literals). View names get ZETARIS_VIEW_PREFIX.
-    """
-    name = "zetaris-rest (untested)"
-    VIEWS = ("v_orders", "v_returns", "v_tickets", "v_logistics", "v_promotions")
 
-    def __init__(self, dataset: str | None = None):
-        self.url = env("ZETARIS_REST_URL")
-        if not self.url or not env("ZETARIS_API_KEY") or not env("ZETARIS_ORG_ID"):
-            raise RuntimeError("ZETARIS_REST_URL, ZETARIS_API_KEY and ZETARIS_ORG_ID must be set")
-        self.prefix = env("ZETARIS_VIEW_PREFIX")
+def render(sql: str, params: list | None, prefix: str = "") -> str:
+    """Inline escaped literals (one plain statement per call), translate DuckDB-isms to Lightning
+    (Spark) SQL and qualify the 5 view names."""
+    parts = sql.split("?")
+    if len(parts) - 1 != len(params or []):
+        raise ValueError("placeholder/parameter count mismatch")
+    out = parts[0] + "".join(literal(p) + rest for p, rest in zip(params or [], parts[1:]))
+    out = re.sub(r"\bAS\s+VARCHAR\b", "AS STRING", out, flags=re.I)
+    if prefix:
+        out = re.sub(r"(?<![\w.])(" + "|".join(VIEWS) + r")\b", lambda m: prefix + m.group(1), out)
+    return out.strip().rstrip(";")
 
-    @staticmethod
-    def literal(v) -> str:
-        if v is None:
-            return "NULL"
-        if isinstance(v, bool):
-            return "TRUE" if v else "FALSE"
-        if isinstance(v, (int, float)):
-            return repr(v)
-        return "'" + str(v).replace("'", "''") + "'"
 
-    def render(self, sql: str, params: list | None) -> str:
-        parts = sql.split("?")
-        if len(parts) - 1 != len(params or []):
-            raise ValueError("placeholder/parameter count mismatch")
-        out = parts[0] + "".join(self.literal(p) + rest for p, rest in zip(params or [], parts[1:]))
-        if self.prefix:
-            import re
-            out = re.sub(r"\b(" + "|".join(self.VIEWS) + r")\b", lambda m: self.prefix + m.group(1), out)
-        return out
+def _py(v):
+    """JDBC values -> plain Python (JPype may hand back java.lang.* objects)."""
+    if v is None or isinstance(v, (bool, int, float, str)):
+        return v
+    s = str(v)
+    for cast in (int, float):
+        try:
+            return cast(s)
+        except ValueError:
+            pass
+    return s
+
+
+def jdbc_connect():
+    """Open a JayDeBeApi connection from env. Never logs the password."""
+    jar, user, pw = env("ZETARIS_JDBC_JAR"), env("ZETARIS_USER"), env("ZETARIS_PASSWORD")
+    url = env("ZETARIS_JDBC_URL", DEFAULT_JDBC_URL)
+    missing = [k for k, v in (("ZETARIS_JDBC_JAR", jar), ("ZETARIS_USER", user), ("ZETARIS_PASSWORD", pw)) if not v]
+    if missing:
+        raise RuntimeError("missing env: " + ", ".join(missing))
+    from pathlib import Path
+    if not Path(jar).is_file():
+        raise RuntimeError(f"ZETARIS_JDBC_JAR not found: {jar}")
+    if Path(jar).resolve().is_relative_to(ROOT.resolve()):
+        raise RuntimeError("keep the Zetaris JDBC jar outside the repo")
+    import jaydebeapi
+    return jaydebeapi.connect(DRIVER_CLASS, url, [user, pw], jar)
+
+
+class ZetarisJdbcBackend:
+    name = "zetaris-jdbc"
+
+    def __init__(self, dataset: str | None = None, conn=None):
+        if dataset:
+            raise ValueError("eval datasets are local snapshots; the Zetaris backend serves the loaded demo data")
+        self.prefix = env("ZETARIS_VIEW_PREFIX", "veriagent.")
+        if self.prefix and not self.prefix.endswith("."):
+            self.prefix += "."
+        self.conn = conn or jdbc_connect()
+
+    def execute(self, sql: str) -> list[dict] | None:
+        cur = self.conn.cursor()
+        try:
+            cur.execute(sql)
+            if not cur.description:
+                return None
+            cols = [d[0].split(".")[-1].lower() for d in cur.description]
+            return [dict(zip(cols, map(_py, r))) for r in cur.fetchall()]
+        finally:
+            cur.close()
 
     def query(self, sql: str, params: list | None = None) -> list[dict]:
-        import json as _json, urllib.request, uuid
-        from ..config import TIMEOUTS
-        body = {"queryId": str(uuid.uuid4()), "sql": self.render(sql, params), "source": "SqlEditor", "limit": 100000}
-        req = urllib.request.Request(self.url.rstrip("/") + "/sql-editor/sqls/run", data=_json.dumps(body).encode(), headers={
-            "Content-Type": "application/json", "Authorization": "Bearer " + env("ZETARIS_API_KEY"),
-            "X-Org-ID": env("ZETARIS_ORG_ID"), "X-Request-ID": str(uuid.uuid4())})
-        with urllib.request.urlopen(req, timeout=TIMEOUTS["zetaris_s"]) as r:
-            out = _json.load(r)
-        data = out.get("data") or []
-        if data and isinstance(data[0], dict):
-            return data
-        cols = out.get("columns") or out.get("columnNames") or out.get("schema") or out.get("header")
-        if cols and isinstance(cols[0], dict):
-            cols = [c.get("name") for c in cols]
-        if not cols:
-            raise RuntimeError("Zetaris reply has no column names; TODO: confirm the response schema in /redoc")
-        return [dict(zip(cols, row)) for row in data]
+        return self.execute(render(sql, params, self.prefix)) or []
 
 
 def get_backend(dataset: str | None = None):
     if sample_mode() or env("ZETARIS_BACKEND", "sample") == "sample":
         return SampleBackend(dataset)
-    return ZetarisBackend(dataset)
+    return ZetarisJdbcBackend(dataset)

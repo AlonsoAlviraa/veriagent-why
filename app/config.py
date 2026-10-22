@@ -23,3 +23,16 @@ def provider() -> str:
 
 CAPS = {"evaluator_rounds": 3, "claim_gate_rounds": 2, "retriever_retries": 2}
 TIMEOUTS = {"model_s": 60, "zetaris_s": 20, "run_s": 480}
+
+
+def load_dotenv(path: Path = ROOT / ".env") -> None:
+    """Read KEY=VALUE lines from .env (gitignored); exported variables win. Never prints values."""
+    if not path.exists():
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, v = line.split("=", 1)
+            v = v.strip().strip('"').strip("'")
+            if v and k.strip() not in os.environ:
+                os.environ[k.strip()] = v

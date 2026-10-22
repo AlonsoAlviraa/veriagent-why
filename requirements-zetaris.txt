@@ -1,0 +1,4 @@
+# Only for the live Zetaris backend / loader (not needed for SAMPLE_MODE or CI). Needs Java 8+.
+JayDeBeApi>=1.2.3
+JPype1>=1.5.0
+psycopg[binary]>=3.1

@@ -24,3 +24,4 @@ data/eval/
 logs/memo-*.pdf
 logs/result-*.json
 logs/nvidia_smoke.json
+*.jar
