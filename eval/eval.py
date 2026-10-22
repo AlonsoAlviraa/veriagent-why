@@ -28,11 +28,23 @@ def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--split", choices=["dev", "test"], required=True)
+    ap.add_argument("--split", choices=["dev", "test", "test_v2"], required=True)
     ap.add_argument("--freeze", action="store_true")
+    ap.add_argument("--final-v2", action="store_true", help="required for test_v2: the reserved final Nemotron eval")
     a = ap.parse_args()
-    qs = json.loads((R / "eval" / "questions.json").read_text())
+    if a.split == "test_v2":
+        qs = json.loads((R / "eval" / "questions_test_v2.json").read_text())
+        h = hashlib.sha256(json.dumps(qs, sort_keys=True).encode()).hexdigest()
+        if h != (R / "eval" / "SPLITS_test_v2.sha256").read_text().split()[0]:
+            sys.exit("test_v2 hash mismatch: the reserved test set was modified")
+        if not a.final_v2:
+            sys.exit("test_v2 is reserved for the final Nemotron eval; pass --final-v2 only for that run")
+        if provider() == "sample":
+            sys.exit("test_v2 must be run with a live model provider (LLM_PROVIDER=nvidia|nightshift, SAMPLE_MODE=false)")
+    else:
+        qs = json.loads((R / "eval" / "questions.json").read_text())
     if a.split == "test":
+        print("WARNING: the v1 test split is contaminated (see eval/RESULTS_HISTORY.md); use dev or the reserved test_v2")
         h = hashlib.sha256(json.dumps([q for q in qs if q["split"] == "test"], sort_keys=True).encode()).hexdigest()
         if h != (R / "eval" / "SPLITS.sha256").read_text().split()[0]:
             sys.exit("test split hash mismatch: the frozen test set was modified")
