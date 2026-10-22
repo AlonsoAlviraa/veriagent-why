@@ -1,0 +1,95 @@
+{
+  "split": "dev",
+  "provider": "sample",
+  "n": 6,
+  "agent_k": 6,
+  "agent_wilson95": [
+    0.6096569663469354,
+    0.9999999999999999
+  ],
+  "baseline_k": 1,
+  "baseline_wilson95": [
+    0.03005258587173032,
+    0.563509436563646
+  ],
+  "rows": [
+    {
+      "qid": "q01",
+      "kind": "carrier_breach",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 100,
+      "baseline": "none",
+      "baseline_context_tokens": 468,
+      "agent_s2_context_tokens": 472,
+      "log": "logs/trace-eval-q01.jsonl",
+      "secs": 0.34
+    },
+    {
+      "qid": "q02",
+      "kind": "carrier_breach",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 100,
+      "baseline": "none",
+      "baseline_context_tokens": 624,
+      "agent_s2_context_tokens": 630,
+      "log": "logs/trace-eval-q02.jsonl",
+      "secs": 0.24
+    },
+    {
+      "qid": "q03",
+      "kind": "carrier_breach",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 100,
+      "baseline": "none",
+      "baseline_context_tokens": 639,
+      "agent_s2_context_tokens": 644,
+      "log": "logs/trace-eval-q03.jsonl",
+      "secs": 0.27
+    },
+    {
+      "qid": "q04",
+      "kind": "breach_with_date_promo_trap",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 100,
+      "baseline": "promotion_effect",
+      "baseline_context_tokens": 561,
+      "agent_s2_context_tokens": 567,
+      "log": "logs/trace-eval-q04.jsonl",
+      "secs": 0.25
+    },
+    {
+      "qid": "q05",
+      "kind": "negative_control",
+      "expected": "none",
+      "agent": "none",
+      "agent_status": "partial",
+      "agent_confidence": 20,
+      "baseline": "none",
+      "baseline_context_tokens": 282,
+      "agent_s2_context_tokens": 284,
+      "log": "logs/trace-eval-q05.jsonl",
+      "secs": 0.2
+    },
+    {
+      "qid": "q06",
+      "kind": "carrier_breach",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 88,
+      "baseline": "none",
+      "baseline_context_tokens": 667,
+      "agent_s2_context_tokens": 668,
+      "log": "logs/trace-eval-q06.jsonl",
+      "secs": 0.24
+    }
+  ]
+}
