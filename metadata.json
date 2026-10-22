@@ -1,0 +1,32 @@
+{
+  "_note": "Skeleton. The sponsor overviews ask to describe sponsor usage in README.md and metadata.json, but no schema is published. Fields mirror the submission form. Fill in during the build.",
+  "project_name": "VeriAgent Why",
+  "description": "TODO",
+  "track": "The Agent That Can Explain Why",
+  "team": [
+    {
+      "name": "Alonso Alvira Ballano",
+      "hackos_email": "TODO",
+      "github_username": "TODO",
+      "role": "TODO",
+      "primary_contact": true
+    }
+  ],
+  "repository_url": "TODO",
+  "demo_video_url": "TODO",
+  "slide_deck_url": "TODO",
+  "colab_links": [],
+  "sponsor_technology": {
+    "zetaris": "TODO: where it sits in the build and what it does",
+    "meterless": {
+      "engines_used": ["TODO: e.g. H-MEM", "TODO: e.g. Markovian"],
+      "where": "TODO"
+    },
+    "nvidia": "TODO: where NVIDIA sits in the build (models used)",
+    "cursor": "TODO: how Cursor was used during development",
+    "unique": "TODO"
+  },
+  "models": ["TODO"],
+  "pre_existing_components": "See docs/PRE_EXISTING_WORK.md",
+  "sample_mode": true
+}

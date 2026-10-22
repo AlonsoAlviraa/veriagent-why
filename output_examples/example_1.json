@@ -1,0 +1,10 @@
+{
+  "_note": "TODO: replace with the REAL output of running example_1 (never hand-written)",
+  "run_id": "example-001",
+  "status": "TODO",
+  "output": { "summary": "TODO", "evidence": [], "confidence": null, "limitations": [] },
+  "agents": [],
+  "trace_id": "TODO",
+  "log_file": "logs/trace-example-001.jsonl",
+  "execution_time_seconds": null
+}

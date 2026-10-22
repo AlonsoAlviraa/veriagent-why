@@ -1,0 +1,5 @@
+{
+  "run_id": "example-001",
+  "input": { "query": "TODO: bounded question #1 for the track" },
+  "options": { "sample_mode": false }
+}

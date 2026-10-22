@@ -1,0 +1,3 @@
+# PLACEHOLDER: to be written during the build window.
+# TODO services: agent (run.py / API, port 8000), meterless-bridge (Node, starts automatically, no manual step).
+# Zetaris: TODO (local platform vs official hackathon instance; SAMPLE_MODE fallback when unavailable).

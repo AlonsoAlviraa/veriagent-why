@@ -1,0 +1,19 @@
+.env
+.venv/
+__pycache__/
+node_modules/
+*.pyc
+logs/*.jsonl
+!logs/sample-*.jsonl
+
+# Secrets and runtime output
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*login*.txt
+logs/*.jsonl
+logs/*.log
+__pycache__/
+.venv/
