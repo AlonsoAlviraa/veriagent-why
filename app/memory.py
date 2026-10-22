@@ -1,50 +1,47 @@
-"""Evidence graph + Markovian-style token report.
+"""Evidence graph on Meterless H-MEM, multi-round investigation on Meterless Markovian.
 
-Interface mirrors what the Meterless engines provide (H-MEM: graph nodes/edges + audit
-ledger; Markovian: projected-vs-actual token report). Day-1 status: in-process LOCAL
-implementation, NOT Meterless yet. TODO(Day 2-3): bind HMem/Markovian to the open-source
-Meterless engines (github.com/Meterless/Meterless) via the Node bridge.
+Every hypothesis, evidence node and support/refute edge is written to H-MEM (edges as records
+with derivedFrom=[evidence, hypothesis] and a rel tag), so the H-MEM trust ledger is the audit
+trail of the run. A local index mirrors ids for fast lookups. If node/the bridge is missing,
+a local in-process fallback is used and logged as such.
 """
 from __future__ import annotations
+from .meterless import Bridge
+
+
+def count_tokens(text: str) -> int:
+    """Whitespace token count (approximation, labelled as such)."""
+    return len(text.split())
 
 
 class HMem:
-    backend = "local-inprocess (TODO: Meterless H-MEM)"
-
-    def __init__(self):
+    def __init__(self, bridge: Bridge | None):
+        self.bridge = bridge
+        self.backend = "meterless-hmem (vendored reference, via bridge)" if bridge else "local-fallback (node unavailable)"
         self.nodes: dict[str, dict] = {}
         self.edges: list[dict] = []
-        self.ledger: list[dict] = []
+        self.mem_ids: dict[str, str] = {}
 
-    def add_node(self, nid: str, kind: str, **attrs) -> str:
+    def _write(self, key: str, content: str, source: str, tags: list[str], derived: list[str] | None = None) -> None:
+        if self.bridge:
+            r = self.bridge.call("hmem.add", content=content[:500], source=source, tags=tags,
+                                 derivedFrom=[self.mem_ids[d] for d in derived or [] if d in self.mem_ids])
+            self.mem_ids[key] = r["id"]
+
+    def add_node(self, nid: str, kind: str, source: str = "agent", **attrs) -> str:
         self.nodes[nid] = {"id": nid, "kind": kind, **attrs}
-        self.ledger.append({"op": "node", "id": nid, "kind": kind})
+        self._write(nid, f"{kind} {nid}: {attrs.get('text', '')}", source, [kind, nid])
         return nid
 
-    def add_edge(self, src: str, dst: str, rel: str, **attrs) -> None:
-        self.edges.append({"src": src, "dst": dst, "rel": rel, **attrs})
-        self.ledger.append({"op": "edge", "src": src, "dst": dst, "rel": rel})
+    def add_edge(self, src: str, dst: str, rel: str, source: str = "evidence_evaluator") -> None:
+        self.edges.append({"src": src, "dst": dst, "rel": rel})
+        self._write(f"{src}->{dst}", f"{src} {rel} {dst}", source, ["edge", rel], [src, dst])
 
     def edges_to(self, dst: str, rel: str | None = None) -> list[dict]:
         return [e for e in self.edges if e["dst"] == dst and (rel is None or e["rel"] == rel)]
 
+    def recall(self, query: str) -> str:
+        return self.bridge.call("hmem.query", query=query)["context"] if self.bridge else ""
 
-def count_tokens(text: str) -> int:
-    """Whitespace token count (an approximation, stated as such in reports)."""
-    return len(text.split())
-
-
-class Markovian:
-    backend = "local-inprocess (TODO: Meterless Markovian)"
-
-    def __init__(self):
-        self.rounds: list[dict] = []
-
-    def record(self, round_no: int, projected: int, actual: int) -> None:
-        self.rounds.append({"round": round_no, "projected_tokens": projected, "actual_tokens": actual})
-
-    def report(self) -> dict:
-        p = sum(r["projected_tokens"] for r in self.rounds)
-        a = sum(r["actual_tokens"] for r in self.rounds)
-        return {"backend": self.backend, "token_unit": "whitespace tokens (approx.)", "rounds": self.rounds,
-                "projected_total": p, "actual_total": a, "avoided_by_s1": p - a}
+    def ledger(self) -> dict:
+        return self.bridge.call("hmem.ledger") if self.bridge else {"entries": [], "stats": {}}

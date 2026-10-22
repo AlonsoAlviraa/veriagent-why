@@ -4,12 +4,12 @@ import json, time, uuid
 from pathlib import Path
 from .config import ROOT
 
-SECRET_KEYS = ("key", "token", "secret", "password", "authorization")
+SECRET_KEYS = {"key", "token", "secret", "password", "authorization", "api_key", "access_token", "bearer"}
 
 
 def _clean(obj):
     if isinstance(obj, dict):
-        return {k: ("[redacted]" if any(s in k.lower() for s in SECRET_KEYS) else _clean(v)) for k, v in obj.items()}
+        return {k: ("[redacted]" if (k.lower() in SECRET_KEYS or k.lower().endswith(("_key", "_secret", "_password"))) else _clean(v)) for k, v in obj.items()}
     if isinstance(obj, list):
         return [_clean(v) for v in obj]
     return obj
