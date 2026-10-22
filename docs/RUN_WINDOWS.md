@@ -96,6 +96,8 @@ python scripts\zetaris_rest_source.py
 
 Windows Firewall may ask about Python: allow on private networks (Docker reaches it via host.docker.internal).
 
+The REST source must keep running during load, check AND run.py: Zetaris calls it live on every query (a stopped source gives "REST API call failed: Connection refused"). Check it with `Invoke-WebRequest -UseBasicParsing http://localhost:8765/v_tickets`.
+
 ## 6. Load into Zetaris (idempotent — safe to re-run)
 
 ```powershell
