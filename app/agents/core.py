@@ -16,14 +16,19 @@ class LLMCtx:
     def attempt(self, agent: str, fn, *a):
         if not self.live:
             return None
+        import time
+        t = time.time()
         try:
             out, meta = fn(*a)
             metas = meta if isinstance(meta, list) else [meta]
+            lat = round(time.time() - t, 3)
             for m in metas:
-                self.calls.append({"agent": agent, "provider": m.get("provider"), "model": m.get("model"), "ok": True, "usage": m.get("usage")})
+                self.calls.append({"agent": agent, "provider": m.get("provider"), "model": m.get("model"), "ok": True,
+                                   "usage": m.get("usage"), "latency_s": lat, "batch": len(metas)})
             return out
         except Exception as e:  # fall back to the deterministic path, logged
-            self.calls.append({"agent": agent, "ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}", "fallback": "deterministic"})
+            self.calls.append({"agent": agent, "ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}", "fallback": "deterministic",
+                               "latency_s": round(time.time() - t, 3)})
             return None
 
 TAXONOMY = ["carrier_sla_breach", "supplier_cost_increase", "promotion_effect", "seasonality", "stockout", "none"]
@@ -48,7 +53,12 @@ class Planner:
                          "text": "A broad rise across almost all carrier x region segments (calendar/seasonal pattern), not one segment"})
             chosen = ctx.attempt(self.name, llm_steps.plan, q["query"], memory_context) if ctx else None
             if chosen:
-                hyps = [h for h in hyps if h["id"] in chosen]
+                # The model prioritises; it cannot drop the rival hypotheses that rule out traps
+                # (promotion, seasonality). Dropping them was the main live failure on dev (22 Oct).
+                rivals = {"H_promo", "H_seasonal"}
+                keep = [h for h in hyps if h["id"] in chosen or h["id"] in rivals]
+                order = {hid: i for i, hid in enumerate(chosen)}
+                hyps = sorted(keep, key=lambda h: order.get(h["id"], len(order)))
         for h in hyps:
             mem.add_node(h["id"], "hypothesis", source=self.name, text=h["text"])
         return hyps
@@ -214,7 +224,13 @@ class EvidenceEvaluator:
             for v in verdicts:
                 lv = ctx.attempt(self.name, llm_steps.verdict, texts.get(v["hyp"], v["hyp"]), {k: x for k, x in v.items() if k not in ("hyp", "verdict")})
                 if lv:
-                    v["rule_verdict"], v["verdict"] = v["verdict"], lv
+                    # SQL decides support; the model may only be stricter (supports -> gap), never
+                    # turn a SQL refutes/gap into supports. Disagreements are kept in the verdict.
+                    v["model_verdict"] = lv
+                    if lv != v["verdict"]:
+                        v["rule_verdict"] = v["verdict"]
+                        if v["verdict"] == "supports" and lv == "gap":
+                            v["verdict"] = "gap"
             supported = [h for h in hyps if any(v["hyp"] == h["id"] and v["verdict"] == "supports" for v in verdicts)]
         for v in verdicts:
             ev = [c["node"] for c in kept if c["hyp"] == v["hyp"] and "node" in c]
@@ -274,7 +290,10 @@ class CauseAnalyst:
         top = causes[0] if causes else None
         lab = top["label"] if top else "none"
         if top and ctx:
-            lab = ctx.attempt(self.name, llm_steps.label, causes) or lab
+            ml = ctx.attempt(self.name, llm_steps.label, causes)
+            # the model's label is accepted only if a computed cause carries it
+            if ml and ml != lab and ml in {c["label"] for c in causes}:
+                lab = ml
             top["label"] = lab
         secondary = None
         if top and top["label"] == "carrier_sla_breach":

@@ -79,9 +79,12 @@ def run(inp: dict, run_id: str | None = None) -> dict:
         bridge = None
         tr.log("orchestrator", "meterless_unavailable", error=str(e))
     tr.log("orchestrator", "backend", data=db.name, meterless="bridge" if bridge else "local-fallback")
+    from . import llm
+    llm.set_deadline(t0 + TIMEOUTS["run_s"])  # model calls past the 8-min cap fail fast -> deterministic fallback
     try:
         return _run(inp, q, db, bridge, tr, ctx, t0, run_id)
     finally:
+        llm.set_deadline(None)
         if bridge:
             bridge.close()
 
@@ -166,6 +169,11 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
         reasons.append("no hypothesis was supported by the data" + ("" if st.get("moved", True) else "; the KPI did not move materially"))
     if analysis.get("ambiguous"):
         reasons.append("top and secondary causes explain similar shares; not separable with this data")
+    deadline_hit = time.time() - t0 > TIMEOUTS["run_s"]
+    if deadline_hit:
+        status = "partial"
+        reasons.append(f"run timeout: exceeded {TIMEOUTS['run_s']} s; remaining model steps used deterministic fallbacks")
+        tr.log("orchestrator", "deadline_hit", run_s=TIMEOUTS["run_s"])
     if st["feedback"]:
         reasons.append("investigation round cap reached with an open gap: " + st["feedback"]["gap"])
     open_h = sorted({v["hyp"] for v in st["verdicts"] if v["verdict"] == "gap"})
@@ -190,7 +198,13 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
            "evidence_graph": {"backend": mem.backend, "nodes": len(mem.nodes), "edges": len(mem.edges),
                               "graph": {"nodes": list(mem.nodes.values()), "edges": mem.edges},
                               "hmem_ledger_entries": len(ledger["entries"]), "hmem_ledger_file": f"logs/{lpath.name}"}}
-    out["memo_md"] = render_memo(out, run_id)
+    from . import report
+    out["run_report"] = report.build(ctx.calls, provider(), st["rounds"], mk, time.time() - t0, deadline_hit)
+    rpath = tr.path.parent / f"report-{run_id}.json"
+    rpath.write_text(__import__("json").dumps(out["run_report"], indent=2, default=str))
+    tr.log("observability", "run_report", tokens=out["run_report"]["tokens"], model_calls=out["run_report"]["model_calls"],
+           cost=out["run_report"]["cost"], file=f"logs/{rpath.name}")
+    out["memo_md"] = render_memo(out, run_id) + "\n".join(report.to_md(out["run_report"])) + "\n"
     memo_path = tr.path.parent / f"memo-{run_id}.md"
     memo_path.write_text(out["memo_md"])
     (tr.path.parent / f"result-{run_id}.json").write_text(__import__("json").dumps(out, default=str))
@@ -201,6 +215,7 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
         pass
     tr.log("orchestrator", "end", status=status, confidence=conf["confidence"])
     return {"run_id": run_id, "status": status, "output": {"summary": out["memo_md"].splitlines()[1],
-            "result": out, "artifacts": [f"logs/{memo_path.name}", f"logs/{lpath.name}"]},
+            "result": out, "artifacts": [f"logs/{memo_path.name}", f"logs/{lpath.name}", f"logs/{rpath.name}"]
+            + ([f"logs/memo-{run_id}.pdf"] if (tr.path.parent / f"memo-{run_id}.pdf").exists() else [])},
             "agents": [{"name": a.name} for a in (planner, retr, s1, ev, analyst, writer, gate)],
             "trace_id": tr.trace_id, "log_file": f"logs/{tr.path.name}", "execution_time_seconds": round(time.time() - t0, 3)}
