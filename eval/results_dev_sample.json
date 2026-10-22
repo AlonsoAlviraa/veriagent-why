@@ -1,16 +1,16 @@
 {
   "split": "dev",
   "provider": "sample",
-  "n": 6,
-  "agent_k": 6,
+  "n": 10,
+  "agent_k": 10,
   "agent_wilson95": [
-    0.6096569663469354,
-    0.9999999999999999
+    0.7224598312333834,
+    1.0
   ],
-  "baseline_k": 1,
+  "baseline_k": 3,
   "baseline_wilson95": [
-    0.03005258587173032,
-    0.563509436563646
+    0.10778928748621183,
+    0.6032267800204347
   ],
   "rows": [
     {
@@ -21,10 +21,10 @@
       "agent_status": "success",
       "agent_confidence": 100,
       "baseline": "none",
-      "baseline_context_tokens": 468,
-      "agent_s2_context_tokens": 472,
+      "baseline_context_tokens": 501,
+      "agent_s2_context_tokens": 508,
       "log": "logs/trace-eval-q01.jsonl",
-      "secs": 0.34
+      "secs": 0.29
     },
     {
       "qid": "q02",
@@ -34,10 +34,10 @@
       "agent_status": "success",
       "agent_confidence": 100,
       "baseline": "none",
-      "baseline_context_tokens": 624,
-      "agent_s2_context_tokens": 630,
+      "baseline_context_tokens": 657,
+      "agent_s2_context_tokens": 666,
       "log": "logs/trace-eval-q02.jsonl",
-      "secs": 0.24
+      "secs": 0.23
     },
     {
       "qid": "q03",
@@ -47,10 +47,10 @@
       "agent_status": "success",
       "agent_confidence": 100,
       "baseline": "none",
-      "baseline_context_tokens": 639,
-      "agent_s2_context_tokens": 644,
+      "baseline_context_tokens": 672,
+      "agent_s2_context_tokens": 680,
       "log": "logs/trace-eval-q03.jsonl",
-      "secs": 0.27
+      "secs": 0.24
     },
     {
       "qid": "q04",
@@ -60,10 +60,10 @@
       "agent_status": "success",
       "agent_confidence": 100,
       "baseline": "promotion_effect",
-      "baseline_context_tokens": 561,
-      "agent_s2_context_tokens": 567,
+      "baseline_context_tokens": 594,
+      "agent_s2_context_tokens": 603,
       "log": "logs/trace-eval-q04.jsonl",
-      "secs": 0.25
+      "secs": 0.22
     },
     {
       "qid": "q05",
@@ -73,10 +73,10 @@
       "agent_status": "partial",
       "agent_confidence": 20,
       "baseline": "none",
-      "baseline_context_tokens": 282,
-      "agent_s2_context_tokens": 284,
+      "baseline_context_tokens": 315,
+      "agent_s2_context_tokens": 320,
       "log": "logs/trace-eval-q05.jsonl",
-      "secs": 0.2
+      "secs": 0.18
     },
     {
       "qid": "q06",
@@ -86,10 +86,62 @@
       "agent_status": "success",
       "agent_confidence": 88,
       "baseline": "none",
-      "baseline_context_tokens": 667,
-      "agent_s2_context_tokens": 668,
+      "baseline_context_tokens": 700,
+      "agent_s2_context_tokens": 704,
       "log": "logs/trace-eval-q06.jsonl",
+      "secs": 0.22
+    },
+    {
+      "qid": "q25",
+      "kind": "seasonality",
+      "expected": "seasonality",
+      "agent": "seasonality",
+      "agent_status": "success",
+      "agent_confidence": 100,
+      "baseline": "none",
+      "baseline_context_tokens": 356,
+      "agent_s2_context_tokens": 357,
+      "log": "logs/trace-eval-q25.jsonl",
+      "secs": 0.23
+    },
+    {
+      "qid": "q26",
+      "kind": "seasonality",
+      "expected": "seasonality",
+      "agent": "seasonality",
+      "agent_status": "success",
+      "agent_confidence": 100,
+      "baseline": "none",
+      "baseline_context_tokens": 353,
+      "agent_s2_context_tokens": 360,
+      "log": "logs/trace-eval-q26.jsonl",
+      "secs": 0.22
+    },
+    {
+      "qid": "q27",
+      "kind": "promotion_effect",
+      "expected": "promotion_effect",
+      "agent": "promotion_effect",
+      "agent_status": "success",
+      "agent_confidence": 91,
+      "baseline": "promotion_effect",
+      "baseline_context_tokens": 489,
+      "agent_s2_context_tokens": 493,
+      "log": "logs/trace-eval-q27.jsonl",
       "secs": 0.24
+    },
+    {
+      "qid": "q28",
+      "kind": "promotion_effect",
+      "expected": "promotion_effect",
+      "agent": "promotion_effect",
+      "agent_status": "success",
+      "agent_confidence": 91,
+      "baseline": "promotion_effect",
+      "baseline_context_tokens": 488,
+      "agent_s2_context_tokens": 493,
+      "log": "logs/trace-eval-q28.jsonl",
+      "secs": 0.22
     }
   ]
 }

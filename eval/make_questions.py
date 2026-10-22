@@ -1,4 +1,4 @@
-"""Writes eval/questions.json (24 questions: 6 dev, 18 test) and eval/SPLITS.sha256.
+"""Writes eval/questions.json (28 questions: 10 dev, 18 test; 4 dev added after the first test run) and eval/SPLITS.sha256.
 Each question has its own seeded synthetic dataset (eval/build_datasets.py). The demo scenario
 (seed 42) is NOT in any split. Trap types promotion_effect and seasonality are test-only.
 Run once; the test split is frozen by its hash and must not be edited after the first test run."""
@@ -38,12 +38,18 @@ SPEC = [  # (split, kind, scenario, expected label)
     ("test", "negative_control", {}, "none"),
     ("test", "negative_control", {"promo": {"category": "home", "region": "North", "causes_late": False}}, "none"),
     ("test", "negative_control", {}, "none"),
+    # Added 22 Oct after the first test run: dev-only examples of the two test-only trap families,
+    # so the new seasonality / promotion-vs-carrier logic is tuned on dev only. Test split unchanged.
+    ("dev", "seasonality", {"seasonal_p": 0.22}, "seasonality"),
+    ("dev", "seasonality", {"seasonal_p": 0.28}, "seasonality"),
+    ("dev", "promotion_effect", {"promo": {"category": "home", "region": "South", "causes_late": True}}, "promotion_effect"),
+    ("dev", "promotion_effect", {"promo": {"category": "electronics", "region": "West", "causes_late": True}}, "promotion_effect"),
 ]
 
 qs = [{"qid": f"q{i+1:02d}", "split": sp, "kind": k, "seed": 1001 + i, "scenario": sc, "expected_label": lab,
        "input": {"query": Q, "kpi": "on_time_rate", "baseline": B, "period": P, "dataset": f"q{i+1:02d}"}}
       for i, (sp, k, sc, lab) in enumerate(SPEC)]
-assert sum(q["split"] == "test" for q in qs) == 18 and len(qs) == 24
+assert sum(q["split"] == "test" for q in qs) == 18 and len(qs) == 28
 (E / "questions.json").write_text(json.dumps(qs, indent=2) + "\n")
 test = json.dumps([q for q in qs if q["split"] == "test"], sort_keys=True).encode()
 (E / "SPLITS.sha256").write_text(hashlib.sha256(test).hexdigest() + "  test split of eval/questions.json\n")

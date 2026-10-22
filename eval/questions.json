@@ -636,5 +636,105 @@
       ],
       "dataset": "q24"
     }
+  },
+  {
+    "qid": "q25",
+    "split": "dev",
+    "kind": "seasonality",
+    "seed": 1025,
+    "scenario": {
+      "seasonal_p": 0.22
+    },
+    "expected_label": "seasonality",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q25"
+    }
+  },
+  {
+    "qid": "q26",
+    "split": "dev",
+    "kind": "seasonality",
+    "seed": 1026,
+    "scenario": {
+      "seasonal_p": 0.28
+    },
+    "expected_label": "seasonality",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q26"
+    }
+  },
+  {
+    "qid": "q27",
+    "split": "dev",
+    "kind": "promotion_effect",
+    "seed": 1027,
+    "scenario": {
+      "promo": {
+        "category": "home",
+        "region": "South",
+        "causes_late": true
+      }
+    },
+    "expected_label": "promotion_effect",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q27"
+    }
+  },
+  {
+    "qid": "q28",
+    "split": "dev",
+    "kind": "promotion_effect",
+    "seed": 1028,
+    "scenario": {
+      "promo": {
+        "category": "electronics",
+        "region": "West",
+        "causes_late": true
+      }
+    },
+    "expected_label": "promotion_effect",
+    "input": {
+      "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
+      "kpi": "on_time_rate",
+      "baseline": [
+        "2026-09-15",
+        "2026-09-30"
+      ],
+      "period": [
+        "2026-10-01",
+        "2026-10-14"
+      ],
+      "dataset": "q28"
+    }
   }
 ]
