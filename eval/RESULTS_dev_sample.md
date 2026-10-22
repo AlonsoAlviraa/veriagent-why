@@ -9,6 +9,8 @@ Measured by `eval/eval.py` on seeded synthetic data. Metric: exact match of `top
 
 Secondary metrics (agent): segment match 11/13, secondary cause detected 1/3, secondary false positives 0/19.
 
+Agent model calls: 0 ok, 0 failed (those steps fell back to the deterministic rules). Baseline model errors (scored wrong): 0.
+
 | qid | kind | expected | agent | baseline |
 |---|---|---|---|---|
 | q01 | carrier_breach | carrier_sla_breach | carrier_sla_breach | none |

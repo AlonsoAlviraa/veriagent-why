@@ -36,7 +36,13 @@ function fnv1a(str) {
   }
   return h >>> 0;
 }
+var embedOverride = null;
+function setEmbedOverride(fn) {
+  embedOverride = fn;
+}
 function embed(text) {
+  const o = embedOverride?.(text);
+  if (o) return o;
   const vec = new Array(DIM).fill(0);
   for (const token of tokenize(text)) {
     const h = fnv1a(token);
@@ -49,6 +55,7 @@ function embed(text) {
   return norm === 0 ? vec : vec.map((v) => v / norm);
 }
 function cosine(a, b) {
+  if (a.length !== b.length) return 0;
   let dot = 0;
   for (let i = 0; i < a.length; i++) dot += a[i] * b[i];
   return dot;
@@ -1315,6 +1322,8 @@ var Markovian = class {
 
 // bridge.ts
 import * as readline from "node:readline";
+var vecs = /* @__PURE__ */ new Map();
+setEmbedOverride((text) => vecs.get(text));
 var t = 179e10;
 var clock = () => t += 1e3;
 var hmem = new HMEM({ clock, actor: "veriagent-why" });
@@ -1326,9 +1335,11 @@ async function handle(msg) {
     case "reset":
       t = 179e10;
       resetRunSeq();
+      vecs.clear();
       hmem = new HMEM({ clock, actor: "veriagent-why" });
       return { ok: true };
     case "hmem.add": {
+      if (Array.isArray(a.embedding)) vecs.set(a.content, a.embedding);
       const r = hmem.add({
         content: a.content,
         type: "factual",
@@ -1342,6 +1353,7 @@ async function handle(msg) {
       return { id: r.id };
     }
     case "hmem.query": {
+      if (Array.isArray(a.queryEmbedding)) vecs.set(a.query, a.queryEmbedding);
       const q = hmem.query(a.query, { topN: a.topN ?? 5, threshold: a.threshold ?? 0.1 });
       return { context: q.context, ids: q.memories?.map((m) => m.id ?? m.memory?.id) ?? [] };
     }

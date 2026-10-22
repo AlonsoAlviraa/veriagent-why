@@ -21,6 +21,7 @@ def serve(reply):
 
 
 def good(sys):
+    if "retrieval agent" in sys: return '{"sufficient": false, "tool": "drill_down", "args": {"carrier": "CarrierB", "region": "North"}, "why": "check cell"}'
     if "plan" in sys: return '{"hypotheses": ["H_carrier", "H_region", "H_promo"]}'
     if "relevant" in sys: return '{"score": 0.9}'
     if "verify" in sys: return '{"verdict": "supports"}'

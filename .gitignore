@@ -26,3 +26,4 @@ logs/result-*.json
 logs/nvidia_smoke.json
 *.jar
 logs/report-*.json
+data/emb_cache/
