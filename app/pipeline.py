@@ -18,7 +18,7 @@ DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
 def parse_question(inp: dict) -> dict:
-    q = {"query": inp.get("query", ""), "kpi": inp.get("kpi"), "period": inp.get("period"), "baseline": inp.get("baseline")}
+    q = {"query": inp.get("query", ""), "kpi": inp.get("kpi"), "period": inp.get("period"), "baseline": inp.get("baseline"), "dataset": inp.get("dataset")}
     if not q["kpi"] and re.search(r"on[- ]time", q["query"], re.I):
         q["kpi"] = "on_time_rate"
     if not (q["period"] and q["baseline"]):
@@ -175,10 +175,17 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
                                           "actual_total": act, "avoided_by_s1": proj - act}, "markovian": mk},
            "model_calls": ctx.calls, "resolution": "resolved" if status == "success" else "unresolved",
            "evidence_graph": {"backend": mem.backend, "nodes": len(mem.nodes), "edges": len(mem.edges),
+                              "graph": {"nodes": list(mem.nodes.values()), "edges": mem.edges},
                               "hmem_ledger_entries": len(ledger["entries"]), "hmem_ledger_file": f"logs/{lpath.name}"}}
     out["memo_md"] = render_memo(out, run_id)
     memo_path = tr.path.parent / f"memo-{run_id}.md"
     memo_path.write_text(out["memo_md"])
+    (tr.path.parent / f"result-{run_id}.json").write_text(__import__("json").dumps(out, default=str))
+    try:
+        from .pdf import memo_pdf
+        memo_pdf(out["memo_md"], tr.path.parent / f"memo-{run_id}.pdf")
+    except ImportError:
+        pass
     tr.log("orchestrator", "end", status=status, confidence=conf["confidence"])
     return {"run_id": run_id, "status": status, "output": {"summary": out["memo_md"].splitlines()[1],
             "result": out, "artifacts": [f"logs/{memo_path.name}", f"logs/{lpath.name}"]},
