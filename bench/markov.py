@@ -110,9 +110,11 @@ class Controller:
         return self._d("evidence_check", st, "RETRY", f"quoted evidence weakly relevant (p={p_rel} < {RELEVANCE_MIN}); re-quote") == "RETRY"
 
     # ---------------- InsightBench
-    def sql_repair(self, err: str, attempts: int, prev_err: str | None, max_attempts: int = 2) -> bool:
+    def sql_repair(self, err: str, attempts: int, prev_err: str | None, max_attempts: int = 2, repeat_sql: bool = False) -> bool:
         cls = next((c for c in REPAIRABLE if c.lower() in err.lower()), "other")
-        st = {"error_class": cls, "attempts": attempts, "same_as_previous": bool(prev_err and prev_err[:120] == err[:120])}
+        st = {"error_class": cls, "attempts": attempts, "same_as_previous": bool(prev_err and prev_err[:120] == err[:120]), "repeat_sql": repeat_sql}
+        if repeat_sql:  # trace-fix 5: the repair returned a query already tried; never re-run it
+            return self._d("sql_repair", st, "GIVE_UP", "repair returned an SQL identical to one already tried; not re-run") == "REPAIR"
         if attempts >= max_attempts:
             return self._d("sql_repair", st, "GIVE_UP", "repair cap reached") == "REPAIR"
         if cls == "other" and attempts >= 1:  # fix B7: unknown classes got 0 repairs (baseline: 1); now 1 try
@@ -121,15 +123,26 @@ class Controller:
             return self._d("sql_repair", st, "GIVE_UP", "repair reproduced the same error; low expected gain") == "REPAIR"
         return self._d("sql_repair", st, "REPAIR", f"{cls} is usually fixable from the schema" if cls != "other" else "unknown error class: one repair attempt") == "REPAIR"
 
-    def requery(self, round_: int, n_ok: int, n_err: int, new_ok: int, max_rounds: int) -> bool:
-        st = {"round": round_, "ok_results": n_ok, "failed_results": n_err, "new_ok_this_round": new_ok, "max_rounds": max_rounds}
+    def requery(self, round_: int, n_ok: int, n_err: int, new_ok: int, max_rounds: int, n_empty: int = 0) -> bool:
+        """trace-fix 2: n_ok counts only results with >=1 non-null row; empty results are gaps (REPORT.md pattern 5:
+        "evidence sufficient (>=5 successful queries)" was logged with 0-row results)."""
+        st = {"round": round_, "usable_results": n_ok, "empty_results": n_empty, "failed_results": n_err, "new_usable_this_round": new_ok, "max_rounds": max_rounds}
         if round_ + 1 >= max_rounds:
-            return self._d("requery", st, "STOP", "round cap") == "EVALUATE"
+            return self._d("requery", st, "STOP", "round cap" + (f" ({n_empty} empty / {n_err} failed results remain as gaps)" if n_empty or n_err else "")) == "EVALUATE"
         if round_ > 0 and new_ok == 0:
             return self._d("requery", st, "STOP", "last round added no usable evidence; expected gain low") == "EVALUATE"
-        if n_ok >= 5 and n_err == 0:
-            return self._d("requery", st, "STOP", "evidence sufficient (>=5 successful queries, 0 errors); evaluator call skipped") == "EVALUATE"
-        return self._d("requery", st, "EVALUATE", "gaps or failed queries remain") == "EVALUATE"
+        if n_ok >= 5 and n_err == 0 and n_empty == 0:
+            return self._d("requery", st, "STOP", "evidence sufficient (>=5 non-empty results, 0 errors, 0 empty); evaluator call skipped") == "EVALUATE"
+        return self._d("requery", st, "EVALUATE", "gaps remain: " + ", ".join(x for x in (f"{n_err} failed" if n_err else "", f"{n_empty} empty" if n_empty else "", f"only {n_ok} usable" if n_ok < 5 else "") if x)) == "EVALUATE"
+
+    def calc_step(self, step: int, expr: str, obs: str, seen_exprs: set, prev_obs: str | None) -> bool:
+        """trace-fix 6: stop the calculator loop when the expression or the observation repeats (REPORT.md pattern 1:
+        31/150 items repeated the same calc up to 3 times). Returns True to continue."""
+        rep_e, rep_o = expr in seen_exprs, prev_obs is not None and obs == prev_obs
+        st = {"step": step, "repeat_expression": rep_e, "repeat_observation": rep_o}
+        if rep_e or rep_o:
+            return self._d("calc", st, "STOP", "calculator " + ("expression" if rep_e else "observation") + " repeated: no progress; remaining calc calls skipped") == "CONTINUE"
+        return self._d("calc", st, "CONTINUE", "new calculator result") == "CONTINUE"
 
     def insight_rounds(self, item_id: str) -> tuple[int, str | None]:
         f = self.nv.get(item_id) if self.use_nv else None

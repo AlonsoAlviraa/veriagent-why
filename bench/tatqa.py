@@ -124,21 +124,30 @@ def agent(it: dict, m: Meter) -> dict:
     ctx = context(doc)
     msgs = [{"role": "system", "content": "You are VeriAgent Why's evidence step. Answer only from the context; quote your evidence. " + ANS},
             {"role": "user", "content": ctx + "\nQUESTION: " + q["question"]}]
-    log = []
+    log, decisions = [], []
     for g in range(2):
         out = m.call_json(msgs, "tat_agent", "s2", 600)
         reasons = gate(out, ctx)
         log.append({"round": g, "reasons": reasons, "out": {k: out.get(k) for k in ("answer", "scale", "expression", "evidence")}})  # audit trace
+        # trace-fix 8: named fixed-policy decisions; STOP only means "gate still failing at the round cap"
+        act = "ACCEPT" if not reasons else ("RETRY" if g == 0 else "STOP")
+        decisions.append({"decision": "gate", "state": {"gate_round": g, "reasons": reasons}, "action": act,
+                          "reason": {"ACCEPT": "gate passed", "RETRY": "fixed policy: retry once on any rejection", "STOP": "gate failed at round cap"}[act], "source": "fixed_policy"})
         if not reasons:
             break
         msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
                        {"role": "user", "content": "Claim gate rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS}]
     p = _pred(out, it)
     # deterministic confidence (declared in docs/BENCHMARKS.md): gate outcome x traceability, no model input
-    det = (0.8 if len(log) == 1 else 0.55) if not reasons else 0.2
-    if not traceable(str(p["answer"]), ctx):
-        det = min(det, 0.1)
-    return {**p, "gate_passed": not reasons, "gate": log, "confidence_det": det}
+    det = tat_det(len(log), not reasons, traceable(str(p["answer"]), ctx), None)
+    return {**p, "gate_passed": not reasons, "gate": log, "confidence_det": det, "policy_decisions": decisions,
+            "conf_formula": "tat_det", "conf_inputs": {"gate_rounds": len(log), "gate_passed": not reasons, "traceable": traceable(str(p["answer"]), ctx), "rerank_p": None}}
+
+
+def tat_det(rounds: int, passed: bool, tr: bool, rerank_p: float | None) -> float:
+    """Declared deterministic confidence (agent / agent_mk*). trace-fix 8: same function used by the audit trace."""
+    from .confidence import tat_det as f
+    return f(rounds, passed, tr, rerank_p)
 
 
 def rag(it: dict, m: Meter, k: int = 3) -> dict:
@@ -179,7 +188,14 @@ def _pred(out: dict, it: dict | None = None) -> dict:
     ev = [str(e) for e in (flatten(ev) if isinstance(ev, (list, dict)) else [ev])]
     raw = {"answer": a, "scale": sc, "expression": str(out.get("expression", "") or "")}
     post = postprocess(raw, it["q"]["question"], it["doc"]) if it else raw
-    return {**post, "raw": raw, "evidence": ev, "confidence": conf01(out.get("confidence"))}
+    rules = []
+    if it:  # trace-fix 1: span post-rules selected on TAT-QA TRAIN only (scripts/fit_trace_fixes.py span)
+        from . import fixes as FX
+        a2, r1 = FX.split_years(post["answer"])
+        a2, r2 = FX.span_extend(a2, [p["text"] for p in it["doc"]["paragraphs"]])
+        rules = [x for x in (r1, r2) if x]
+        post = {**post, "answer": a2}
+    return {**post, "raw": raw, "evidence": ev, "confidence": conf01(out.get("confidence")), "span_rules": rules}
 
 
 # fix B3: the model often 'quotes' reformatted cells ("Total Revenue $3,037,000 (2019)", "£m 2019: 0.8"), which the
@@ -197,7 +213,7 @@ def agent_markov(it: dict, m: Meter, use_nv: bool = False, use_rerank: bool = Fa
     ctl = Controller(use_nv, load_features("tatqa") if use_nv else None, "tatqa")
     ctx = context(doc)
     r = ctl.route(q["question"], it["id"])
-    hist = ""
+    hist, seen, prev_obs = "", set(), None
     if r["path"] == "NUMERIC":
         for s in range(3):
             a = m.call_json([{"role": "system", "content": "You are VeriAgent Why's numeric step with one tool: calc (arithmetic). Each turn reply with JSON only: {\"thought\": str, \"action\": \"calc\", \"input\": expression over context numbers} or {\"action\": \"final\"}."},
@@ -208,6 +224,10 @@ def agent_markov(it: dict, m: Meter, use_nv: bool = False, use_rerank: bool = Fa
                 obs = str(round(safe_eval(str(a.get("input", ""))), 6))
             except Exception as e:
                 obs = f"error {type(e).__name__}"
+            ek = re.sub(r"\s+", "", str(a.get("input", "")))
+            if not ctl.calc_step(s + 1, ek, obs, seen, prev_obs):  # trace-fix 6: stop on repeated expression/observation
+                break
+            seen.add(ek); prev_obs = obs
             hist += f"\nACTION {s + 1}: calc({a.get('input')})\nOBSERVATION {s + 1}: {obs}"
     msgs = [{"role": "system", "content": "You are VeriAgent Why's evidence step. Answer only from the context; quote your evidence"  # fix B2: calc lines were quoted as evidence
              + ("; reuse the calculator expression that produced the answer, but quote ONLY verbatim context text as evidence, never "
@@ -238,12 +258,11 @@ def agent_markov(it: dict, m: Meter, use_nv: bool = False, use_rerank: bool = Fa
         msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
                        {"role": "user", "content": "Claim gate rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS + QUOTE_RULE}]
     p = _pred(out, it)
-    det = (0.8 if len(log) == 1 else 0.55) if not reasons else 0.2
-    if not traceable(str(p["answer"]), ctx):
-        det = min(det, 0.1)
-    if rel and rel[-1] is not None and rel[-1] < RELEVANCE_MIN:
-        det = min(det, 0.4)
+    rp = rel[-1] if rel else None
+    tr = traceable(str(p["answer"]), ctx)
+    det = tat_det(len(log), not reasons, tr, rp)
     return {**p, "gate_passed": not reasons, "gate": log, "confidence_det": det, "route": r, "decisions": ctl.log, "calc_history": hist,
+            "conf_formula": "tat_det", "conf_inputs": {"gate_rounds": len(log), "gate_passed": not reasons, "traceable": tr, "rerank_p": rp},
             "rerank_p": rel, "rerank_seconds": rerank_s}
 
 
@@ -276,7 +295,9 @@ def agent_vr(it: dict, m: Meter) -> dict:
     out = V.loop(m, q["question"], generate, check)
     p = _pred(out, it)
     reasons = gate(out, ctx)
-    return {**p, "confidence": out["confidence"], "confidence_det": out["confidence"], "gate_passed": not reasons,
+    glog = [{"round": a["attempt"] - 1, "reasons": [n for n in a["det_notes"]], "verify_score": a["score"]} for a in out["vr_attempts"]]
+    return {**p, "confidence": out["confidence"], "confidence_det": out["confidence"], "gate_passed": not reasons, "gate": glog,
+            "vr_decisions": out.get("vr_decisions", []), "vr_attempts": out.get("vr_attempts"), "conf_formula": "vr_score", "conf_inputs": {"vr_score": out["vr_score"]},
             **{k: out[k] for k in ("vr_score", "vr_attempts", "vr_best_attempt", "vr_n_attempts")}}
 
 

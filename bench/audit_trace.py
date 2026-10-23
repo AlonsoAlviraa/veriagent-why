@@ -58,6 +58,76 @@ def mk_decision(d: dict) -> dict:
             "action": d.get("action"), "reason": d.get("reason"), "carryover": d.get("carryover")}
 
 
+def policy_decision(out: dict, g: dict, last: bool) -> dict:
+    """Plain agent / vr: named fixed-policy decision for a gate round (trace-fix 8). ACCEPT = gate passed;
+    RETRY = rejected and another round follows; STOP = rejected at the round cap. Logged decisions win."""
+    for d in (out.get("policy_decisions") or []):
+        if (d.get("state") or {}).get("gate_round") == g.get("round"):
+            return {"source": "fixed_policy", "decision": "gate", "state": d.get("state"), "action": d["action"], "reason": d["reason"]}
+    act = "ACCEPT" if not g.get("reasons") else ("STOP" if last else "RETRY")
+    return {"source": "fixed_policy", "decision": "gate", "state": {"gate_round": g.get("round")}, "action": act,
+            "reason": {"ACCEPT": "gate passed", "RETRY": "agent retries once on any gate rejection", "STOP": "gate still failing at the round cap"}[act]}
+
+
+VERIFIER_TAGS = ("verify", "verifier", "vr_verify", "v2_critic", "v2_adjudicate")
+JUDGE_TAGS = ("judge", "faith")
+
+
+def call_role(tag: str) -> str:
+    t = (tag or "").replace("_json_retry", "")
+    return "verifier" if t in VERIFIER_TAGS else "judge" if t in JUDGE_TAGS else "generator"
+
+
+def models_from_calls(calls: list[dict]) -> list[dict]:
+    """Roles per call tag (trace-fix 8: everything used to be labelled generator)."""
+    agg = {}
+    for c in calls:
+        if c.get("cached"):
+            continue
+        prov, _, mid = str(c.get("model") or "not_logged:not_logged").partition(":")
+        k = (call_role(c.get("tag")), mid, prov)
+        agg[k] = agg.get(k, 0) + 1
+    return [{"role": r, "model_id": m, "provider": p, "calls": n, "source": "meter.trace_calls (role by call tag)"} for (r, m, p), n in agg.items()]
+
+
+def ib_split(item_id: str):
+    p = Path(__file__).resolve().parent / "splits" / "insightbench_split.json"
+    if not p.exists():
+        return NL
+    sp = json.loads(p.read_text())
+    return "tune" if item_id in sp.get("tune", []) else "eval" if item_id in sp.get("eval", []) else NL
+
+
+def confidence_block(out: dict, legacy: dict) -> dict:
+    """trace-fix 8: formula id + inputs logged by the system, recomputed with the SAME function."""
+    from .confidence import FORMULAS, recompute
+    f = out.get("conf_formula")
+    if f not in FORMULAS:
+        return {**legacy, "formula_id": "legacy_unlogged"}
+    inp = dict(out.get("conf_inputs") or {})
+    val = recompute(f, inp)
+    if inp.get("cmap") is not None:
+        inp["cmap"] = {"isotonic_points": inp["cmap"], "fit_on": "TAT-QA train" if f == "cr_tat" else "InsightBench tune (30)"}
+    logged = out.get("confidence_det", out.get("confidence"))
+    return {"deterministic": logged, "model_self_reported": out.get("confidence", NL), "formula_id": f, "formula": FORMULAS[f][1],
+            "inputs": inp, "recomputed": val, "matches_logged": val == logged, "recompute_check": "recomputed_by_audit with bench.confidence"}
+
+
+def vr_steps(out: dict) -> list[dict]:
+    """agent_vr: one verify_retry_attempt step per attempt with its verify score and ACCEPT/RETRY/STOP decision."""
+    res = []
+    decs = out.get("vr_decisions") or []
+    for a in out.get("vr_attempts") or []:
+        k = a.get("attempt")
+        d = next((x for x in decs if (x.get("state") or {}).get("attempt") == k), None)
+        res.append(step("verify_retry_attempt", f"Verify attempt {k}: score {a.get('score', NL)} (deterministic {a.get('det', NL)}, verifier {a.get('verifier', NL)})"
+                        + (f" -> {d['action']}" if d else ""),
+                        outputs={k2: a.get(k2, NL) for k2 in ("score", "det", "verifier", "det_notes", "feedback")},
+                        decision={"source": "verify_retry", "decision": "verify", "state": d.get("state"), "action": d["action"], "reason": d["reason"]} if d else None,
+                        retries=max(0, (k or 1) - 1)))
+    return res
+
+
 def meter_models(meter: dict | None, role: str) -> list[dict]:
     out = []
     for k, n in ((meter or {}).get("providers") or {}).items():
@@ -171,8 +241,7 @@ def tat_trace(row: dict, run: str, data: Path, fail: dict | None) -> dict:
         verdict = "PASS" if not g.get("reasons") else "REJECT"
         steps.append(step("claim_gate", f"Claim Gate round {r}: {verdict}" + (": " + "; ".join(g["reasons"]) if g.get("reasons") else ""),
                           outputs={"verdict": verdict, "reasons": g.get("reasons", [])},
-                          decision=mk_decision(d) if d else ({"source": "fixed_policy", "action": "RETRY" if g.get("reasons") and not last else "STOP",
-                                                              "reason": "agent retries once on any gate rejection"} if decisions is None else None),
+                          decision=mk_decision(d) if d else (policy_decision(out, g, last) if decisions is None else None),
                           retries=r))
     if raw:
         changes = []
@@ -286,7 +355,7 @@ def ib_trace(row: dict, run: str, data: Path, fail: dict | None) -> dict:
             "recomputed": round(min(0.9, 0.2 + 0.7 * (1 - n_err / len(store)) * (len(kept) / len(claims))), 3) if store and kept else 0.1}
     md = task.get("metadata") or {}
     return {"case": {"bench": "insightbench", "run": run, "config": row["system"], "item_id": row["id"],
-                     "question": md.get("goal", NL), "dataset_split": NL, "ts": row.get("ts", NL),
+                     "question": md.get("goal", NL), "dataset_split": ib_split(row["id"]), "ts": row.get("ts", NL),
                      "eval_only": {"_label": "EVAL ONLY - never shown to any model; used by the scorer and this audit",
                                    "gold": {"insights": task.get("insights", NL), "summary": task.get("summary", NL)}}},
             "steps": steps, "evidence": evidence, "claims": claims, "final_answer": final, "confidence": conf,
@@ -362,7 +431,18 @@ def build(row: dict, results_path: Path, data: Path, failures: dict) -> dict:
     run = run_name(results_path, bench)
     fail = failures.get((bench, run, row["system"], row["id"]))
     t = (tat_trace if bench == "tatqa" else ib_trace)(row, run, data, fail)
-    models = meter_models(row.get("meter"), "generator") + meter_models(row.get("judge_meter"), "judge")
+    calls0 = (row.get("meter") or {}).get("trace_calls")
+    out0 = row.get("output") or {}
+    models = (models_from_calls(calls0) if calls0 else meter_models(row.get("meter"), "generator")) + meter_models(row.get("judge_meter"), "judge")
+    sc0 = row.get("scores") or {}
+    if not any(m["role"] == "judge" for m in models) and (sc0.get("summary_judge") is not None or sc0.get("judge") is not None):
+        from .llmio import JUDGE_MODEL
+        models.append({"role": "judge", "model_id": JUDGE_MODEL, "provider": "nebius", "calls": NL, "source": "scores present; judge meter not stored (model = JUDGE_MODEL)"})
+    if out0.get("vr_attempts"):
+        t["steps"][-1:-1] = vr_steps(out0)  # before scoring
+    t["confidence"] = confidence_block(out0, t["confidence"])
+    if t["scores"].get("failure") is None:  # trace-fix 8: failure was null whenever no failures file was passed
+        t["scores"]["failure"] = {"cause": failure_cause(row), "source": "bench.audit_trace.failure_cause (deterministic, gold-aware, index only)"}
     if not models and row.get("model"):
         models.append({"role": "generator", "model_id": row["model"], "provider": row.get("provider"), "calls": NL, "source": "row.model"})
     if row["system"].endswith("nv"):
