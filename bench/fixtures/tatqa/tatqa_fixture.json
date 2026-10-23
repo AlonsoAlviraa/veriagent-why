@@ -1,0 +1,46 @@
+[
+ {
+  "_note": "HAND-MADE CI FIXTURE in TAT-QA format; not TAT-QA data.",
+  "table": {
+   "uid": "fx-t",
+   "table": [
+    [
+     "",
+     "2019",
+     "2018"
+    ],
+    [
+     "Revenue",
+     "$1,200",
+     "$1,000"
+    ],
+    [
+     "Cost",
+     "700",
+     "650"
+    ]
+   ]
+  },
+  "paragraphs": [
+   {
+    "uid": "fx-p1",
+    "order": 1,
+    "text": "Revenue grew because of higher volume in 2019."
+   }
+  ],
+  "questions": [
+   {
+    "uid": "fx-q1",
+    "order": 1,
+    "question": "What was revenue in 2019?",
+    "answer": "1200",
+    "derivation": "",
+    "answer_type": "span",
+    "answer_from": "table",
+    "rel_paragraphs": [],
+    "req_comparison": false,
+    "scale": ""
+   }
+  ]
+ }
+]

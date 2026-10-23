@@ -36,3 +36,15 @@ The single end-to-end proof is `python scripts/e2e_live.py`. It goes User → UI
 - **Zetaris JDBC**: tested with a fake JDBC connection that runs the rendered SQL on DuckDB. It has not run against a live Zetaris instance; see `docs/RUN_WINDOWS.md`.
 - **Deadline scope**: the deadline is process-global (`llm._DEADLINE`). Two concurrent runs in one API process share it, so the later run's deadline wins. The demo runs one at a time.
 - **Cost**: tokens come from the provider's `usage` field. On the NVIDIA free endpoint and the sample provider, cost is reported as 0 EUR. No list price is invented unless you pass `MODEL_PRICE_EUR_PER_MTOK`.
+
+## Markovian control (bench harness only)
+| Decision | Code | Log | Test |
+|---|---|---|---|
+| route EVIDENCE / NUMERIC (+DEEP) | `bench/markov.py` `Controller.route`, `reason_kind` | `decisions[]` in bench JSONL rows | `tests/test_markov_control.py` |
+| gate retry/stop (expected gain) | `Controller.gate_retry` | same | same |
+| SQL repair / give up | `Controller.sql_repair` | same | same |
+| requery early stop | `Controller.requery` | same | same |
+| rewrite vs drop (skip LLM call) | `Controller.rewrite` | same | same |
+| depth from NVIDIA classifier | `Controller.insight_rounds`, `bench/features/nvclf-*.json` | same | same |
+| reranker evidence/citation check | `Controller.evidence_check`, `bench/nv_rerank.py` | same, with `rerank_p` | same (offline) |
+Gap: `app/pipeline.py` does not use the controller yet.

@@ -1,0 +1,21 @@
+category,location,priority
+Hardware,UK,1 - Critical
+Hardware,US,1 - Critical
+Hardware,US,3 - Moderate
+Hardware,US,3 - Moderate
+Hardware,UK,1 - Critical
+Hardware,US,1 - Critical
+Hardware,US,3 - Moderate
+Hardware,UK,3 - Moderate
+Hardware,US,1 - Critical
+Hardware,UK,3 - Moderate
+Hardware,UK,1 - Critical
+Hardware,UK,1 - Critical
+Software,US,1 - Critical
+Software,US,1 - Critical
+Software,UK,3 - Moderate
+Software,US,1 - Critical
+Software,US,1 - Critical
+Network,UK,3 - Moderate
+Network,US,1 - Critical
+Network,US,1 - Critical
