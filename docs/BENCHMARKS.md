@@ -75,6 +75,61 @@ python -m bench.report bench/results/<file>.jsonl [--md out.md]
 - Policy: use Nebius Lightning for pilots and development, and reserve Super (Nebius or NVIDIA) for the final eval.
 - On Nebius, thinking is disabled (`enable_thinking=false`). JSON mode (`response_format=json_object`) is enabled when the prompt asks for JSON, because Lightning otherwise often returns a bare answer.
 
+## v2 harness changes (post-audit, 2026-10-23)
+
+These come from the audit of the v1 dev run. All of them apply to **agent, rag and react alike**, unless the text says otherwise.
+
+- **TAT-QA scale/format post-step** (`bench/tat_post.py`). It is deterministic and uses only the question, the context and the system's own answer. It **never reads the gold answer or the gold scale**, and a test checks that. The rules:
+  - **Format:** strip `$`, commas and `%`. Parentheses become a negative sign. Numbers are rounded to 2 decimals.
+  - **Scale:**
+    - `percent` if the question asks for a percentage, a proportion or a percentage change;
+    - `""` for text answers, counts and years;
+    - otherwise the unit the context gives for the figures the answer uses: a table header or introducing paragraph that says "in thousands", "in millions", "USD '000" and so on, or a paragraph number written as "$3.4 million";
+    - `""` if the context gives no unit.
+
+  We score both the raw answer (`EM_raw_no_post`) and the post-processed one, so the step's contribution is visible.
+- **TAT-QA convention prompt.** It states the scale rules, 2-decimal rounding, the shortest exact span, and lists for "respective" questions. It also asks for a `confidence` in [0, 1].
+- **Dict answers are flattened** (the RAG `sorted()` TypeError) and so are dict evidence ids (the InsightBench flag-14 TypeError).
+- **InsightBench output and context:**
+  - up to 10 plain-prose insights plus a ground-truth-style summary (v1: at most 6, under 40 words);
+  - results of up to 100 rows and 4,000 characters (v1: 40 rows, 1,500 characters);
+  - a RAG context budget of 6,000 tokens (v1: 3,000).
+- **Agent: SQL retry.** On a failed query the agent makes one fix call with the DuckDB error message. The harness logs the SQL error rate on the first try and after the retry, for agent and react.
+- **Agent claim gate.** A number now passes if it appears in the cited results or can be **recomputed** from two of them:
+  - the operations are a+b, |a−b|, a/b, |a−b|/b, ×100 for percentages, and the mean of two;
+  - the match is precision-aware: the value must agree to half a unit of the claim's last digit;
+  - every dropped claim is logged in `output.dropped_claims`, with its unsupported numbers and the reason.
+
+  **Limitation:** recomputation from 25 values builds a dense pool. In a synthetic test on random numbers, about 22% of random integers and about 61% of random one-decimal percentages "match" by chance. A derived pass is therefore weaker evidence than a direct match.
+- **flag-36** has no ground-truth insights in the dataset. It is reported under `excluded` and left out of InsightBench means and counts. It is not dropped silently.
+- **Errors:** item errors count as 0 in means and as failures in counts.
+- **Per-request timeout:** 90 s (`MODEL_TIMEOUT_S`), with up to 3 attempts with backoff on timeouts, 429 and 5xx. `NEBIUS_STRICT=1` still stops the run instead of overspending or falling back.
+
+### Reported metrics (v2)
+
+| Metric | Shown as |
+|---|---|
+| TAT-QA EM | Wilson 95% CI |
+| TAT-QA F1 mean | bootstrap 95% CI (2,000 resamples, seed 2026) |
+| TAT-QA per-answer-type breakdown | EM/F1 mean by `answer_type`, the same pivot as the official `get_detail_metric` |
+| InsightBench insight ROUGE-1, summary ROUGE-1, summary judge | means with bootstrap CIs |
+
+The ROUGE ≥ 0.25 and judge ≥ 0.6 counts are our own thresholds and are **secondary** only.
+
+### Explainability metrics (Track 02), `bench/explain.py`
+
+They are deterministic except for faithfulness. A claim is one final insight in InsightBench, or the answer in TAT-QA. Citations point into the system's own evidence store: query results `q1..` for the agent, retrieved row ids for RAG, observation numbers for ReAct. In TAT-QA they are verbatim evidence quotes.
+
+| Metric | Definition |
+|---|---|
+| **citation precision** | Valid citations divided by all citations. A citation is valid if it exists (the id is in the store, or the quote appears verbatim in the context) **and** supports the claim's number, directly or by recomputation. For claims without numbers, existence is enough. In TAT-QA the quote must contain a number used by the answer or expression; for text answers it must share a token with the answer. |
+| **claim traceability rate** | Claims with at least one valid citation whose numbers all follow from the cited evidence, divided by all claims. In TAT-QA, a text answer must appear inside a cited quote. A claim with no citations is not traceable. |
+| **unsupported-number rate** | Numbers in the final insights and summary that cannot be traced, directly or derived, to *any* evidence the system saw, divided by all numbers. For TAT-QA it is the v1 metric: numeric answers not traceable to the whole context. |
+| **confidence calibration** | ECE (10 equal bins) and Brier score of confidence against correctness. Correctness is TAT-QA EM = 1; for InsightBench it is summary judge ≥ 0.6, our threshold. `calibration_self` uses the confidence the model reports, which all systems are asked for. `calibration_det` is the agent's deterministic confidence. For TAT-QA it is 0.8 if the gate passes on the first round, 0.55 after a rewrite and 0.2 if it fails, capped at 0.1 when the answer is not traceable. For InsightBench it is 0.2 + 0.7 × (share of SQL that ran) × (share of claims surviving the gate), capped at 0.9. |
+| **faithfulness (LLM judge, sample)** | On the first 30 InsightBench tasks for each system, the same model (Lightning) is given the system's evidence store (up to 9,000 characters) and its insights and summary, and rates 1–10 how well the claims and stated causes are supported. We report the mean /10. It is not deterministic and it is a self-family judge, so read it as indicative. |
+
+Rates over citations, claims and numbers come with Wilson CIs. These units are not independent (they cluster within tasks), so the intervals are optimistic.
+
 ## dev run, Nebius Lightning (2026-10-22/23) — dev model, not the final evaluation
 
 All systems on **Nebius `nvidia/Nemotron-3_5-Lightning`** (`LLM_PROVIDER=nebius`, single model for every step and for the judge). InsightBench: 100 tasks; TAT-QA dev: 150 questions (seeded sample). Scored with `python -m bench.report <file> --md`; bracketed ranges are 95% Wilson intervals. `errors` are counted inside `n` (an errored item scores as a miss). Raw records: `bench/results/insightbench-nebius-lightning-dev.jsonl`, `bench/results/tatqa-nebius-lightning-dev.jsonl` (resumed runs append; the report keeps the last record per system and id).
@@ -150,3 +205,45 @@ The pilot spent about **$0.03 on Nebius**, including smoke calls and a discarded
 - In TAT-QA, EM is strongly affected by `scale` (the official metric is scale-aware). Lightning often leaves scale empty even when prompted.
 - If the gate's rewrite comes back empty or unparseable, the agent keeps the previous draft, and the gate still drops that draft's unsupported insights.
 - The judge differs from the paper's logprob LLaMA-3 judge (see Scoring above).
+
+## dev run v2 (post-audit), Nebius Lightning (2026-10-23) — dev model, not the final evaluation
+
+Same model (`nvidia/Nemotron-3_5-Lightning`, Nebius, `NEBIUS_STRICT=1`), same 100 InsightBench tasks and 150 TAT-QA questions as v1, harness changes described above. v1 numbers below are the v1 records re-scored with the v2 report (`python -m bench.report`). Brackets: Wilson 95% CI for counts, bootstrap 95% CI for means. Both v2 runs finished with **0 errored items** (no error-row re-run was needed). Raw: `bench/results/*-nebius-lightning-dev-v2.jsonl`. Test suite: 70 passed.
+
+### TAT-QA (n=150)
+
+| system | EM v1 | EM v2 | F1 v1 | F1 v2 | EM raw (no post-step) v2 | errors v1→v2 |
+|---|---|---|---|---|---|---|
+| agent | 57 (0.31-0.46) | 77 (0.43-0.59) | 0.501 (0.420-0.578) | 0.638 (0.567-0.709) | 42 (0.21-0.36) | 0→0 |
+| rag | 51 (0.27-0.42) | 69 (0.38-0.54) | 0.458 (0.380-0.538) | 0.565 (0.488-0.641) | 35 (0.17-0.31) | 1→0 |
+| react | 57 (0.31-0.46) | 92 (0.53-0.69) | 0.487 (0.413-0.561) | 0.712 (0.642-0.779) | 44 (0.23-0.37) | 0→0 |
+
+By answer type (EM, v1→v2): agent arithmetic 0.397→0.483, span 0.378→0.500, multi-span 0.385→0.769, count 0.200→0.400; rag arithmetic 0.368→0.379, span 0.324→0.500, multi-span 0.462→0.769, count 0→0; react arithmetic 0.483→0.810, span 0.324→0.500, multi-span 0.154→0.538, count 0.600→0.200 (n=5).
+
+Track 02 (v2 only): citation precision agent 151/292 (0.46-0.57), rag 142/319 (0.39-0.50), react 122/297 (0.36-0.47); claim traceability agent 98/150 (0.57-0.72), rag 89/150 (0.51-0.67), react 82/150 (0.47-0.62); unsupported numbers 0 for all. Calibration (ECE/Brier): self-reported agent 0.461/0.462, rag 0.503/0.495, react 0.362/0.363 (all mean conf 0.98); agent deterministic 0.278/0.323.
+
+### InsightBench (n=100, flag-36 not excluded in this sample)
+
+| system | insight ROUGE-1 v1→v2 | summary ROUGE-1 v1→v2 | summary judge v1→v2 | judge≥0.6 v1→v2 | ROUGE≥0.25 v1→v2 |
+|---|---|---|---|---|---|
+| agent | 0.185 (0.171-0.199) → 0.188 (0.174-0.203) | 0.225 → 0.262 (0.250-0.273) | 0.329 (0.299-0.364) → 0.315 (0.280-0.354) | 8 → 7 | 22 → 19 |
+| rag | 0.166 (0.151-0.181) → 0.124 (0.112-0.136) | 0.221 → 0.225 (0.208-0.242) | 0.299 → 0.272 (0.239-0.305) | 8 → 2 | 9 → 1 |
+| react | 0.174 (0.161-0.188) → 0.160 (0.147-0.172) | 0.229 → 0.262 (0.250-0.274) | 0.293 → 0.304 (0.272-0.338) | 1 → 4 | 15 → 5 |
+
+Agent SQL error rate: v1 171/1008 (0.15-0.19); v2 first try 191/1020 (0.17-0.21), after retry 139/1020 (0.12-0.16). React v2: 96/563 (0.14-0.20). Claims dropped by the agent gate: 45 → 27.
+
+Track 02 (v2): 
+
+| system | citation precision | claim traceability | unsupported-number rate | faithfulness judge (/10 scaled, first 30) | calib. self ECE/Brier | calib. det ECE/Brier |
+|---|---|---|---|---|---|---|
+| agent | 711/737 (0.95-0.98) | 480/530 (0.88-0.93) | 8/2046 (0.00-0.01) | 0.600 (0.543-0.650) | 0.834/0.760 | 0.705/0.588 |
+| rag | 1374/1376 (0.99-1.00) | 44/237 (0.14-0.24) | 32/2004 (0.01-0.02) | 0.517 (0.434-0.597) | 0.879/0.795 | — |
+| react | 137/160 (0.79-0.90) | 82/404 (0.17-0.24) | 194/2229 (0.08-0.10) | 0.593 (0.513-0.663) | 0.867/0.792 | — |
+
+### Honest reading
+
+- TAT-QA improved for all systems, mostly from the deterministic scale/format post-step (raw EM without it is *lower* than v1, e.g. agent 42 vs 57: the new prompt asks for unscaled numbers and relies on the post-step). **React now beats the agent on TAT-QA EM** (92 vs 77; CIs overlap), driven by arithmetic (0.81 vs 0.48).
+- InsightBench did **not** improve on the content metrics: insight ROUGE is flat for the agent and **worse for rag and react**; judge means are within noise; the secondary threshold counts fell for agent (22→19), rag (9→1) and react (15→5) because v2 asks for longer prose insights. Summary ROUGE rose for all.
+- Where the architecture does separate: on InsightBench the agent has 0.90 claim traceability vs 0.19 (rag) and 0.20 (react), and 0.4% unsupported numbers vs 9% for react. On TAT-QA the agent leads citation precision and traceability, with overlapping CIs.
+- Calibration is poor everywhere on InsightBench (accuracy at the 0.6 judge threshold is 2-7%); the agent's deterministic confidence is better calibrated than self-reports but still overconfident. Citation/claim CIs are optimistic (clustered units). The faithfulness judge is the same model family.
+- Spend: ledger $0.879 at resume → $1.023 after both v2 runs (all Nebius promo credit).
