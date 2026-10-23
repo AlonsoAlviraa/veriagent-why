@@ -1,7 +1,12 @@
 # Verify v2: three verification ideas on top of agent_mk
 
 All three configs keep agent_mk's claim-gate re-ask (agent_vr skipped it, which gave 28 gate failures versus 17).
-Model: Lightning only. Calibration was fitted only on TAT-QA **train** (n=80). Dev and eval were never used for tuning.
+Model: Lightning only. Calibration was fitted only on TAT-QA **train** (n=80).
+
+> **Caveats (external review, PR #8 verdict "acceptable as an experiment"):** numeric calibration was fit on train only, but the configs
+> were designed after reading dev/eval failures, so TAT-QA dev and InsightBench are development sets (`bench/splits/contaminated.json`).
+> The cr +4 EM over mk (110 vs 106 of 150) is inside the ~4 pp T=0 run-to-run noise floor and not significant. The IB calibration map is fit
+> on n=29; the critic threshold was chosen on small n. Report AUROC/AURC with ECE (TAT v2 cr AUROC 0.703). Held-out: `docs/HELDOUT_RESULTS.md`.
 
 ## Research (verified links)
 - CRITIC: tool-interactive critiquing. https://arxiv.org/abs/2305.11738
