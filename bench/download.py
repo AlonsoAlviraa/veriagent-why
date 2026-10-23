@@ -71,7 +71,7 @@ def insightbench(limit: int | None = None) -> Path:
 
 def tatqa() -> Path:
     d = DATA / "tatqa"
-    for f in ("dataset_raw/tatqa_dataset_dev.json", "tatqa_eval.py", "tatqa_metric.py", "tatqa_utils.py", "LICENSE"):
+    for f in ("dataset_raw/tatqa_dataset_dev.json", "dataset_raw/tatqa_dataset_test_gold.json", "tatqa_eval.py", "tatqa_metric.py", "tatqa_utils.py", "LICENSE"):
         fetch(TAT_RAW + f, d / Path(f).name)
     _manifest(d, {"source": "NExTplusplus/TAT-QA", "commit": TAT_COMMIT, "license": "data CC BY 4.0; code MIT"})
     print(f"tatqa: dev + official scorer -> {d}")

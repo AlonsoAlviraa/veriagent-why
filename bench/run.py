@@ -36,6 +36,44 @@ def select(bench: str, fixtures: bool, limit: int | None, ids: list[str] | None)
     return tasks[:limit] if limit else tasks
 
 
+def git_state() -> dict:
+    """Provenance for every result row (external review P0-2): full HEAD sha + dirty flag."""
+    import subprocess
+    def g(*a):
+        try:
+            return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True, timeout=20).stdout
+        except Exception:
+            return ""
+    rev = g("rev-parse", "HEAD").strip() or None
+    porcelain = g("status", "--porcelain")
+    return {"code_rev": rev[:7] if rev else None, "code_rev_full": rev, "dirty": bool(porcelain.strip()),
+            "dirty_files": [l[3:] for l in porcelain.splitlines()][:50]}
+
+
+def split_info(bench: str, fixtures: bool, split_file: str | None) -> dict:
+    """Split name + sha256 of the source data file and (if given) of the frozen id-list file."""
+    import hashlib
+    if bench == "tatqa":
+        name = "fixture" if fixtures else os.environ.get("TATQA_SPLIT", "dev")
+        src = (FIX / "tatqa" / "tatqa_fixture.json") if fixtures else DATA / "tatqa" / f"tatqa_dataset_{name}.json"
+    else:
+        name, src = ("fixture" if fixtures else "all"), None
+    info = {"name": name, "data_sha256": hashlib.sha256(src.read_bytes()).hexdigest() if src and src.exists() else None}
+    if split_file:
+        sf = Path(split_file)
+        info.update({"split_file": sf.name, "split_file_sha256": hashlib.sha256(sf.read_bytes()).hexdigest(),
+                     "name": json.loads(sf.read_text()).get("name", sf.stem)})
+    return info
+
+
+def split_ids(split_file: str, bench: str) -> list[str]:
+    d = json.loads(Path(split_file).read_text())
+    ids = d.get("ids") or (d.get(bench) or {}).get("ids")
+    if not ids:
+        raise SystemExit(f"{split_file}: no ids for {bench}")
+    return list(ids)
+
+
 def done_keys(path: Path) -> set:
     if not path.exists():
         return set()
@@ -68,7 +106,23 @@ def main(argv=None):
     ap.add_argument("--fixtures", action="store_true", help="use bench/fixtures instead of data/bench")
     ap.add_argument("--dry-run", action="store_true", help="list what would run, no model calls")
     ap.add_argument("--out", help="results JSONL (default bench/results/<bench>-<mode>.jsonl)")
+    ap.add_argument("--split-file", help="frozen id list (e.g. bench/splits/holdout_v1.json); its sha256 is recorded per row")
+    ap.add_argument("--repeat", type=int, default=0, help="repeat index recorded per row (paired repeats)")
+    ap.add_argument("--allow-dirty", action="store_true",
+                    help="DEV DEBUGGING ONLY: run with uncommitted changes; rows get dirty=true and are not evidence")
     a = ap.parse_args(argv)
+    gs = git_state()
+    if gs["dirty"] and not (a.offline or a.dry_run or a.fixtures):
+        if not a.allow_dirty:
+            raise SystemExit("ABORT: git working tree is dirty (git status --porcelain non-empty); commit first so "
+                             "results are attributable to code_rev. Dirty files: " + ", ".join(gs["dirty_files"][:10]))
+        print("WARNING --allow-dirty: rows will carry dirty=true and MUST NOT be used as evidence")
+    if a.split_file:
+        a.ids = ",".join(split_ids(a.split_file, a.bench))
+        tsplit = json.loads(Path(a.split_file).read_text()).get("tatqa_split")
+        if a.bench == "tatqa" and tsplit:
+            os.environ["TATQA_SPLIT"] = tsplit  # e.g. holdout_v1 -> official test_gold
+    sinfo = split_info(a.bench, a.fixtures, a.split_file)
 
     systems = [s for s in a.systems.split(",") if s]
     tasks = select(a.bench, a.fixtures, a.limit, a.ids.split(",") if a.ids else None)
@@ -100,7 +154,10 @@ def main(argv=None):
         rec = {"bench": a.bench, "system": s, "id": t["id"], "mode": "offline" if a.offline else "live",
                "provider": None if a.offline else os.environ.get("LLM_PROVIDER"),
                "model": None if a.offline else (os.environ.get("NEBIUS_MODEL", "nvidia/Nemotron-3_5-Lightning") if os.environ.get("LLM_PROVIDER") == "nebius" else os.environ.get("REASONING_MODEL", "nvidia/nemotron-3.5-super-vl-120b-a12b")),
-               "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
+               "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+               "code_rev": gs["code_rev"], "code_rev_full": gs["code_rev_full"], "dirty": gs["dirty"],
+               "allow_dirty": bool(a.allow_dirty), "split": sinfo, "seed": SEED, "repeat": a.repeat,
+               "temperature": 0}  # app/llm.py hard-codes temperature 0
         t0 = time.time()
         try:
             if a.bench == "insightbench":
@@ -133,7 +190,6 @@ def main(argv=None):
             # fix (audit #4): "model" is the configured default; models_used is what was actually called (Super on routed items)
             rec["models_used"] = dict(sys_meter.get("providers") or {})
             rec["question"] = (t.get("metadata") or {}).get("goal") if a.bench == "insightbench" else t["q"]["question"]  # audit trace
-            rec["code_rev"] = os.popen("git rev-parse --short HEAD 2>/dev/null").read().strip() or None
         except NebiusHardStop as e:
             print(f"HARD STOP (NEBIUS_STRICT=1): {e}; item not recorded, rerun to resume")
             break
