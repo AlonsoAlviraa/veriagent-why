@@ -48,7 +48,7 @@ Paired tests vs the previous `agent_mk` (`*-post-agent_mk`). Round spend: $0.53 
 | IB cr prev | 0.366 | 0.271 | 0.313 | 6.71 | 0.162 | -0.004 [-0.053, 0.044], 0.86 / 1.0 |
 | IB cr fix | 0.346 | 0.200 | **0.138** | 7.04 | 0.174 | -0.024 [-0.077, 0.031], 0.39 / 0.50 |
 
-No accuracy change is statistically significant. The ECE drop is not a calibration improvement (AUROC fell, see above). The fixes and cut TAT-QA calls (-8 to -16%).
+No accuracy change is statistically significant. The ECE drop is not a calibration improvement (AUROC fell, see above). The fixes cut TAT-QA calls (-8 to -16%).
 InsightBench uses more calls (+5 to +15%) because empty or error results now trigger a requery instead of being cited.
 **Correction (external review P1-1):** an earlier version said TAT `agent_cr fix` matches `agent_mk fix` "item for item". That was false: both
 total 104/150, but 8 answers and 6 EM values differ. Two differences are critic REVISED decisions (1148519a revised to correct, 5c7d8918
