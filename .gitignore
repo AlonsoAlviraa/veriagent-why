@@ -30,3 +30,4 @@ logs/report-*.json
 # Public benchmark data and runs (downloaded, never committed)
 data/bench/
 bench/results/
+logs/*/

@@ -60,6 +60,8 @@ def main(argv=None):
     ap.add_argument("--max-calls-item", type=int, default=40, help="hard cap per item")
     ap.add_argument("--rpm", type=float, default=30.0)
     ap.add_argument("--no-judge", action="store_true")
+    ap.add_argument("--no-trace", action="store_true", help="do not write per-item audit traces (bench/results/traces/)")
+    ap.add_argument("--trace-dir", default=str(Path(__file__).resolve().parent / "results" / "traces"))
     ap.add_argument("--judge-insights", action="store_true", help="InsightBench o2m insight judge (|gt|x|pred| calls)")
     ap.add_argument("--faith-sample", type=int, default=30, help="InsightBench: LLM-judge faithfulness on the first N tasks per system (0=off)")
     ap.add_argument("--offline", action="store_true", help="scripted fake model, no network (CI)")
@@ -142,8 +144,18 @@ def main(argv=None):
             rec["trace"] = traceback.format_exc()[-800:]
         rec["seconds"] = round(time.time() - t0, 2)
         total += m.calls + ((rec.get("judge_meter") or {}).get("calls") or 0)
+        full = [c.pop("prompt_full", None) for c in ((rec.get("meter") or {}).get("trace_calls") or [])]
         with out.open("a") as f:
-            f.write(json.dumps(rec, default=str) + "\n")
+            f.write(json.dumps(rec, default=str) + "\n")  # results row keeps truncated prompts only
+        if not a.no_trace:
+            try:
+                from .audit_trace import write_item_trace
+                for c, fp in zip((rec.get("meter") or {}).get("trace_calls") or [], full):
+                    if fp:
+                        c["prompt_full"] = fp
+                write_item_trace(rec, out, DATA if not a.fixtures else FIX, Path(a.trace_dir))
+            except Exception as e:  # a trace failure must not lose the scored row; logged
+                print(f"  TRACE ERROR {type(e).__name__}: {str(e)[:120]}")
         sc = rec.get("scores") or {}
         print(f"  {s:6s} {t['id'][:36]:36s} {rec['seconds']:6.1f}s calls={m.calls} {'ERR ' + rec['error'][:80] if rec.get('error') else json.dumps(sc)}")
     print(f"total model calls this run: {total}")

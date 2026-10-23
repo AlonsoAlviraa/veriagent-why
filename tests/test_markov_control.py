@@ -24,17 +24,18 @@ def test_route_deep_only_with_nv_features():
 def test_gate_retry_expected_gain():
     c = MK.Controller()
     assert not c.gate_retry([], 0, True)
-    assert not c.gate_retry(["evidence not found in context: foo"], 0, True)  # gain 0.1 < 0.25
+    assert c.gate_retry(["evidence not found in context: foo"], 0, True)  # fix B1: quote rejection retries (gain 0.4)
     assert c.gate_retry(["answer 3 != expression value 4"], 0, False)
     assert not c.gate_retry(["answer 3 != expression value 4"], 1, False)  # round cap
-    assert [d["action"] for d in c.log] == ["ACCEPT", "STOP", "RETRY", "STOP"]
+    assert [d["action"] for d in c.log] == ["ACCEPT", "RETRY", "RETRY", "STOP"]
 
 
 def test_sql_repair_policy():
     c = MK.Controller()
     assert c.sql_repair("ERROR BinderException: Binder Error: column x not found", 0, None)
     assert not c.sql_repair("ERROR BinderException: Binder Error: column x not found", 1, "ERROR BinderException: Binder Error: column x not found")
-    assert not c.sql_repair("ERROR OutOfMemoryException: boom", 0, None)
+    assert c.sql_repair("ERROR OutOfMemoryException: boom", 0, None)  # fix B7: unknown class gets one repair
+    assert not c.sql_repair("ERROR OutOfMemoryException: boom", 1, None)
     assert not c.sql_repair("ERROR Parser Error: x", 2, None)
 
 
@@ -69,6 +70,6 @@ def test_evidence_check_rerank_decision():
     c = MK.Controller()
     assert not c.evidence_check(None, 0, True)
     assert not c.evidence_check(0.9, 0, True)
-    assert c.evidence_check(0.01, 0, True)
-    assert not c.evidence_check(0.01, 1, True)  # cap -> FLAG
+    assert c.evidence_check(MK.RELEVANCE_MIN / 2, 0, True)  # threshold calibrated on TAT-QA train
+    assert not c.evidence_check(MK.RELEVANCE_MIN / 2, 1, True)  # cap -> FLAG
     assert [d["action"] for d in c.log] == ["NO_SIGNAL", "ACCEPT", "RETRY", "FLAG"]

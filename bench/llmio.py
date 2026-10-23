@@ -67,7 +67,8 @@ class Meter:
             import hashlib
             ptxt = "\n".join(f"[{m['role']}] {m['content']}" for m in messages)
             rec = {"i": self.calls, "tag": tag, "requested_model": model, "prompt_hash": "sha256:" + hashlib.sha256(ptxt.encode()).hexdigest()[:16],
-                   "prompt": ptxt[:int(os.environ.get("AUDIT_PROMPT_CHARS", "2000"))], "prompt_chars": len(ptxt)}
+                   "prompt": ptxt[:int(os.environ.get("AUDIT_PROMPT_CHARS", "2000"))], "prompt_chars": len(ptxt),
+                   **({"prompt_full": ptxt} if os.environ.get("AUDIT_FULL_PROMPTS", "1") == "1" and len(ptxt) > int(os.environ.get("AUDIT_PROMPT_CHARS", "2000")) else {})}
             self.calls_log.append(rec)
         try:
             if self.offline:

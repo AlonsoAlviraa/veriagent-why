@@ -412,3 +412,78 @@ def main(argv=None):
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+# ---------------------------------------------------------------- per-item traces written by bench/run.py
+def failure_cause(row: dict) -> str:
+    """Deterministic, gold-aware label for the index only (never fed back to any system)."""
+    if row.get("error"):
+        return "run_error: " + row["error"].split(":")[0]
+    sc, o = row.get("scores") or {}, row.get("output") or {}
+    if row["bench"] == "tatqa":
+        if sc.get("em") == 1:
+            return "correct"
+        if sc.get("em_raw") == 1 or (str(o.get("answer")) == str((row.get("gold") or {}).get("answer")) and o.get("scale") != (row.get("gold") or {}).get("scale")):
+            return "scale"
+        if not o.get("gate_passed", True):
+            return "gate_failed"
+        if not sc.get("traceable", True):
+            return "untraceable_number"
+        return "wrong_answer" if (sc.get("f1") or 0) == 0 else "partial_answer"
+    if sc.get("excluded"):
+        return "excluded"
+    if o.get("sql_errors"):
+        return "sql_error" if (sc.get("summary_judge") or 0) < 0.6 else "ok_with_sql_errors"
+    j = sc.get("summary_judge")
+    return "judge_none" if j is None else ("ok" if j >= 0.6 else "weak_insight")
+
+
+def _disk_free_gb(p: Path) -> float:
+    import shutil
+    return shutil.disk_usage(p).free / 1e9
+
+
+def write_item_trace(row: dict, results_path: Path, data: Path, root: Path, min_free_gb: float = 2.0) -> dict:
+    """bench/results/traces/<run>/<config>/<item_id>.audit.json + one line in <root>/<run>/audit_index.jsonl.
+    Prompts in the trace are truncated (AUDIT_PROMPT_CHARS, default 2000); the full prompt texts go to a gzip
+    sidecar <item_id>.prompts.json.gz only if more than min_free_gb of disk is free."""
+    import gzip
+    row = dict(row)
+    meter = dict(row.get("meter") or {})
+    calls = meter.get("trace_calls") or []
+    full = [{"i": c.get("i"), "tag": c.get("tag"), "prompt": c.pop("prompt_full", None)} for c in calls]
+    row["meter"] = meter
+    run = Path(results_path).stem
+    d = root / run / row["system"]
+    d.mkdir(parents=True, exist_ok=True)
+    safe = re.sub(r"[^A-Za-z0-9_.-]", "_", str(row["id"]))
+    t = build(row, Path(results_path), data, {})
+    p = d / f"{safe}.audit.json"
+    p.write_text(json.dumps(t, indent=1, ensure_ascii=False, default=str))
+    gz = None
+    if any(f["prompt"] for f in full) and _disk_free_gb(root) > min_free_gb:
+        clean, _ = secret_scan(full)
+        gz = d / f"{safe}.prompts.json.gz"
+        with gzip.open(gz, "wt") as f:
+            json.dump(clean, f, ensure_ascii=False)
+    sc = row.get("scores") or {}
+    idx = {"id": row["id"], "config": row["system"], "bench": row["bench"],
+           "score": sc.get("em") if row["bench"] == "tatqa" else sc.get("summary_judge"),
+           "failure_cause": failure_cause(row), "path": str(p), "prompts_gz": str(gz) if gz else None,
+           "redactions": t["secret_scan"]["redactions"]}
+    with (root / run / "audit_index.jsonl").open("a") as f:
+        f.write(json.dumps(idx) + "\n")
+    return idx
+
+
+def backfill(results_path: Path, data: Path, root: Path) -> int:
+    """Write traces for every row of an existing results JSONL (rows from before the hook was wired)."""
+    n = 0
+    seen = {}
+    for line in Path(results_path).read_text().splitlines():
+        r = json.loads(line)
+        seen[(r["system"], r["id"])] = r  # last record wins (resume)
+    for r in seen.values():
+        write_item_trace(r, Path(results_path), data, root)
+        n += 1
+    return n

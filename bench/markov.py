@@ -98,8 +98,8 @@ class Controller:
         return self._d("gate", st, "RETRY", f"expected gain {gain} >= {GAIN_MIN}") == "RETRY"
 
     def evidence_check(self, p_rel: float | None, round_: int, gate_ok: bool, max_rounds: int = 2) -> bool:
-        """NVIDIA reranker relevance of (question, quoted evidence) as a gate input. RELEVANCE_MIN was set on
-        held-out TAT-QA dev items 41-100 (not the 40 evaluated): EM 0.42 when p<0.05 vs 0.61 when p>=0.5."""
+        """NVIDIA reranker relevance of (question, quoted evidence) as a gate input. RELEVANCE_MIN is calibrated on TAT-QA TRAIN
+        only (scripts/calib_relevance.py: 5th percentile of p on gold evidence, n=150); dev is never used for tuning."""
         st = {"gate_round": round_, "gate_ok": gate_ok, "rerank_p": p_rel}
         if p_rel is None:
             return self._d("evidence_check", st, "NO_SIGNAL", "reranker unavailable; numeric gate only") == "RETRY"

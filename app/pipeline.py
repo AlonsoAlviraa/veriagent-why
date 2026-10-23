@@ -1,6 +1,7 @@
 """Orchestrator: Planner -> Retriever -> S1 Filter -> Evidence Evaluator (loop to Planner, max 3)
 -> Cause Analyst -> Writer -> Claim Gate (loop to Cause Analyst, max 2) -> memo + confidence."""
 from __future__ import annotations
+import os
 import re, time, uuid
 from .adapters.zetaris import get_backend
 from .agents.core import Planner, Retriever, S1Filter, EvidenceEvaluator, CauseAnalyst, Writer, ClaimGate
@@ -208,6 +209,12 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
     memo_path = tr.path.parent / f"memo-{run_id}.md"
     memo_path.write_text(out["memo_md"])
     (tr.path.parent / f"result-{run_id}.json").write_text(__import__("json").dumps(out, default=str))
+    if os.environ.get("AUDIT_TRACE", "1") == "1":  # logs/<run_id>/audit.json next to a copy of the memo
+        try:
+            from .audit import write as audit_write
+            audit_write(tr.path.parent, tr.events, out, run_id, memo_path)
+        except Exception as e:  # never lose the memo over a trace failure; logged
+            tr.log("observability", "audit_trace_error", error=f"{type(e).__name__}: {str(e)[:200]}")
     try:
         from .pdf import memo_pdf
         memo_pdf(out["memo_md"], tr.path.parent / f"memo-{run_id}.pdf")
