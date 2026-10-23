@@ -12,10 +12,12 @@ import json
 from pathlib import Path
 import duckdb
 from app.bm25 import bm25
-from .common import gate_text, safe_sql
+from .common import gate_claim, gate_text, safe_sql, conf01
 from .llmio import Meter, parse_json
 
-MAX_ROWS = 40
+MAX_ROWS = 100  # v2: larger result window (v1: 40)
+RESULT_CHARS = 4000  # v2 (v1: 1500)
+SQL_RETRIES = 1
 ROUNDS = 3
 GATE_ROUNDS = 2
 
@@ -63,9 +65,11 @@ def _context(task: dict, sch: str) -> str:
     return f"GOAL: {m['goal']}\nROLE: {m.get('role','')}\nDATASET: {m.get('dataset_description','')[:1200]}\nSCHEMA:\n{sch}"
 
 
-OUT_SPEC = ('Reply with JSON only (at most 6 insights, each under 40 words): {"insights": [{"text": one specific data-backed insight (descriptive, diagnostic '
-            '- why it happened -, predictive or prescriptive), "evidence": [result ids]}], "summary": a short paragraph}. '
-            "Every number you write must come from the results.")
+OUT_SPEC = ('Reply with JSON only (up to 10 insights): {"insights": [{"text": one or two plain-prose sentences stating a finding the way an '
+            'analyst notebook would (e.g. "Hardware incidents are significantly higher than other categories, at 335 of 500"), descriptive, diagnostic '
+            '- why it happened -, predictive or prescriptive, "evidence": [result ids]}], "summary": a paragraph that states the main trend and its cause '
+            'in plain prose, "confidence": your probability 0-1 that the main finding is correct}. '
+            "Every number you write must come from, or be computed from, the cited results.")
 
 
 def agent(task, con, tables, m: Meter) -> dict:
@@ -77,7 +81,18 @@ def agent(task, con, tables, m: Meter) -> dict:
     for rnd in range(ROUNDS):
         for s in steps:
             qid = f"q{len(results) + 1}"
-            results[qid] = {"question": s.get("question", ""), "sql": s.get("sql", ""), "result": run_sql(con, s.get("sql", ""))}
+            sql = str(s.get("sql", "") or "")
+            res, first_err = run_sql(con, sql), None
+            for _ in range(SQL_RETRIES):
+                if not res.startswith("ERROR"):
+                    break
+                first_err = res
+                fx = parse_json(m.call([{"role": "system", "content": "Fix this DuckDB SQL query. Reply with JSON only: {\"sql\": str}."},
+                                        {"role": "user", "content": ctx + f"\nQUESTION: {s.get('question','')}\nSQL: {sql}\n{res}"}], "sqlfix", "s1", 600)) or {}
+                if fx.get("sql"):
+                    sql = str(fx["sql"])
+                    res = run_sql(con, sql)
+            results[qid] = {"question": s.get("question", ""), "sql": sql, "result": res, "first_error": first_err}
         if rnd == ROUNDS - 1:
             break
         ev = parse_json(m.call([{"role": "system", "content": "You are the Evidence Evaluator. Given the goal and the query results, decide whether the evidence is sufficient to explain WHY, or propose follow-up queries (drill-downs, comparisons, fixes for failed SQL). Reply with JSON only: {\"sufficient\": bool, \"new_steps\": [{\"question\": str, \"sql\": str}]} (max 4)."},
@@ -90,20 +105,21 @@ def agent(task, con, tables, m: Meter) -> dict:
     gate_log = []
     prev = None
     for g in range(GATE_ROUNDS + 1):
-        out = parse_json(m.call(msgs, "write", "s2", 2500)) or {}
-        ins = [i for i in (out.get("insights") or []) if isinstance(i, dict) and i.get("text")]
+        out = parse_json(m.call(msgs, "write", "s2", 3500)) or {}
+        ins = [i for i in (out.get("insights") or []) if isinstance(i, dict) and i.get("text")][:10]
         if not ins and prev:  # unparseable/empty rewrite: keep previous draft; the gate still drops its unsupported insights
             out, ins = prev
             gate_log.append({"round": g, "insights": 0, "note": "empty rewrite, kept previous draft"})
             break
         bad = []
         for i in ins:
-            src = [results[e]["result"] for e in (i.get("evidence") or []) if e in results] or [r["result"] for r in results.values()]
-            un = gate_text(i["text"], src)
-            i["unsupported_numbers"] = un
+            i["evidence"] = norm_ids(i.get("evidence"), results)
+            src = [results[e]["result"] for e in i["evidence"]] or [r["result"] for r in results.values()]
+            un, nlog = gate_claim(i["text"], src)
+            i["unsupported_numbers"], i["number_log"] = un, nlog
             if un:
                 bad.append(i)
-        sum_un = gate_text(out.get("summary", ""), [r["result"] for r in results.values()])
+        sum_un, _ = gate_claim(out.get("summary", ""), [r["result"] for r in results.values()])
         gate_log.append({"round": g, "insights": len(ins), "failed": len(bad), "summary_unsupported": sum_un})
         if (not bad and not sum_un) or g == GATE_ROUNDS:
             break
@@ -113,16 +129,51 @@ def agent(task, con, tables, m: Meter) -> dict:
                         + json.dumps([{"text": i["text"], "unsupported": i["unsupported_numbers"]} for i in bad] + ([{"summary": sum_un}] if sum_un else []))
                         + ". Rewrite. " + OUT_SPEC}]
     kept = [i for i in ins if not i["unsupported_numbers"]]
-    return {"insights": [i["text"] for i in kept], "summary": out.get("summary", ""),
-            "dropped_by_gate": len(ins) - len(kept), "gate": gate_log, "queries": len(results),
-            "sql_errors": sum(r["result"].startswith("ERROR") for r in results.values())}
+    dropped = [{"text": i["text"], "evidence": i["evidence"], "unsupported": i["unsupported_numbers"],
+                "reason": "numbers not in cited results nor recomputable from them"} for i in ins if i["unsupported_numbers"]]
+    return {"insights": [i["text"] for i in kept], "claims": [{"text": i["text"], "evidence": i["evidence"]} for i in kept],
+            "summary": out.get("summary", ""), "confidence": conf01(out.get("confidence")),
+            "confidence_det": det_confidence(results, kept, dropped),
+            "dropped_by_gate": len(dropped), "dropped_claims": dropped, "gate": gate_log, "queries": len(results),
+            "sql_errors": sum(r["result"].startswith("ERROR") for r in results.values()),
+            "sql_errors_first_try": sum(1 for r in results.values() if r.get("first_error")),
+            "evidence_store": {k: v["result"][:RESULT_CHARS] for k, v in results.items()}}
+
+
+def norm_ids(ev, store: dict) -> list[str]:
+    """Evidence ids may come back as str, int, dict ({"id": "q1"}) or "[q1]" -> keys of `store` (fixes flag-14 TypeError)."""
+    if ev is None:
+        return []
+    if not isinstance(ev, list):
+        ev = [ev]
+    out = []
+    for e in ev:
+        vals = list(e.values()) if isinstance(e, dict) else [e]
+        for v in vals:
+            k = str(v).strip().strip("[]").strip()
+            import re as _re
+            dg = _re.findall(r"\d+", k)
+            for cand in (k, f"q{k}", k.lower(), *( [dg[-1], f"q{dg[-1]}"] if dg and "#" not in k else [])):
+                if cand in store and cand not in out:
+                    out.append(cand)
+                    break
+    return out
+
+
+def det_confidence(results: dict, kept: list, dropped: list) -> float:
+    """Deterministic confidence (declared): share of SQL that ran x share of claims surviving the gate, capped."""
+    if not results or not kept:
+        return 0.1
+    ok = 1 - sum(r["result"].startswith("ERROR") for r in results.values()) / len(results)
+    surv = len(kept) / (len(kept) + len(dropped))
+    return round(min(0.9, 0.2 + 0.7 * ok * surv), 3)
 
 
 def _fmt(results: dict) -> str:
-    return "\n".join(f"[{k}] {v['question']}\nSQL: {v['sql']}\n{v['result'][:1500]}" for k, v in results.items())
+    return "\n".join(f"[{k}] {v['question']}\nSQL: {v['sql']}\n{v['result'][:RESULT_CHARS]}" for k, v in results.items())
 
 
-def rag(task, con, tables, m: Meter, token_budget: int = 3000) -> dict:
+def rag(task, con, tables, m: Meter, token_budget: int = 6000) -> dict:  # v2: 6000 (v1: 3000)
     docs = []
     for t in tables:
         cur = con.execute(f"SELECT * FROM {t}")
@@ -137,24 +188,41 @@ def rag(task, con, tables, m: Meter, token_budget: int = 3000) -> dict:
             break
         ctx.append(docs[i]); used += n
     out = parse_json(m.call([{"role": "system", "content": "Answer the analytics goal from the retrieved rows only. " + OUT_SPEC.replace("result ids", "row ids")},
-                             {"role": "user", "content": f"GOAL: {task['metadata']['goal']}\nRESULTS (retrieved rows)\n" + "\n".join(ctx)}], "rag", "s2", 2500)) or {}
-    ins = [i["text"] if isinstance(i, dict) else str(i) for i in (out.get("insights") or [])]
-    return {"insights": [i for i in ins if i], "summary": out.get("summary", ""), "context_tokens": used}
+                             {"role": "user", "content": f"GOAL: {task['metadata']['goal']}\nRESULTS (retrieved rows)\n" + "\n".join(ctx)}], "rag", "s2", 3500)) or {}
+    store = {d.split("]", 1)[0].lstrip("["): d for d in ctx}
+    claims = _claims(out, store)
+    return {"insights": [c["text"] for c in claims], "claims": claims, "summary": out.get("summary", ""),
+            "confidence": conf01(out.get("confidence")), "context_tokens": used, "evidence_store": store}
+
+
+def _claims(out: dict, store: dict) -> list[dict]:
+    res = []
+    for i in (out.get("insights") or [])[:10]:
+        if isinstance(i, dict) and i.get("text"):
+            res.append({"text": str(i["text"]), "evidence": norm_ids(i.get("evidence"), store)})
+        elif isinstance(i, str) and i:
+            res.append({"text": i, "evidence": []})
+    return res
 
 
 def react(task, con, tables, m: Meter, max_steps: int = 6) -> dict:
     ctx = _context(task, schema(con, tables))
-    hist = ""
+    hist, store, errs = "", {}, 0
     for s in range(max_steps):
         a = parse_json(m.call([{"role": "system", "content": "You are a ReAct data analyst with one tool: DuckDB SQL. Each turn reply with JSON only: {\"thought\": str, \"action\": \"sql\", \"sql\": str} or {\"action\": \"final\"} when you have enough."},
                                {"role": "user", "content": ctx + hist}], "react", "s2", 800)) or {}
         if a.get("action") != "sql" or not a.get("sql"):
             break
-        hist += f"\nACTION {s + 1}: {a['sql']}\nOBSERVATION {s + 1}:\n{run_sql(con, a['sql'])[:1500]}"
+        obs = run_sql(con, str(a["sql"]))
+        errs += obs.startswith("ERROR")
+        store[str(s + 1)] = obs[:RESULT_CHARS]
+        hist += f"\nACTION {s + 1}: {a['sql']}\nOBSERVATION {s + 1}:\n{obs[:RESULT_CHARS]}"
     out = parse_json(m.call([{"role": "system", "content": "Write the final answer. " + OUT_SPEC.replace("result ids", "observation numbers")},
-                             {"role": "user", "content": ctx + "\nRESULTS" + hist}], "react_final", "s2", 2500)) or {}
-    ins = [i["text"] if isinstance(i, dict) else str(i) for i in (out.get("insights") or [])]
-    return {"insights": [i for i in ins if i], "summary": out.get("summary", ""), "steps": hist.count("ACTION ")}
+                             {"role": "user", "content": ctx + "\nRESULTS" + hist}], "react_final", "s2", 3500)) or {}
+    claims = _claims(out, store)
+    return {"insights": [c["text"] for c in claims], "claims": claims, "summary": out.get("summary", ""),
+            "confidence": conf01(out.get("confidence")), "steps": hist.count("ACTION "), "queries": len(store),
+            "sql_errors": errs, "sql_errors_first_try": errs, "evidence_store": store}
 
 
 SYSTEMS = {"agent": agent, "rag": rag, "react": react}
