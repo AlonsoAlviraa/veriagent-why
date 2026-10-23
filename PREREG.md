@@ -11,6 +11,11 @@ Committed **before any run on this split**. The config freeze is pending (V7 app
   - **Pilot exclusion:** the 100 ids in `bench/splits/holdout_v1.json` were run on 2026-10-23 before this decision. They are listed in `bench/splits/pilot_holdout_v1_manifest.json`, excluded from the draw, and are not part of any reported result.
 - No tuning, calibration fitting or error inspection on these 500 items, ever. Calibration maps are fit on TAT-QA train only.
 
+## Frozen config (filled at V7 freeze, before the run)
+- Frozen code sha: `<TBD_CODE_SHA>`
+- Config hash (sha256 of the canonical JSON of model, endpoint, arms, env flags, max_calls, rpm and calib file hashes): `<TBD_CONFIG_SHA256>`
+- Freeze commit: `<TBD_FREEZE_COMMIT>`, at `<TBD_TIMESTAMP>`
+
 ## Run
 - One run per arm, at T=0, from a clean commit. Rows carry `code_rev` and `dirty=false`. Dirty runs abort.
 - FREEZE: commit sha, model id + endpoint, max calls, rpm, env flags (`CR_USE_CALIB`, …).
