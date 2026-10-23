@@ -5,11 +5,16 @@
 Every call is counted against a hard budget (BudgetExceeded) and metered (calls, tokens, seconds).
 """
 from __future__ import annotations
+import os
 import json, os, re, time
 
 
 class BudgetExceeded(RuntimeError):
     pass
+
+
+# Alonso's decision: every LLM-judge metric (InsightBench G-Eval + faithfulness) uses Super on Nebius, for all configs.
+JUDGE_MODEL = os.environ.get("JUDGE_MODEL", "nvidia/nemotron-3-super-120b-a12b")
 
 
 class Meter:
@@ -21,18 +26,49 @@ class Meter:
         self.finish = []
         self.usd = 0.0
         self.providers = {}
+        self.parse_failures, self.parse_log = 0, []
+        # audit trace hook (docs/AUDIT_TRACE.md): one record per model call; AUDIT_TRACE=0 disables
+        self.trace = os.environ.get("AUDIT_TRACE", "1") == "1"
+        self.calls_log: list[dict] = []
 
     def snapshot(self) -> dict:
         return {"calls": self.calls, "prompt_tokens": self.prompt_tokens,
                 "completion_tokens": self.completion_tokens, "model_seconds": round(self.seconds, 2), "errors": self.errors,
                 "nebius_usd": round(self.usd, 6), "providers": self.providers,
-                "finish_reasons": self.finish, "last_reply_head": (self.last or "")[:300]}
+                "finish_reasons": self.finish, "parse_failures": self.parse_failures, "parse_log": self.parse_log[:10], "last_reply_head": (self.last or "")[:300], **({"trace_calls": self.calls_log} if self.trace else {})}
+
+    def call_json(self, messages: list[dict], tag: str, tier: str = "s2", max_tokens: int = 800, model: str | None = None,
+                  retries: int = 1) -> dict:
+        """fix (audit #5): parse_json(...) or {} silently turned an unparseable reply into an empty answer.
+        Now every failure is counted/logged in the meter and retried once with an explicit JSON-only nudge."""
+        reply = self.call(messages, tag, tier, max_tokens, model=model)
+        out = parse_json(reply)
+        k = 0
+        while out is None and k < retries:
+            self.parse_failures += 1
+            self.parse_log.append({"tag": tag, "retry": k + 1, "reply_head": (reply or "")[:120]})
+            reply = self.call(messages + [{"role": "assistant", "content": (reply or "")[:1500]},
+                                          {"role": "user", "content": "Your reply was not valid JSON. Reply again with ONE JSON object only, no prose, no code fences."}],
+                              tag + "_json_retry", tier, max_tokens, model=model)
+            out = parse_json(reply)
+            k += 1
+        if out is None:
+            self.parse_failures += 1
+            self.parse_log.append({"tag": tag, "retry": "gave_up", "reply_head": (reply or "")[:120]})
+        return out or {}
 
     def call(self, messages: list[dict], tag: str, tier: str = "s2", max_tokens: int = 800, model: str | None = None) -> str:
         if self.calls >= self.max_calls:
             raise BudgetExceeded(f"max_calls={self.max_calls} reached")
         self.calls += 1
         t = time.time()
+        pt0, ct0, usd0, rec = self.prompt_tokens, self.completion_tokens, self.usd, None
+        if self.trace:
+            import hashlib
+            ptxt = "\n".join(f"[{m['role']}] {m['content']}" for m in messages)
+            rec = {"i": self.calls, "tag": tag, "requested_model": model, "prompt_hash": "sha256:" + hashlib.sha256(ptxt.encode()).hexdigest()[:16],
+                   "prompt": ptxt[:int(os.environ.get("AUDIT_PROMPT_CHARS", "2000"))], "prompt_chars": len(ptxt)}
+            self.calls_log.append(rec)
         try:
             if self.offline:
                 out = fake(messages, tag)
@@ -48,14 +84,22 @@ class Meter:
                     self.usd += cost(r["model"], int(usage.get("prompt_tokens") or 0), int(usage.get("completion_tokens") or 0))
         except BudgetExceeded:
             raise
-        except Exception:
+        except Exception as e:
             self.errors += 1
+            if rec is not None:
+                rec["error"] = f"{type(e).__name__}: {str(e)[:200]}"
             raise
         finally:
             self.seconds += time.time() - t
+            if rec is not None:
+                rec["latency_s"] = round(time.time() - t, 3)
         self.prompt_tokens += int(usage.get("prompt_tokens") or 0)
         self.completion_tokens += int(usage.get("completion_tokens") or 0)
         self.last = out
+        if rec is not None:
+            rec.update({"model": None if self.offline else f'{r.get("provider")}:{r.get("model")}',
+                        "prompt_tokens": self.prompt_tokens - pt0, "completion_tokens": self.completion_tokens - ct0,
+                        "cost_usd": round(self.usd - usd0, 6), "reply_head": (out or "")[:600]})
         return out
 
 

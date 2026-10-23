@@ -24,17 +24,21 @@ from pathlib import Path
 
 FEAT = Path(__file__).resolve().parent / "features"
 GAIN_MIN = 0.25
-RELEVANCE_MIN = 0.05
+RELEVANCE_MIN = 0.001  # TAT-QA TRAIN calibration (scripts/calib_relevance.py, n=150): 5th pct of gold-evidence p; was 0.05 (dev-tuned)
 # Expected gain of one more gate round, by rejection reason (declared priors, fixed; not fitted on test items).
-GATE_GAIN = {"answer_mismatch": 0.5, "number_not_in_context": 0.4, "no_expression": 0.3, "bad_expression": 0.4, "evidence_quote": 0.1}
+GATE_GAIN = {"answer_mismatch": 0.5, "number_not_in_context": 0.4, "no_expression": 0.3, "bad_expression": 0.4, "evidence_quote": 0.4}
+# fix B1: evidence_quote was 0.1 (< GAIN_MIN), so a quote-format rejection STOPPED the gate instead of retrying;
+# one re-quote round recovers most of them (baseline agent always retried), and quotes ARE the Track 02 citations.
 REPAIRABLE = ("Binder Error", "Catalog Error", "Parser Error", "Conversion Error", "syntax error", "does not exist", "not found")
 NUMERIC_Q = re.compile(r"\b(change|percentage|percent|average|ratio|difference|differ|total|sum|increase|decrease|growth|"
                        r"proportion|rate|how much (?:more|less|higher|lower)|what (?:is|was) the (?:mean|net))\b", re.I)
-# NVIDIA classifier thresholds (declared). Set from the classifier's own score distribution on the sample
-# (about the top quarter of prompt_complexity_score per benchmark), using NO gold labels and NO results.
-DEEP_COMPLEXITY = {"tatqa": 0.145, "insightbench": 0.258}
+# NVIDIA classifier thresholds: top quarter (q75) of prompt_complexity_score, NO gold labels, NO results.
+# Calibration data only: TAT-QA TRAIN (seeded 1000-question sample, bench/features/nvclf-tatqa-train.json) and the
+# 30 InsightBench TUNE tasks (bench/splits/insightbench_split.json). Dev / the 70 eval tasks are never used.
+DEEP_COMPLEXITY = {"tatqa": 0.1405, "insightbench": 0.2516}
 DEEP_REASONING = 0.5
-DEEP_MODEL = "nvidia/nemotron-3-super-120b-a12b"
+# Main table: Lightning for every config (fair). "controller + Super deep route" variant: DEEP_MODEL=nvidia/nemotron-3-super-120b-a12b
+DEEP_MODEL = __import__("os").environ.get("DEEP_MODEL", "nvidia/Nemotron-3_5-Lightning")
 
 
 def load_features(bench: str) -> dict:
@@ -49,7 +53,8 @@ class Controller:
 
     def _d(self, decision: str, state: dict, action: str, reason: str) -> str:
         ck = "[STATE_CHECKPOINT]\n" + "\n".join(f"{k.upper()}: {v}" for k, v in state.items()) + f"\nDECISION: {decision}={action}"
-        self.log.append({"decision": decision, "state": state, "action": action, "reason": reason, "carryover": ck})
+        import time as _t  # audit trace: wall-clock order so decisions can be interleaved with model calls
+        self.log.append({"decision": decision, "state": state, "action": action, "reason": reason, "carryover": ck, "t": round(_t.time(), 3)})
         return action
 
     # ---------------- TAT-QA
@@ -110,11 +115,11 @@ class Controller:
         st = {"error_class": cls, "attempts": attempts, "same_as_previous": bool(prev_err and prev_err[:120] == err[:120])}
         if attempts >= max_attempts:
             return self._d("sql_repair", st, "GIVE_UP", "repair cap reached") == "REPAIR"
-        if cls == "other":
-            return self._d("sql_repair", st, "GIVE_UP", "non-repairable error class; LLM call skipped") == "REPAIR"
+        if cls == "other" and attempts >= 1:  # fix B7: unknown classes got 0 repairs (baseline: 1); now 1 try
+            return self._d("sql_repair", st, "GIVE_UP", "unknown error class, one repair already tried") == "REPAIR"
         if st["same_as_previous"]:
             return self._d("sql_repair", st, "GIVE_UP", "repair reproduced the same error; low expected gain") == "REPAIR"
-        return self._d("sql_repair", st, "REPAIR", f"{cls} is usually fixable from the schema") == "REPAIR"
+        return self._d("sql_repair", st, "REPAIR", f"{cls} is usually fixable from the schema" if cls != "other" else "unknown error class: one repair attempt") == "REPAIR"
 
     def requery(self, round_: int, n_ok: int, n_err: int, new_ok: int, max_rounds: int) -> bool:
         st = {"round": round_, "ok_results": n_ok, "failed_results": n_err, "new_ok_this_round": new_ok, "max_rounds": max_rounds}

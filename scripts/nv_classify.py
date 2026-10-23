@@ -74,8 +74,13 @@ class CustomModel(nn.Module, PyTorchModelHubMixin):
         return r
 
 
-def prompts(bench: str, limit: int):
+def prompts(bench: str, limit: int, train: int = 0):
     from bench.run import select
+    if train:  # calibration sample from the TAT-QA TRAIN split (dev stays evaluation-only)
+        import random
+        from bench import tatqa as T
+        its = T.items(ROOT / "data/bench/tatqa/tatqa_dataset_train.json")
+        return [(t["id"], "Prompt: " + t["q"]["question"]) for t in random.Random(20261023).sample(its, train)]
     tasks = select(bench, False, limit, None)
     if bench == "tatqa":
         return [(t["id"], "Prompt: " + t["q"]["question"]) for t in tasks]
@@ -86,18 +91,19 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--bench", choices=["tatqa", "insightbench"], required=True)
     ap.add_argument("--limit", type=int, default=40)
+    ap.add_argument("--train-sample", type=int, default=0, help="tatqa only: N seeded TRAIN questions")
     a = ap.parse_args()
     torch.manual_seed(0)
     cfg = json.loads(Path(hf_hub_download(MID, "config.json")).read_text())  # no model_type key -> read raw
     tok = DebertaV2TokenizerFast.from_pretrained(MID)
     model = CustomModel.from_pretrained(MID).eval()  # init kwargs come from config.json (mixin)
     out, t0 = {}, time.time()
-    for iid, p in prompts(a.bench, a.limit):
+    for iid, p in prompts(a.bench, a.limit, a.train_sample):
         enc = tok([p], return_tensors="pt", add_special_tokens=True, max_length=512, padding="max_length", truncation=True)
         with torch.no_grad():
             r = model(enc)
         out[iid] = {k: v[0] for k, v in r.items()}
-    dst = ROOT / "bench" / "features" / f"nvclf-{a.bench}.json"
+    dst = ROOT / "bench" / "features" / f"nvclf-{a.bench}{'-train' if a.train_sample else ''}.json"
     dst.write_text(json.dumps({"model": MID, "runtime": "CPU, local open weights", "items": out}, indent=1))
     print(f"{len(out)} items in {time.time() - t0:.1f}s -> {dst}")
 

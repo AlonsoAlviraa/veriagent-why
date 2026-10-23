@@ -12,7 +12,7 @@ from __future__ import annotations
 import argparse, json, os, random, time, traceback
 from pathlib import Path
 from . import explain as EX, insightbench as IB, tatqa as TQ
-from .llmio import BudgetExceeded, Meter, NebiusHardStop
+from .llmio import JUDGE_MODEL, BudgetExceeded, Meter, NebiusHardStop
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "bench"
@@ -29,7 +29,7 @@ def select(bench: str, fixtures: bool, limit: int | None, ids: list[str] | None)
             t["_root"] = root
     else:
         root = FIX / "tatqa" if fixtures else DATA / "tatqa"
-        tasks = TQ.items(root / ("tatqa_fixture.json" if fixtures else "tatqa_dataset_dev.json"))
+        tasks = TQ.items(root / ("tatqa_fixture.json" if fixtures else f"tatqa_dataset_{os.environ.get('TATQA_SPLIT', 'dev')}.json"))  # TATQA_SPLIT=train: calibration only
         random.Random(SEED).shuffle(tasks)  # fixed, documented sample order (seed 2026) over the dev split
     if ids:
         tasks = [t for t in tasks if t["id"] in ids]
@@ -107,13 +107,14 @@ def main(argv=None):
                 sys_meter = m.snapshot()
                 jm = None if a.no_judge else Meter(10 if not a.judge_insights else 200, a.offline)
                 rec["scores"] = IB.score(t, res, jm, a.judge_insights)
-                if not (t.get("insights") or []):
+                if not [x for x in (t.get("insights") or []) if str(x).strip()]:  # fix (audit #3): flag-36 has 5 EMPTY strings, not []
                     rec["scores"]["excluded"] = "empty ground-truth insights in the dataset"
                 rec["explain"] = EX.insight_metrics(res)
                 if jm and a.faith_sample and order[t["id"]] < a.faith_sample:
                     jm.max_calls += 1
                     rec["explain"]["faithfulness"] = EX.faithfulness(jm, res)
                 rec["judge_meter"] = jm.snapshot() if jm else None
+                rec["judge_model"] = JUDGE_MODEL if jm else None
             else:
                 res = TQ.SYSTEMS[s](t, m)
                 sys_meter = m.snapshot()
@@ -127,6 +128,10 @@ def main(argv=None):
                 rec["explain"] = EX.tat_metrics(res, ctx)
                 rec["gold"] = {"answer": t["q"]["answer"], "scale": t["q"]["scale"], "answer_type": t["q"]["answer_type"], "answer_from": t["q"]["answer_from"]}
             rec["output"], rec["meter"] = res, sys_meter
+            # fix (audit #4): "model" is the configured default; models_used is what was actually called (Super on routed items)
+            rec["models_used"] = dict(sys_meter.get("providers") or {})
+            rec["question"] = (t.get("metadata") or {}).get("goal") if a.bench == "insightbench" else t["q"]["question"]  # audit trace
+            rec["code_rev"] = os.popen("git rev-parse --short HEAD 2>/dev/null").read().strip() or None
         except NebiusHardStop as e:
             print(f"HARD STOP (NEBIUS_STRICT=1): {e}; item not recorded, rerun to resume")
             break

@@ -17,6 +17,7 @@ Calibration (ECE, Brier) is computed in bench.report from per-item confidence vs
 """
 from __future__ import annotations
 import re
+from .llmio import JUDGE_MODEL
 from .common import derived_ok, derived_pool, nums, supported
 
 
@@ -57,7 +58,11 @@ def insight_metrics(out: dict) -> dict:
 
 
 def _n(s: str) -> str:
-    return re.sub(r"[\s$,()]+", " ", str(s).lower()).strip()
+    """Quote normaliser shared by the Claim Gate and the citation scorer. Fix B3: thousands commas are removed
+    (was: replaced by a space, so a quote '4351' never matched context '4,351') and table '|' separators are
+    ignored (a row quoted without pipes never matched the '| a | b |' table rendering)."""
+    s = re.sub(r"(?<=\d),(?=\d{3}\b)", "", str(s).lower()).replace("|", " ")
+    return re.sub(r"[\s$,()]+", " ", s).strip()
 
 
 def tat_metrics(out: dict, ctx: str) -> dict:
@@ -100,6 +105,6 @@ def faithfulness(m, out: dict, max_chars: int = 9000) -> float | None:
     ex = "\n".join(f"- {t}" for t in out.get("insights") or []) + "\nSUMMARY: " + (out.get("summary") or "")
     if not (out.get("insights") or out.get("summary")):
         return None
-    r = m.call([{"role": "system", "content": FAITH_SYSTEM}, {"role": "user", "content": FAITH_TEMPLATE.format(evidence=ev or "(none)", explanation=ex[:4000])}], "faith", "s2", 50)
+    r = m.call([{"role": "system", "content": FAITH_SYSTEM}, {"role": "user", "content": FAITH_TEMPLATE.format(evidence=ev or "(none)", explanation=ex[:4000])}], "faith", "s2", 50, model=JUDGE_MODEL)
     x = re.findall(r"<rating>\s*(\d+)\s*</rating>", r or "") or re.findall(r"\b(10|[1-9])\b", r or "")
     return int(x[0]) / 10 if x else None
