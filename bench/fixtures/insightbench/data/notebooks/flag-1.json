@@ -1,0 +1,15 @@
+{
+ "_note": "HAND-MADE CI FIXTURE in InsightBench format; not InsightBench data.",
+ "dataset_csv_path": "data/notebooks/csvs/flag-1.csv",
+ "user_dataset_csv_path": null,
+ "metadata": {
+  "goal": "Find why incidents are unevenly distributed across categories",
+  "role": "Analyst",
+  "category": "fixture",
+  "dataset_description": "20 fixture incidents"
+ },
+ "insights": [
+  "Hardware incidents are significantly higher than others"
+ ],
+ "summary": "Hardware dominates with 12 of 20 incidents."
+}
