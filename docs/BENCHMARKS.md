@@ -247,3 +247,35 @@ Track 02 (v2):
 - Where the architecture does separate: on InsightBench the agent has 0.90 claim traceability vs 0.19 (rag) and 0.20 (react), and 0.4% unsupported numbers vs 9% for react. On TAT-QA the agent leads citation precision and traceability, with overlapping CIs.
 - Calibration is poor everywhere on InsightBench (accuracy at the 0.6 judge threshold is 2-7%); the agent's deterministic confidence is better calibrated than self-reports but still overconfident. Citation/claim CIs are optimistic (clustered units). The faithfulness judge is the same model family.
 - Spend: ledger $0.879 at resume → $1.023 after both v2 runs (all Nebius promo credit).
+
+## Markovian control, sample (23 Oct 2026)
+
+Model: Nebius `nvidia/Nemotron-3_5-Lightning` (`NEBIUS_STRICT=1`), deep path `nvidia/nemotron-3-super-120b-a12b` on Nebius. Sample sizes are small (TAT-QA dev 40 items, InsightBench 20); differences of a few items are within noise. Results: `bench/results/*-markov-sample.jsonl`, `*-markov-rerank-sample.jsonl`; table from `python -m bench.markov_report <files>`.
+
+Systems: `agent` (before), `agent_mk` (Markov controller), `agent_mknv` (controller + NVIDIA classifier features), `agent_mkr` (controller + classifier + NVIDIA reranker relevance/citation check).
+
+**What is our code.** The policy (`bench/markov.py`) is our own code. Each decision depends only on the current state and is logged as `{decision, state, action, reason, carryover}`. The vendored Meterless Markovian engine only provides chunked generation with `[STATE_CHECKPOINT]` carryover and `[TASK_COMPLETE]` stop; it has no routing/policy API. The controller uses its carryover format but does not call the vendored engine in the bench harness. **Bench only:** `app/pipeline.py` is not wired to the controller.
+
+### TAT-QA (40 items)
+| System | EM | F1 | Gate pass | Citations valid | Claims traceable | LLM calls/item | Wall s/item | Tokens/item | USD |
+|---|---|---|---|---|---|---|---|---|---|
+| agent | 0.525 | 0.632 | 0.775 | 0.627 | 0.625 | 1.35 | 1.10 | 1447 | 0.0044 |
+| agent_mk | 0.625 | 0.732 | 0.425 | 0.385 | 0.550 | 2.35 | 1.92 | 2111 | 0.0067 |
+| agent_mknv | 0.675 | 0.782 | 0.600 | 0.465 | 0.650 | 2.43 | 2.39 | 2176 | 0.0082 |
+| agent_mkr | 0.625 | 0.732 | 0.625 | 0.395 | 0.625 | 2.55 | 2.97 | 2414 | 0.0096 |
+
+Trade-off: accuracy rises (numeric route), but citation validity drops because the gate STOPs on quote-format failures instead of retrying. More calls and time per item. Reranker: 47 calls, 0.50 s/call including the 35 rpm pacing; it did not improve EM here.
+
+### InsightBench (20 items)
+| System | Insight ROUGE-1 | Summary ROUGE-1 | Summary judge | Faithfulness | Numbers unsupported | Citations valid | Claims traceable | SQL error rate | LLM calls/item | Wall s/item | Tokens/item | USD |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| agent | 0.201 | 0.274 | 0.390 | 0.590 | 0.006 | 0.980 | 0.938 | 0.037 | 6.05 | 13.9 | 27257 | 0.0427 |
+| agent_mk | 0.192 | 0.263 | 0.385 | 0.568 | 0.006 | 0.953 | 0.769 | 0.085 | 4.00 | 10.4 | 11813 | 0.0222 |
+| agent_mknv | 0.203 | 0.277 | 0.410 | 0.605 | 0.000 | 0.991 | 0.901 | 0.083 | 3.70 | 8.4 | 10139 | 0.0269 |
+| agent_mkr | 0.199 | 0.266 | 0.380 | 0.595 | 0.000 | 0.966 | 0.876 | 0.085 | 4.10 | 34.2 | 11433 | 0.0329 |
+
+The controller cuts LLM calls by about 35-40 % and tokens by about 60 % at similar quality; the classifier version is on par with or slightly above the baseline. The SQL error rate is higher because early stop/give-up keeps failed queries in the count. Reranker citation check: 97 calls, 48 SUPPORTED / 49 WEAK, logged only (never drops claims, uncalibrated on this bench); 1.41 s/call wall including pacing.
+
+### NVIDIA models used (free only)
+- `nvidia/prompt-task-and-complexity-classifier` (open weights, CPU, `scripts/nv_classify.py`): features precomputed into `bench/features/`. 40 TAT-QA items took 181 s and 20 InsightBench items 101 s on CPU, including model load. Thresholds are the top quartile of each bench's own complexity distribution (no labels): TAT-QA 0.145, InsightBench 0.258.
+- `nvidia/llama-nemotron-rerank-vl-1b-v2` via `ai.api.nvidia.com/v1/retrieval/.../reranking`, with a sigmoid on the logits. `RELEVANCE_MIN=0.05` was calibrated on held-out TAT-QA dev items 41-100, never on the evaluated 40. The requested `llama-nemotron-rerank-1b-v2`, `llama-3.2-nemoretriever-500m-rerank-v2` and `llama-3.2-nv-rerankqa-1b-v2` return HTTP 410 (end of life). `nemotron-3.5-rerank-8b` was not tested.

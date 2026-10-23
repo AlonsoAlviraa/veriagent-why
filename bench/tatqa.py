@@ -10,7 +10,7 @@ Scoring: official TAT-QA scorer (tatqa_metric.TaTQAEmAndF1, downloaded) + our 'u
 rate', applied identically to every system (see `traceable`).
 """
 from __future__ import annotations
-import ast, itertools, json, operator, re, sys
+import ast, itertools, json, operator, re, sys, time
 from pathlib import Path
 from app.bm25 import bm25
 from .common import nums, supported
@@ -170,7 +170,66 @@ def _pred(out: dict, it: dict | None = None) -> dict:
     return {**post, "raw": raw, "evidence": ev, "confidence": conf01(out.get("confidence"))}
 
 
-SYSTEMS = {"agent": agent, "rag": rag, "react": react}
+def agent_markov(it: dict, m: Meter, use_nv: bool = False, use_rerank: bool = False) -> dict:
+    """agent + Markovian control (bench/markov.py): route NUMERIC (calculator steps, react's strength) or EVIDENCE
+    (single call), optional DEEP final model from the NVIDIA classifier, expected-gain gate retry.
+    Both routes keep the agent's quoted evidence, expression, Claim Gate and deterministic confidence."""
+    from .markov import Controller, load_features
+    doc, q = it["doc"], it["q"]
+    ctl = Controller(use_nv, load_features("tatqa") if use_nv else None, "tatqa")
+    ctx = context(doc)
+    r = ctl.route(q["question"], it["id"])
+    hist = ""
+    if r["path"] == "NUMERIC":
+        for s in range(3):
+            a = parse_json(m.call([{"role": "system", "content": "You are VeriAgent Why's numeric step with one tool: calc (arithmetic). Each turn reply with JSON only: {\"thought\": str, \"action\": \"calc\", \"input\": expression over context numbers} or {\"action\": \"final\"}."},
+                                   {"role": "user", "content": ctx + "\nQUESTION: " + q["question"] + hist}], "tat_mk_calc", "s2", 400)) or {}
+            if a.get("action") != "calc":
+                break
+            try:
+                obs = str(round(safe_eval(str(a.get("input", ""))), 6))
+            except Exception as e:
+                obs = f"error {type(e).__name__}"
+            hist += f"\nACTION {s + 1}: calc({a.get('input')})\nOBSERVATION {s + 1}: {obs}"
+    msgs = [{"role": "system", "content": "You are VeriAgent Why's evidence step. Answer only from the context; quote your evidence"
+             + ("; reuse the calculator expression that produced the answer" if hist else "") + ". " + ANS},
+            {"role": "user", "content": ctx + "\nQUESTION: " + q["question"] + hist}]
+    log, rel, rerank_s = [], [], []
+    for g in range(2):
+        out = parse_json(m.call(msgs, "tat_agent", "s2", 600, model=r["model"])) or {}
+        reasons = gate(out, ctx)
+        log.append({"round": g, "reasons": reasons})
+        retry = ctl.gate_retry(reasons, g, traceable(str(out.get("answer")), ctx))
+        if use_rerank and not retry:
+            from . import nv_rerank as NR
+            try:
+                t_r = time.time()
+                p_rel = NR.rank(q["question"], [" | ".join(str(e) for e in (out.get("evidence") or [])) or "(no evidence)"])[0]
+                rerank_s.append(round(time.time() - t_r, 3))
+            except Exception:
+                p_rel = None
+            rel.append(p_rel)
+            if ctl.evidence_check(p_rel, g, not reasons):
+                msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
+                               {"role": "user", "content": "Evidence check: your quoted evidence does not look relevant to the question. Re-read the question, quote the exact cells/sentences that answer it, recompute if needed. " + ANS}]
+                continue
+        if not retry:
+            break
+        msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
+                       {"role": "user", "content": "Claim gate rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS}]
+    p = _pred(out, it)
+    det = (0.8 if len(log) == 1 else 0.55) if not reasons else 0.2
+    if not traceable(str(p["answer"]), ctx):
+        det = min(det, 0.1)
+    if rel and rel[-1] is not None and rel[-1] < 0.05:
+        det = min(det, 0.4)
+    return {**p, "gate_passed": not reasons, "gate": log, "confidence_det": det, "route": r, "decisions": ctl.log,
+            "rerank_p": rel, "rerank_seconds": rerank_s}
+
+
+SYSTEMS = {"agent": agent, "rag": rag, "react": react,
+           "agent_mk": lambda it, m: agent_markov(it, m, False), "agent_mknv": lambda it, m: agent_markov(it, m, True),
+           "agent_mkr": lambda it, m: agent_markov(it, m, True, True)}
 
 
 def official_scores(data_dir: Path, gold_items: list[dict], preds: dict[str, list]) -> dict:

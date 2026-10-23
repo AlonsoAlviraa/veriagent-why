@@ -41,6 +41,7 @@ UI: question and KPI, live trace of rounds (including Evaluator send-backs), H-M
 The open-source Meterless reference engines (github.com/Meterless/Meterless, Apache-2.0, pinned commit in `vendor/meterless/README.md`) are vendored unmodified and called through `meterless_bridge/` (a JSON-lines bridge run with `node`; prebuilt bundle committed, so SAMPLE_MODE needs no `npm install`).
 - **H-MEM** stores the evidence graph: every hypothesis, evidence node and support/refute edge is an H-MEM record (edges carry `derivedFrom=[evidence, hypothesis]`). The H-MEM trust ledger is exported per run to `logs/hmem-ledger-<run_id>.jsonl`. The Planner recalls H-MEM context when it plans.
 - **Markovian** drives the Evaluator → Planner rounds: each investigation round is one Markovian chunk, the round summary is the `[STATE_CHECKPOINT]` carryover, and `[TASK_COMPLETE]` ends the loop (max 3 chunks). Its run record (chunks, carryover, estimated tokens) is in the run output and trace.
+- **Markovian control (bench only):** a Markov decision policy (`bench/markov.py`, our own code, not part of the vendored engine) routes, stops loops, repairs SQL and skips LLM calls in the benchmark harness. Every decision is logged with its state and reason. It is not wired into `app/pipeline.py` yet. Results: `docs/BENCHMARKS.md` → "Markovian control, sample".
 - If `node` is missing the pipeline falls back to a local in-process graph and says so in the trace and memo.
 
 ## Model providers
@@ -63,6 +64,8 @@ Models (product runtime):
 - Meterless Nightshift as the primary provider (`LLM_PROVIDER=nightshift`, OpenAI-compatible, `meterless/*` routing modes). **Status: not available yet** (no runtime reachable); `nvidia` is the direct fallback, disclosed per call in the trace.
 - SAMPLE_MODE uses no model at all: deterministic rules with real computation.
 - Model output never supplies numbers or confidence: numbers come from SQL, confidence from a formula, and the Claim Gate checks every number in model-written text.
+
+- Benchmarks only: Nebius `nvidia/Nemotron-3_5-Lightning` and `nvidia/nemotron-3-super-120b-a12b` (paid, small spend); NVIDIA `prompt-task-and-complexity-classifier` (open weights, CPU) and `llama-nemotron-rerank-vl-1b-v2` (free API endpoint) as inputs to the Markov controller.
 
 Agent framework: none; own Python orchestrator (`app/pipeline.py`).
 

@@ -28,7 +28,7 @@ class Meter:
                 "nebius_usd": round(self.usd, 6), "providers": self.providers,
                 "finish_reasons": self.finish, "last_reply_head": (self.last or "")[:300]}
 
-    def call(self, messages: list[dict], tag: str, tier: str = "s2", max_tokens: int = 800) -> str:
+    def call(self, messages: list[dict], tag: str, tier: str = "s2", max_tokens: int = 800, model: str | None = None) -> str:
         if self.calls >= self.max_calls:
             raise BudgetExceeded(f"max_calls={self.max_calls} reached")
         self.calls += 1
@@ -38,7 +38,7 @@ class Meter:
                 out = fake(messages, tag)
                 usage = {"prompt_tokens": sum(len(m["content"].split()) for m in messages), "completion_tokens": len(out.split())}
             else:
-                r = _live(messages, tier, max_tokens)
+                r = _live(messages, tier, max_tokens, model)
                 out, usage = r.get("content") or "", r.get("usage") or {}
                 self.finish.append(r.get("finish_reason"))
                 pk = f'{r.get("provider")}:{r.get("model")}'
@@ -63,7 +63,7 @@ class NebiusHardStop(BaseException):
     """Raised with NEBIUS_STRICT=1 when the Nebius budget guard refuses a call; stops the whole run."""
 
 
-def _live(messages, tier, max_tokens):
+def _live(messages, tier, max_tokens, model=None):
     """LLM_PROVIDER=nebius -> Nebius (hard spend guard); on NebiusBudgetExceeded fall back to NVIDIA free.
     Otherwise app.llm.complete. BENCH_SINGLE_MODEL=1 (default): one model for every step and system."""
     from app import llm
@@ -75,7 +75,7 @@ def _live(messages, tier, max_tokens):
             to = float(os.environ.get("MODEL_TIMEOUT_S") or 90)  # per-request timeout
             for attempt in range(3):  # transient errors (timeout, 429, 5xx): bounded retry with backoff
                 try:
-                    return nebius.complete(messages, None, max_tokens, to)
+                    return nebius.complete(messages, model, max_tokens, to)  # model: per-call override (Markovian DEEP route), else NEBIUS_MODEL
                 except nebius.NebiusBudgetExceeded:
                     raise
                 except Exception as e:

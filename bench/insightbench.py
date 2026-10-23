@@ -225,7 +225,99 @@ def react(task, con, tables, m: Meter, max_steps: int = 6) -> dict:
             "sql_errors": errs, "sql_errors_first_try": errs, "evidence_store": store}
 
 
-SYSTEMS = {"agent": agent, "rag": rag, "react": react}
+def agent_markov(task, con, tables, m: Meter, use_nv: bool = False, use_rerank: bool = False) -> dict:
+    """agent + Markovian control (bench/markov.py): SQL repair only for repairable error classes, evaluator
+    skipped when evidence is sufficient or the last round added nothing, gate rewrite only when expected to pay,
+    optional deeper run (3 rounds + bigger Writer) for items the NVIDIA classifier rates hard. Same Claim Gate."""
+    from .markov import Controller, load_features
+    ctl = Controller(use_nv, load_features("insightbench") if use_nv else None, "insightbench")
+    max_rounds, writer_model = ctl.insight_rounds(task["id"])
+    sch = schema(con, tables)
+    ctx = _context(task, sch)
+    plan = parse_json(m.call([{"role": "system", "content": "You are the Planner of a root-cause analytics agent. Decompose the goal into analysis questions, each answered by one DuckDB SQL query over the given tables. Include diagnostic (why) questions. Reply with JSON only: {\"steps\": [{\"question\": str, \"sql\": str}]} (max 6)."},
+                              {"role": "user", "content": ctx}], "plan", "s2", 1500)) or {}
+    steps, results = list(plan.get("steps") or [])[:6], {}
+    for rnd in range(max_rounds):
+        ok_before = sum(not r["result"].startswith("ERROR") for r in results.values())
+        for s in steps:
+            qid = f"q{len(results) + 1}"
+            sql = str(s.get("sql", "") or "")
+            res, first_err, prev, att = run_sql(con, sql), None, None, 0
+            while res.startswith("ERROR") and ctl.sql_repair(res, att, prev):
+                first_err, prev, att = first_err or res, res, att + 1
+                fx = parse_json(m.call([{"role": "system", "content": "Fix this DuckDB SQL query. Reply with JSON only: {\"sql\": str}."},
+                                        {"role": "user", "content": ctx + f"\nQUESTION: {s.get('question','')}\nSQL: {sql}\n{res}"}], "sqlfix", "s1", 600)) or {}
+                if not fx.get("sql"):
+                    break
+                sql = str(fx["sql"])
+                res = run_sql(con, sql)
+            if res.startswith("ERROR") and not first_err:
+                first_err = res
+            results[qid] = {"question": s.get("question", ""), "sql": sql, "result": res, "first_error": first_err}
+        n_ok = sum(not r["result"].startswith("ERROR") for r in results.values())
+        if not ctl.requery(rnd, n_ok, len(results) - n_ok, n_ok - ok_before, max_rounds):
+            break
+        ev = parse_json(m.call([{"role": "system", "content": "You are the Evidence Evaluator. Given the goal and the query results, decide whether the evidence is sufficient to explain WHY, or propose follow-up queries (drill-downs, comparisons, fixes for failed SQL). Reply with JSON only: {\"sufficient\": bool, \"new_steps\": [{\"question\": str, \"sql\": str}]} (max 4)."},
+                                {"role": "user", "content": ctx + "\nRESULTS\n" + _fmt(results)}], "evaluate", "s1", 1200)) or {}
+        steps = list(ev.get("new_steps") or [])[:4]
+        if ev.get("sufficient") or not steps:
+            break
+    msgs = [{"role": "system", "content": "You are the Writer of a root-cause analytics agent. " + OUT_SPEC},
+            {"role": "user", "content": ctx + "\nRESULTS\n" + _fmt(results)}]
+    gate_log, prev, prev_bad = [], None, None
+    for g in range(GATE_ROUNDS + 1):
+        out = parse_json(m.call(msgs, "write", "s2", 3500, model=writer_model)) or {}
+        ins = [i for i in (out.get("insights") or []) if isinstance(i, dict) and i.get("text")][:10]
+        if not ins and prev:
+            out, ins = prev
+            gate_log.append({"round": g, "insights": 0, "note": "empty rewrite, kept previous draft"})
+            break
+        bad = []
+        for i in ins:
+            i["evidence"] = norm_ids(i.get("evidence"), results)
+            src = [results[e]["result"] for e in i["evidence"]] or [r["result"] for r in results.values()]
+            un, nlog = gate_claim(i["text"], src)
+            i["unsupported_numbers"], i["number_log"] = un, nlog
+            if un:
+                bad.append(i)
+        sum_un, _ = gate_claim(out.get("summary", ""), [r["result"] for r in results.values()])
+        gate_log.append({"round": g, "insights": len(ins), "failed": len(bad), "summary_unsupported": sum_un})
+        if not ctl.rewrite(len(ins), len(bad), bool(sum_un), g, prev_bad, GATE_ROUNDS):
+            break
+        prev, prev_bad = (out, ins), len(bad)
+        msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:4000]},
+                       {"role": "user", "content": "Claim gate rejected these numbers as not present in the cited results: "
+                        + json.dumps([{"text": i["text"], "unsupported": i["unsupported_numbers"]} for i in bad] + ([{"summary": sum_un}] if sum_un else []))
+                        + ". Rewrite. " + OUT_SPEC}]
+    kept = [i for i in ins if not i["unsupported_numbers"]]
+    dropped = [{"text": i["text"], "evidence": i["evidence"], "unsupported": i["unsupported_numbers"],
+                "reason": "numbers not in cited results nor recomputable from them"} for i in ins if i["unsupported_numbers"]]
+    support, rerank_s = [], []
+    if use_rerank:  # citation check: reranker p(cited evidence supports the claim); logged signal, never drops (uncalibrated here)
+        from . import nv_rerank as NR
+        import time as _t
+        for i in kept:
+            src = "\n".join(results[e]["result"][:1500] for e in i["evidence"]) or "(no citation)"
+            try:
+                t_r = _t.time(); p = NR.rank(i["text"], [src])[0]; rerank_s.append(round(_t.time() - t_r, 3))
+            except Exception:
+                p = None
+            support.append(p)
+            ctl._d("citation_check", {"claim": i["text"][:80], "cited": i["evidence"], "rerank_p": p},
+                   "NO_SIGNAL" if p is None else ("WEAK" if p < 0.05 else "SUPPORTED"), "NVIDIA reranker (claim, cited results) support signal; logged only")
+    return {"insights": [i["text"] for i in kept], "claims": [{"text": i["text"], "evidence": i["evidence"]} for i in kept],
+            "summary": out.get("summary", ""), "confidence": conf01(out.get("confidence")),
+            "confidence_det": det_confidence(results, kept, dropped),
+            "dropped_by_gate": len(dropped), "dropped_claims": dropped, "gate": gate_log, "queries": len(results),
+            "sql_errors": sum(r["result"].startswith("ERROR") for r in results.values()),
+            "sql_errors_first_try": sum(1 for r in results.values() if r.get("first_error")),
+            "evidence_store": {k: v["result"][:RESULT_CHARS] for k, v in results.items()}, "decisions": ctl.log,
+            "rerank_support": support, "rerank_seconds": rerank_s}
+
+
+SYSTEMS = {"agent": agent, "rag": rag, "react": react,
+           "agent_mk": lambda *a: agent_markov(*a, use_nv=False), "agent_mknv": lambda *a: agent_markov(*a, use_nv=True),
+           "agent_mkr": lambda *a: agent_markov(*a, use_nv=True, use_rerank=True)}
 
 
 # ------------------------------------------------------------------ scoring
