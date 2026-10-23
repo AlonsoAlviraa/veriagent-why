@@ -270,12 +270,12 @@ def repair_prompt(ctx: str, tables: list[str], question: str, sql: str, err: str
             + f"\nQUESTION: {question}\nSQL: {sql}\n{err}")
 
 
-def agent_markov(task, con, tables, m: Meter, use_nv: bool = False, use_rerank: bool = False) -> dict:
+def agent_markov(task, con, tables, m: Meter, use_nv: bool = False, use_rerank: bool = False, ctl=None) -> dict:
     """agent + Markovian control (bench/markov.py): SQL repair only for repairable error classes, evaluator
     skipped when evidence is sufficient or the last round added nothing, gate rewrite only when expected to pay,
     optional deeper run (3 rounds + bigger Writer) for items the NVIDIA classifier rates hard. Same Claim Gate."""
     from .markov import Controller, load_features
-    ctl = Controller(use_nv, load_features("insightbench") if use_nv else None, "insightbench")
+    ctl = ctl or Controller(use_nv, load_features("insightbench") if use_nv else None, "insightbench")  # verify-v2 passes a policy subclass
     max_rounds, writer_model = ctl.insight_rounds(task["id"])
     sch = schema(con, tables)
     ctx = _context(task, sch)
@@ -376,6 +376,8 @@ def agent_markov(task, con, tables, m: Meter, use_nv: bool = False, use_rerank: 
 SYSTEMS = {"agent": agent, "agent_vr": lambda t, c, tb, m: agent(t, c, tb, m, vr=True), "rag": rag, "react": react,
            "agent_mk": lambda *a: agent_markov(*a, use_nv=False), "agent_mknv": lambda *a: agent_markov(*a, use_nv=True),
            "agent_mkr": lambda *a: agent_markov(*a, use_nv=True, use_rerank=True)}
+from .verify2 import IB_SYSTEMS as _V2  # noqa: E402  verify-v2 configs (docs/VERIFY_V2.md)
+SYSTEMS.update(_V2)
 
 
 # ------------------------------------------------------------------ scoring
