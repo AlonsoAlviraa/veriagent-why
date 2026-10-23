@@ -32,6 +32,9 @@ def good(sys):
 def live(monkeypatch):
     def setup(reply):
         s = serve(reply)
+        # loopback mock must never go through an HTTP(S)_PROXY (offline/sandboxed CI sets a dead proxy)
+        for k in ("NO_PROXY", "no_proxy"):
+            monkeypatch.setenv(k, "127.0.0.1,localhost")
         monkeypatch.setenv("SAMPLE_MODE", "false"); monkeypatch.setenv("LLM_PROVIDER", "nightshift")
         monkeypatch.setenv("NIGHTSHIFT_BASE_URL", f"http://127.0.0.1:{s.server_port}/v1")
         return s

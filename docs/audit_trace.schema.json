@@ -8,7 +8,7 @@
   "$defs": {
     "nl": {"const": "not_logged"},
     "decision": {"type": ["object", "null"], "properties": {
-      "source": {"enum": ["markov_controller", "fixed_policy"]}, "decision": {"type": "string"}, "state": {"type": "object"},
+      "source": {"enum": ["markov_controller", "fixed_policy", "verify_retry"]}, "decision": {"type": "string"}, "state": {"type": "object"},
       "action": {"type": "string"}, "reason": {"type": "string"}, "carryover": {"type": "string"}}},
     "step": {"type": "object", "required": ["type", "summary", "inputs", "outputs", "decision", "latency_s", "tokens", "cost_usd", "errors", "retries"],
       "properties": {
