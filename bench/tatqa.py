@@ -283,6 +283,8 @@ def agent_vr(it: dict, m: Meter) -> dict:
 SYSTEMS = {"agent": agent, "agent_vr": agent_vr, "rag": rag, "react": react,
            "agent_mk": lambda it, m: agent_markov(it, m, False), "agent_mknv": lambda it, m: agent_markov(it, m, True),
            "agent_mkr": lambda it, m: agent_markov(it, m, True, True)}
+from .verify2 import TAT_SYSTEMS as _V2  # noqa: E402  verify-v2 configs (docs/VERIFY_V2.md)
+SYSTEMS.update(_V2)
 
 
 def official_scores(data_dir: Path, gold_items: list[dict], preds: dict[str, list]) -> dict:
