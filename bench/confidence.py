@@ -15,6 +15,11 @@ def load_map(bench: str):
     env = os.environ.get("CR_CONF_MAP_" + bench.upper())
     if env:
         return json.loads(env)
+    # External review P1-3: the 2-point isotonic map collapsed confidence to the base rate. On the DEVELOPMENT
+    # set (TAT-QA dev cr-fix, n=150) AUROC was 0.548 calibrated vs 0.661 raw, so raw confidence ships by default.
+    # Decided on dev, never on bench/splits/holdout_v1.json. CR_USE_CALIB=1 restores the train-fitted map.
+    if os.environ.get("CR_USE_CALIB", "0") != "1":
+        return None
     p = CAL / f"cr_{bench}.json"
     return json.loads(p.read_text())["map"] if p.exists() else None
 
