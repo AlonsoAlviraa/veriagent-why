@@ -59,6 +59,10 @@ class Meter:
         return out
 
 
+class NebiusHardStop(BaseException):
+    """Raised with NEBIUS_STRICT=1 when the Nebius budget guard refuses a call; stops the whole run."""
+
+
 def _live(messages, tier, max_tokens):
     """LLM_PROVIDER=nebius -> Nebius (hard spend guard); on NebiusBudgetExceeded fall back to NVIDIA free.
     Otherwise app.llm.complete. BENCH_SINGLE_MODEL=1 (default): one model for every step and system."""
@@ -69,7 +73,9 @@ def _live(messages, tier, max_tokens):
         from . import nebius
         try:
             return nebius.complete(messages, None, max_tokens, float(os.environ.get("MODEL_TIMEOUT_S") or 180))
-        except nebius.NebiusBudgetExceeded:
+        except nebius.NebiusBudgetExceeded as e:
+            if os.environ.get("NEBIUS_STRICT") == "1":  # hard stop: never fall back, never overspend
+                raise NebiusHardStop(str(e)) from e
             os.environ["LLM_PROVIDER"] = "nvidia"  # sticky fallback for the rest of the process
     return llm.complete(messages, tier, max_tokens)
 

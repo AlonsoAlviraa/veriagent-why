@@ -12,7 +12,7 @@ from __future__ import annotations
 import argparse, json, os, random, time, traceback
 from pathlib import Path
 from . import insightbench as IB, tatqa as TQ
-from .llmio import BudgetExceeded, Meter
+from .llmio import BudgetExceeded, Meter, NebiusHardStop
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "bench"
@@ -116,6 +116,9 @@ def main(argv=None):
                     rec["scores"]["em"], rec["scores"]["f1"] = TQ.item_em(d, t, res)
                 rec["gold"] = {"answer": t["q"]["answer"], "scale": t["q"]["scale"], "answer_type": t["q"]["answer_type"], "answer_from": t["q"]["answer_from"]}
             rec["output"], rec["meter"] = res, sys_meter
+        except NebiusHardStop as e:
+            print(f"HARD STOP (NEBIUS_STRICT=1): {e}; item not recorded, rerun to resume")
+            break
         except BudgetExceeded as e:
             rec["error"], rec["meter"] = f"BudgetExceeded: {e}", m.snapshot()
         except Exception as e:
