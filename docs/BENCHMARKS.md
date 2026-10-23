@@ -279,3 +279,118 @@ The controller cuts LLM calls by about 35-40 % and tokens by about 60 % at simil
 ### NVIDIA models used (free only)
 - `nvidia/prompt-task-and-complexity-classifier` (open weights, CPU, `scripts/nv_classify.py`): features precomputed into `bench/features/`. 40 TAT-QA items took 181 s and 20 InsightBench items 101 s on CPU, including model load. Thresholds are the top quartile of each bench's own complexity distribution (no labels): TAT-QA 0.145, InsightBench 0.258.
 - `nvidia/llama-nemotron-rerank-vl-1b-v2` via `ai.api.nvidia.com/v1/retrieval/.../reranking`, with a sigmoid on the logits. `RELEVANCE_MIN=0.05` was calibrated on held-out TAT-QA dev items 41-100, never on the evaluated 40. The requested `llama-nemotron-rerank-1b-v2`, `llama-3.2-nemoretriever-500m-rerank-v2` and `llama-3.2-nv-rerankqa-1b-v2` return HTTP 410 (end of life). `nemotron-3.5-rerank-8b` was not tested.
+
+## Markov control battery n=100 (23 Oct 2026; final run extended to TAT-QA dev n=150, InsightBench eval n=70)
+
+Model **Nebius `nvidia/Nemotron-3_5-Lightning`** for every system call (main tables are Lightning-only; `models_used` records the real model per call). Judge for every LLM-judge metric: **`nvidia/nemotron-3-super-120b-a12b` on Nebius** (`judge_model` in each row; a None verdict is excluded and counted in "judge None"). NEBIUS_STRICT=1, hard ledger cap. NVIDIA classifier/reranker on the free tier only (≤35 rpm). 95% CIs: Wilson for k/n, bootstrap for means.
+
+### Protocol
+- **Tuning only on TAT-QA train and the 30 InsightBench tune tasks; dev / the 70 eval tasks are evaluation only.** `RELEVANCE_MIN = 0.001` (5th percentile of reranker p on gold evidence, TAT-QA train n=150, `scripts/calib_relevance.py`; it was 0.05 tuned on dev). `DEEP_COMPLEXITY` = q75 of the classifier complexity on a 200-question train sample (TAT-QA 0.1405) and on the 30 tune tasks (InsightBench 0.2516). tat_post rule ablation on train (13215 q): all rules 11883 correct scale vs none 10795, so all rules kept.
+- **InsightBench split** `bench/splits/insightbench_split.json`: 30 tune / 70 eval, seed 20261023, stratified by category; only the 70 are reported. flag-36 (5 empty gold insights) excluded (audit #3). The prompt's example insight is now a neutral invented one ("north depot"), not text derived from a benchmark task.
+- **Verify-retry (`agent_vr`, `bench/verify.py`)**: the answer is serialised as {answer, claims[], evidence[] with query/result citations}; score 0-100 = 50% deterministic checks + 50% Super verifier (Nebius) that sees only the question and the packet, never gold; score < 50 → regenerate with feedback, max 5 attempts, stop after 2 attempts without improvement; every attempt logged; final score/100 is the confidence. Threshold and weight were replayed offline (`scripts/vr_replay.py`) on always-retry logs from TAT-QA **train** (n=64 items, VR_THRESHOLD=101): every (T, w) in {30..90}×{0.3..0.9} is within ±1 item of single-shot (EM 0.42-0.44), so the agreed defaults T=50, w_det=0.5 were kept. The InsightBench tune replay was stopped at 2/30 tasks to stay inside the budget, so InsightBench uses the train-calibrated defaults too.
+- **Audit trace for every case**: `bench/run.py` calls `bench/audit_trace.py` right after each item is scored and writes `bench/results/traces/<run>/<config>/<item_id>.audit.json` plus one line in `bench/results/traces/<run>/audit_index.jsonl` (id, config, score, failure cause, path). On by default; `--no-trace` turns it off. Prompts are truncated to AUDIT_PROMPT_CHARS (2000); full prompts go to a gzip sidecar only if >2 GB disk is free; every trace passes the secret scanner (redaction test). Rows run before the hook was wired were backfilled with `audit_trace.backfill` (same writer). The app writes `logs/<run_id>/audit.json` (planner, SQL, evidence, requery, cause analyst, writer, claim gate, verify-retry attempts if any, confidence, narrative) next to a copy of the memo. Schema: `docs/audit_trace.schema.json`; see docs/AUDIT_TRACE.md.
+
+### Bugs found by the battery (all fixed, each with a regression test in tests/test_battery_audit.py / tests/test_markov_control.py)
+| id | file | bug | impact |
+|---|---|---|---|
+| B1 | bench/markov.py:29 | `evidence_quote` gain 0.1 < GAIN_MIN, so a quote-format gate rejection STOPPED instead of re-asking | controller lost answers the baseline recovered |
+| B2 | bench/tatqa.py:212 | calculation lines were quoted as evidence | citation precision 78/217 pre |
+| B3 | bench/tatqa.py:185 | reformatted cells rejected by the verbatim gate | gate failures |
+| B4 | bench/insightbench.py (citations) | dict-key citations ({"q2": "..."}) ignored | valid citations dropped |
+| B5 | bench/insightbench.py:316 | gate retry echoed the gate-mutated draft (evidence = []) | retries lost their evidence |
+| B6 | bench/insightbench.py:260 | DuckDB error truncated to 200 chars, table names not stated in repair prompt | SQL repairs failed |
+| B7 | bench/markov.py:118 | unknown SQL error classes got 0 repairs (baseline 1) | |
+| B8 | bench/insightbench.py:331 | numeric claim without a resolvable citation passed silently | unsupported numbers |
+| B9 | bench/insightbench.py:313 | gate saw a different result view than the Writer/scorer | |
+| B10 | bench/tatqa.py:65-67 | abs()/round() wrappers, "a + b = c", unicode minus did not evaluate | false gate failures |
+| B11 | bench/tat_post.py:53 | "(39%)" raised ValueError in infer_scale | item errors |
+| audit #2-#6 | tat_post.py, run.py, llmio.py, report.py | paragraph units / S$ / unicode minus; flag-36; model vs models_used; swallowed parse errors; judge None scored as 0 | |
+
+### Results
+
+**TAT-QA dev, n=150, Lightning only (main table, post-fix)**
+
+| config | EM | F1 | citation precision | calibration (det conf) | attempts/item | $ total | s/item |
+|---|---|---|---|---|---|---|---|
+| agent (post) | 89/150 (0.51-0.67) | 0.705 (0.639-0.769) | 156/279 (0.50-0.62) | ECE 0.178 / Brier 0.263 (n=150, mean conf 0.66, acc 0.59) |  | 0.0163 | 2.2 |
+| agent_mk (post) | 106/150 (0.63-0.77) | 0.826 (0.771-0.879) | 163/249 (0.59-0.71) | ECE 0.146 / Brier 0.243 (n=150, mean conf 0.73, acc 0.71) |  | 0.0279 | 3.9 |
+| agent_mknv (post) | 102/150 (0.60-0.75) | 0.803 (0.747-0.860) | 163/262 (0.56-0.68) | ECE 0.157 / Brier 0.248 (n=150, mean conf 0.71, acc 0.68) |  | 0.0282 | 4.1 |
+| agent_mkr (post) | 45/64 (0.58-0.80) | 0.803 (0.707-0.887) | 74/109 (0.59-0.76) | ECE 0.173 / Brier 0.253 (n=64, mean conf 0.73, acc 0.70) |  | 0.0112 | 3.3 |
+| agent_vr (post) | 79/150 (0.45-0.60) | 0.645 (0.573-0.715) | 159/294 (0.48-0.60) | ECE 0.316 / Brier 0.352 (n=150, mean conf 0.84, acc 0.53) | 1.11 | 0.0387 | 3.6 |
+| react (post) | 100/150 (0.59-0.74) | 0.766 (0.703-0.827) | 139/320 (0.38-0.49) |  |  | 0.0358 | 4.5 |
+| rag (post) | 74/150 (0.41-0.57) | 0.604 (0.532-0.680) | 154/313 (0.44-0.55) |  |  | 0.0105 | 2.4 |
+
+**TAT-QA dev before/after, the same 100 items (pre-fix vs post-fix)**
+
+| config | EM | F1 | citation precision | calibration (det conf) | attempts/item | $ total | s/item |
+|---|---|---|---|---|---|---|---|
+| agent (pre) | 51/100 (0.41-0.61) | 0.599 (0.505-0.688) | 112/203 (0.48-0.62) | ECE 0.298 / Brier 0.326 (n=100, mean conf 0.63, acc 0.51) |  | 0.0114 | 1.2 |
+| agent_mk (pre) | 64/100 (0.54-0.73) | 0.729 (0.645-0.807) | 78/217 (0.30-0.42) | ECE 0.373 / Brier 0.379 (n=100, mean conf 0.53, acc 0.64) |  | 0.0172 | 2.0 |
+| agent_mknv (pre) | 65/100 (0.55-0.74) | 0.739 (0.655-0.816) | 79/213 (0.31-0.44) | ECE 0.383 / Brier 0.385 (n=100, mean conf 0.51, acc 0.65) |  | 0.0173 | 2.2 |
+| agent_mkr (pre) | 62/100 (0.52-0.71) | 0.709 (0.624-0.789) | 79/223 (0.29-0.42) | ECE 0.323 / Brier 0.361 (n=100, mean conf 0.42, acc 0.62) |  | 0.0188 | 3.0 |
+| agent (post) | 58/100 (0.48-0.67) | 0.669 (0.578-0.753) | 113/200 (0.50-0.63) | ECE 0.193 / Brier 0.285 (n=100, mean conf 0.66, acc 0.58) |  | 0.0108 | 1.5 |
+| agent_mk (post) | 73/100 (0.64-0.81) | 0.811 (0.736-0.879) | 114/177 (0.57-0.71) | ECE 0.142 / Brier 0.241 (n=100, mean conf 0.74, acc 0.73) |  | 0.0188 | 4.1 |
+| agent_mknv (post) | 69/100 (0.59-0.77) | 0.776 (0.699-0.850) | 114/178 (0.57-0.71) | ECE 0.146 / Brier 0.245 (n=100, mean conf 0.72, acc 0.69) |  | 0.0188 | 4.2 |
+| agent_mkr (post) | 45/64 (0.58-0.80) | 0.803 (0.707-0.887) | 74/109 (0.59-0.76) | ECE 0.173 / Brier 0.253 (n=64, mean conf 0.73, acc 0.70) |  | 0.0112 | 3.3 |
+| agent_vr (post) | 51/100 (0.41-0.61) | 0.599 (0.502-0.686) | 109/200 (0.48-0.61) | ECE 0.338 / Brier 0.358 (n=100, mean conf 0.85, acc 0.51) | 1.12 | 0.0255 | 3.8 |
+| react (post) | 66/100 (0.56-0.74) | 0.739 (0.656-0.821) | 92/217 (0.36-0.49) |  |  | 0.0239 | 5.4 |
+| rag (post) | 48/100 (0.39-0.58) | 0.583 (0.489-0.674) | 107/207 (0.45-0.58) |  |  | 0.0069 | 2.7 |
+
+**InsightBench, 70 eval tasks, Lightning only, judge = Nemotron Super**
+
+| config | n scored | summary judge mean | judge>=0.6 | judge None | insight ROUGE-1 | faithfulness | unsupported numbers | calibration (det) | attempts/item | $ total (system+judge) | s/item |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| agent (pre) | 70 | 0.336 (0.290-0.386) | 12/70 (0.10-0.28) | 0 | 0.187 (0.170-0.203) | 0.641 (0.578-0.704) | 15/1310 (0.01-0.02) | ECE 0.580 / Brier 0.498 (n=70, mean conf 0.75, acc 0.17) |  | 0.1955 | 15.2 |
+| agent_mk (pre) | 70 | 0.350 (0.304-0.399) | 13/70 (0.11-0.29) | 0 | 0.183 (0.167-0.198) | 0.610 (0.553-0.667) | 12/1231 (0.01-0.02) | ECE 0.518 / Brier 0.454 (n=70, mean conf 0.70, acc 0.19) |  | 0.1176 | 10.6 |
+| agent_mknv (pre) | 70 | 0.369 (0.316-0.426) | 19/70 (0.18-0.39) | 0 | 0.183 (0.168-0.199) | 0.641 (0.579-0.699) | 18/1252 (0.01-0.02) | ECE 0.469 / Brier 0.443 (n=70, mean conf 0.74, acc 0.27) |  | 0.1138 | 9.0 |
+| agent_mkr (pre) | 70 | 0.344 (0.296-0.397) | 16/70 (0.15-0.34) | 0 | 0.181 (0.165-0.198) | 0.541 (0.474-0.603) | 5/1120 (0.00-0.01) | ECE 0.492 / Brier 0.437 (n=70, mean conf 0.72, acc 0.23) |  | 0.1183 | 23.0 |
+| agent (post) | 70 | 0.320 (0.270-0.374) | 13/70 (0.11-0.29) | 0 | 0.188 (0.171-0.206) | 0.628 (0.564-0.694) | 4/1305 (0.00-0.01) | ECE 0.578 / Brier 0.517 (n=70, mean conf 0.76, acc 0.19) |  | 0.2006 | 21.2 |
+| agent_mk (post) | 70 | 0.370 (0.317-0.423) | 18/70 (0.17-0.37) | 0 | 0.181 (0.166-0.196) | 0.607 (0.547-0.663) | 7/1212 (0.00-0.01) | ECE 0.531 / Brier 0.483 (n=70, mean conf 0.76, acc 0.26) |  | 0.1164 | 16.0 |
+| agent_mknv (post) | 70 | 0.340 (0.297-0.386) | 12/70 (0.10-0.28) | 0 | 0.181 (0.165-0.196) | 0.636 (0.574-0.700) | 19/1205 (0.01-0.02) | ECE 0.567 / Brier 0.488 (n=70, mean conf 0.74, acc 0.17) |  | 0.1387 | 16.7 |
+| agent_vr (post) | 61 | 0.351 (0.295-0.407) | 14/61 (0.14-0.35) | 0 | 0.196 (0.180-0.213) | 0.621 (0.556-0.684) | 5/1404 (0.00-0.01) | ECE 0.545 / Brier 0.472 (n=61, mean conf 0.77, acc 0.23) | 1.25 | 0.2514 | 31.2 |
+| react (post) | 70 | 0.293 (0.250-0.339) | 9/70 (0.07-0.23) | 0 | 0.159 (0.147-0.171) | 0.619 (0.547-0.687) | 96/1363 (0.06-0.09) |  |  | 0.1374 | 13.9 |
+| rag (post) | 70 | 0.336 (0.284-0.391) | 14/70 (0.12-0.31) | 0 | 0.136 (0.124-0.150) | 0.274 (0.230-0.329) | 5/1063 (0.00-0.01) |  |  | 0.1559 | 8.2 |
+
+**Failure causes, TAT-QA dev post (audit_index)**
+
+| config | correct | gate_failed | partial_answer | scale | untraceable_number | wrong_answer |
+|---|---|---|---|---|---|---|
+| agent | 89 | 17 | 19 | 3 | 0 | 22 |
+| agent_mk | 106 | 4 | 21 | 4 | 0 | 15 |
+| agent_mknv | 102 | 8 | 19 | 4 | 0 | 17 |
+| agent_mkr | 45 | 1 | 9 | 1 | 0 | 8 |
+| agent_vr | 79 | 28 | 19 | 3 | 0 | 21 |
+| react | 100 | 0 | 21 | 4 | 0 | 25 |
+| rag | 74 | 0 | 24 | 3 | 1 | 48 |
+
+**Failure causes, InsightBench eval post (audit_index)**
+
+| config | ok | ok_with_sql_errors | sql_error | weak_insight |
+|---|---|---|---|---|
+| agent | 7 | 6 | 19 | 38 |
+| agent_mk | 13 | 5 | 10 | 42 |
+| agent_mknv | 10 | 2 | 16 | 42 |
+| agent_vr | 12 | 2 | 14 | 33 |
+| react | 6 | 3 | 22 | 39 |
+| rag | 14 | 0 | 0 | 56 |
+
+TAT-QA `agent_mkr` (reranker) was dropped at 64/150 to stay in budget (as agreed); InsightBench post `agent_mkr` was not run; `agent_vr` on InsightBench stopped at 61/70 when the cap was hit. Pre-fix numbers exist only for agent/agent_mk/agent_mknv/agent_mkr (react and rag were not re-run pre-fix).
+
+**Controller + Super deep route (separate, labelled)**: only the 15 TAT-QA pre-fix items that the classifier routed to Super exist (`*-superdeep.jsonl`); the full Super deep-route run on dev/eval was not done (budget).
+
+### Verify-retry statistics
+| | TAT-QA dev (n=150) | InsightBench eval (n=61) |
+|---|---|---|
+| attempts/item | 1.11 (139×1, 7×2, 3×3, 1×5) | 1.25 (49×1, 11×2, 1×5) |
+| items retried (first score < 50) | 11 | 12 |
+| best attempt was a retry | 9 | 12 |
+| verifier None | 0/167 | 0/76 |
+| mean verifier score / verdicts = 100 | 72.5 / 57 | 54.9 / 0 |
+| EM or judge vs fixed agent | EM 79/150 vs 89/150 | judge 0.351 vs 0.320 (n differs) |
+| ECE / Brier | 0.316 / 0.352 | 0.545 / 0.472 |
+| s/item vs fixed agent | 3.6 vs 2.2 | 31.2 vs 21.2 |
+
+Reading: on TAT-QA the Super verifier is overconfident (57 verdicts of 100, including arithmetically wrong answers), so few items retry and the score is a worse confidence than the deterministic one. `agent_vr` also has 28 gate failures vs 17 for `agent`: its single attempt does not include the fixed agent's gate re-ask, which explains most of the EM gap; that is the next fix. On InsightBench verify-retry is level with the fixed agent within CI.
+
+### Spend
+Ledger $1.1925 at the start → $3.6845 at the end: **$2.49 extra** (cap $2.50). NVIDIA free tier only.

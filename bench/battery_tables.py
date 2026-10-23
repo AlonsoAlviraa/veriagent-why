@@ -7,6 +7,7 @@ from pathlib import Path
 from .report import load, summarise
 from .run import select
 
+CONFIGS = ("agent", "agent_mk", "agent_mknv", "agent_mkr", "agent_vr", "react", "rag")
 B = Path(__file__).resolve().parent / "results" / "battery"
 SPLIT = json.loads((Path(__file__).resolve().parent / "splits" / "insightbench_split.json").read_text())
 
@@ -35,7 +36,7 @@ def tat(tags, ids=None, title=""):
     cols = ["config", "EM", "F1", "citation precision", "calibration (det conf)", "attempts/item", "$ total", "s/item"]
     L = []
     for tag in tags:
-        for s in ("agent", "agent_mk", "agent_mknv", "agent_mkr", "agent_vr"):
+        for s in CONFIGS:
             r = rows(f"tatqa-{tag}-{s}", ids)
             if not r:
                 continue
@@ -50,7 +51,7 @@ def ib(tags, title=""):
     cols = ["config", "n scored", "summary judge mean", "judge>=0.6", "judge None", "insight ROUGE-1", "faithfulness", "unsupported numbers", "calibration (det)", "attempts/item", "$ total (system+judge)", "s/item"]
     L = []
     for tag in tags:
-        for s in ("agent", "agent_mk", "agent_mknv", "agent_mkr", "agent_vr"):
+        for s in CONFIGS:
             r = rows(f"insightbench-{tag}-{s}.rj", ids) or rows(f"insightbench-{tag}-{s}", ids)
             if not r:
                 continue
@@ -61,13 +62,33 @@ def ib(tags, title=""):
     return f"**{title}**\n\n" + table(cols, L)
 
 
+def causes(run_prefix: str) -> str:
+    """Counts by failure cause from bench/results/traces/<run>/audit_index.jsonl (last record per (config, id))."""
+    root = Path(__file__).resolve().parent / "results" / "traces"
+    cnt, cols = {}, set()
+    for idx in sorted(root.glob(f"{run_prefix}-*/audit_index.jsonl")):
+        last = {}
+        for l in idx.read_text().splitlines():
+            r = json.loads(l)
+            last[(r["config"], r["id"])] = r
+        for r in last.values():
+            if r["bench"] == "insightbench" and r["id"] not in SPLIT["eval"]:
+                continue
+            cnt.setdefault(r["config"], {}).setdefault(r["failure_cause"], 0)
+            cnt[r["config"]][r["failure_cause"]] += 1
+            cols.add(r["failure_cause"])
+    cols = sorted(cols)
+    return table(["config"] + cols, [[c] + [cnt[c].get(k, 0) for k in cols] for c in CONFIGS if c in cnt])
+
+
 if __name__ == "__main__":
-    first40 = {t["id"] for t in select("tatqa", False, 40, None)}
-    print(tat(["pre", "post"], None, "TAT-QA dev, n=100, Lightning only (main table)"))
+    pre_ids = {x["id"] for x in (rows("tatqa-pre-agent") or [])}
+    print(tat(["post"], None, "TAT-QA dev, n=150, Lightning only (main table, post-fix)"))
     print()
-    print(tat(["pre"], first40, "TAT-QA dev items 1-40 only (pre agent_mkr used RELEVANCE_MIN tuned on dev items 41-100)"))
+    print(tat(["pre", "post"], pre_ids, "TAT-QA dev before/after, the same 100 items (pre-fix vs post-fix)"))
     print()
     print(ib(["pre", "post"], "InsightBench, 70 eval tasks, Lightning only, judge = Nemotron Super"))
     print()
-    print(tat(["superdeep"], None, "TAT-QA dev: controller + Super deep route"))
-    print(ib(["superdeep"], "InsightBench 70 eval: controller + Super deep route"))
+    print("**Failure causes, TAT-QA dev post (audit_index)**\n\n" + causes("tatqa-post"))
+    print()
+    print("**Failure causes, InsightBench eval post (audit_index)**\n\n" + causes("insightbench-post"))
