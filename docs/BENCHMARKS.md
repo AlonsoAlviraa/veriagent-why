@@ -75,6 +75,33 @@ python -m bench.report bench/results/<file>.jsonl [--md out.md]
 - Policy: use Nebius Lightning for pilots and development, and reserve Super (Nebius or NVIDIA) for the final eval.
 - On Nebius, thinking is disabled (`enable_thinking=false`). JSON mode (`response_format=json_object`) is enabled when the prompt asks for JSON, because Lightning otherwise often returns a bare answer.
 
+## dev run, Nebius Lightning (2026-10-22/23) — dev model, not the final evaluation
+
+All systems on **Nebius `nvidia/Nemotron-3_5-Lightning`** (`LLM_PROVIDER=nebius`, single model for every step and for the judge). InsightBench: 100 tasks; TAT-QA dev: 150 questions (seeded sample). Scored with `python -m bench.report <file> --md`; bracketed ranges are 95% Wilson intervals. `errors` are counted inside `n` (an errored item scores as a miss). Raw records: `bench/results/insightbench-nebius-lightning-dev.jsonl`, `bench/results/tatqa-nebius-lightning-dev.jsonl` (resumed runs append; the report keeps the last record per system and id).
+
+**InsightBench (n=100 per system)**
+
+| system | n | errors | calls_per_item | sys_calls_per_item | tokens_per_item | nebius_usd_total | models | sec_per_item | insight_rouge1 | summary_rouge1 | summary_judge | judge>=0.6 | rouge>=0.25 | dropped_by_gate |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| agent | 100 | 0 | 5.9 | 4.9 | 16640 | 0.14 | ['nvidia/Nemotron-3_5-Lightning'] | 12.9 | 0.185 | 0.225 | 0.329 | 8/100 (0.04-0.15) | 22/100 (0.15-0.31) | 45 |
+| rag | 100 | 0 | 2.0 | 1 | 5757 | 0.0513 | ['nvidia/Nemotron-3_5-Lightning'] | 3.9 | 0.166 | 0.221 | 0.299 | 8/100 (0.04-0.15) | 9/100 (0.05-0.16) | 0 |
+| react | 100 | 0 | 7.9 | 6.9 | 12830 | 0.1025 | ['nvidia/Nemotron-3_5-Lightning'] | 10.0 | 0.174 | 0.229 | 0.293 | 1/100 (0.00-0.05) | 15/100 (0.09-0.23) | 0 |
+
+**TAT-QA dev (n=150 per system)**
+
+| system | n | errors | calls_per_item | sys_calls_per_item | tokens_per_item | nebius_usd_total | models | sec_per_item | EM | F1_mean | unsupported_numbers |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| agent | 150 | 0 | 1.4 | 1.4 | 1364 | 0.0159 | ['nvidia/Nemotron-3_5-Lightning'] | 1.1 | 57/150 (0.31-0.46) | 0.501 | 0/124 (0.00-0.03) |
+| rag | 150 | 1 | 1 | 1 | 711 | 0.0088 | ['nvidia/Nemotron-3_5-Lightning'] | 0.7 | 51/150 (0.27-0.42) | 0.458 | 0/122 (0.00-0.03) |
+| react | 150 | 0 | 3.1 | 3.1 | 2707 | 0.033 | ['nvidia/Nemotron-3_5-Lightning'] | 2.4 | 57/150 (0.31-0.46) | 0.487 | 0/127 (0.00-0.03) |
+
+Notes:
+
+- The dev run's Nebius cost, summed from the tables, is about $0.35 (InsightBench $0.29, TAT-QA $0.06), paid from promotional credit, under the hard guard (`NEBIUS_STRICT=1`, budget $5.20).
+- One TAT-QA RAG item (`bdcabe8e-6738-47d3-8412-40e5e9a359d0`) fails deterministically with `TypeError: '<' not supported between instances of 'dict' and 'dict'`; a rerun on 2026-10-23 reproduced it. It is a harness bug, not a model error, and is still open.
+- On InsightBench, the agent's gate dropped 45 unsupported insights across the 100 tasks.
+- Intervals overlap on most metrics at this n; read the differences as indicative, not significant. The final evaluation is meant to run on the larger Nemotron model.
+
 ## Pilot (2026-10-22) — PILOT, tiny n, not results
 
 The pilot ran on **Nebius `nvidia/Nemotron-3_5-Lightning`**: 3 InsightBench tasks (`flag-1..3`) and 15 TAT-QA dev questions (seeded random sample). Calls and tokens include the judge.
