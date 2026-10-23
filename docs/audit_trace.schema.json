@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AlonsoAlviraa/veriagent-why/docs/audit_trace.schema.json",
+  "title": "VeriAgent Why per-case audit trace (audit-trace/1)",
+  "description": "Any field the run did not record holds the string \"not_logged\". Fields recomputed by bench/audit_trace.py are labelled recomputed_by_audit.",
+  "type": "object",
+  "required": ["schema_version", "case", "models", "steps", "evidence", "claims", "final_answer", "confidence", "scores", "narrative", "secret_scan"],
+  "$defs": {
+    "nl": {"const": "not_logged"},
+    "decision": {"type": ["object", "null"], "properties": {
+      "source": {"enum": ["markov_controller", "fixed_policy"]}, "decision": {"type": "string"}, "state": {"type": "object"},
+      "action": {"type": "string"}, "reason": {"type": "string"}, "carryover": {"type": "string"}}},
+    "step": {"type": "object", "required": ["type", "summary", "inputs", "outputs", "decision", "latency_s", "tokens", "cost_usd", "errors", "retries"],
+      "properties": {
+        "type": {"enum": ["plan", "route_decision", "sql", "retrieval", "evidence_eval", "requery", "cause_analysis", "writer", "claim_gate", "verify_retry_attempt", "post_format", "scoring"]},
+        "summary": {"type": "string"},
+        "inputs": {}, "outputs": {},
+        "prompt_hash": {"type": "string"}, "prompt": {"type": "string", "description": "full prompt truncated to PROMPT_CHARS"},
+        "prompt_template_ref": {"type": "string"},
+        "decision": {"$ref": "#/$defs/decision"},
+        "model": {"type": ["string", "null"]},
+        "latency_s": {"type": ["number", "string"]}, "tokens": {"type": ["object", "string"]}, "cost_usd": {"type": ["number", "string"]},
+        "errors": {"type": "array"}, "retries": {"type": "integer"}}}
+  },
+  "properties": {
+    "schema_version": {"const": "audit-trace/1"},
+    "case": {"type": "object", "required": ["bench", "run", "config", "item_id", "question", "eval_only"], "properties": {
+      "bench": {"enum": ["tatqa", "insightbench"]}, "run": {"type": "string"}, "config": {"type": "string"}, "item_id": {"type": "string"},
+      "question": {"type": "string"},
+      "eval_only": {"type": "object", "required": ["_label", "gold"], "description": "never shown to any model"}}},
+    "models": {"type": "array", "items": {"type": "object", "required": ["role", "model_id", "provider"], "properties": {
+      "role": {"enum": ["generator", "verifier", "judge", "classifier", "reranker"]}, "model_id": {"type": "string"}, "provider": {"type": ["string", "null"]}}}},
+    "steps": {"type": "array", "items": {"$ref": "#/$defs/step"}},
+    "evidence": {"type": "array", "items": {"type": "object", "required": ["id", "source", "query"]}},
+    "claims": {"type": "array", "items": {"type": "object", "required": ["id", "text", "cited_evidence", "traceable", "gate_verdict", "why"]}},
+    "final_answer": {"type": "object", "required": ["composed_from", "post_format"]},
+    "confidence": {"type": "object", "required": ["deterministic", "formula", "inputs"]},
+    "scores": {"type": "object", "properties": {"failure": {"type": ["object", "null"]}}},
+    "narrative": {"type": "string"},
+    "totals": {"type": "object"},
+    "availability": {"type": "object"},
+    "secret_scan": {"type": "object", "required": ["checked", "redactions"]}
+  }
+}
