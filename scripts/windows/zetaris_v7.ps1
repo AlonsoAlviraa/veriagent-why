@@ -55,8 +55,11 @@ function Record {
 function Olist {
   # V7 P4: Olist real data (CC BY-NC-SA 4.0) -> Postgres (orders/items/reviews) + REST (sellers) -> Zetaris container `olist`.
   # Needs the Postgres container (step postgres) and the REST window (step rest) running (the REST source
-  # serves /ol_sellers as soon as data/olist/olist.duckdb exists; no restart needed).
+  # serves /ol_sellers once data/olist/olist.duckdb exists; a REST source started from pre-P4 code must be restarted).
+  # JDBC prints SLF4J warnings on stderr; with "Stop" PowerShell would treat them as fatal. Rely on exit codes.
+  $ErrorActionPreference = "Continue"
   python scripts\olist_fetch.py
+  if ($LASTEXITCODE -ne 0) { throw "olist fetch failed" }
   python scripts\olist_zetaris_load.py
   if ($LASTEXITCODE -ne 0) { throw "olist load failed" }
   python scripts\olist_demo.py --backend zetaris --mutate
