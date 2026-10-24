@@ -41,6 +41,7 @@ def main(argv=None) -> int:
     rid = f"verify-demo-{uuid.uuid4().hex[:6]}"
     if a.backend == "zetaris":
         os.environ["SAMPLE_MODE"] = "false"; os.environ["ZETARIS_BACKEND"] = "zetaris"
+        os.environ.setdefault("LLM_PROVIDER", "sample")  # data-only demo: $0, no model calls unless .env says otherwise
         open_db, flip = (lambda: get_backend()), pg_flip
     else:
         os.environ["SAMPLE_MODE"] = "true"
