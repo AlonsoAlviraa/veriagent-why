@@ -1,0 +1,9 @@
+{
+ "selected_arm": "none accepted -> combined config = V7 (agent_mk) unchanged",
+ "accepted_ideas": [],
+ "rule": "delta_em_vs_base>0 and broken<=fixed/3",
+ "design_slice_sha256": "64bfa65c94147dfb7831b02ae9f94d517896e48b418c57ca3056ab566113da0e",
+ "holdout_slice_sha256": "5a8c7544ae39cc088c2ff4376ef7c3b0ff8bc5cd98cff92e2e1470a7221fa3d3",
+ "holdout_run": false,
+ "config_sha256": "91d6817984a4a9085300fbbde7e873ca0a100e4a96af8db4aeac901ad640c834"
+}
