@@ -1,4 +1,4 @@
-"""Second federated source: serves v_tickets and v_promotions as JSON ({"rows": [...]}) from the local
+"""Second federated source: serves v_tickets, v_promotions (and ol_sellers for the Olist demo) as JSON ({"rows": [...]}) from the local
 snapshot, for the Zetaris REST tables created by zetaris_load.py. Keep it running during the demo.
 Binds 0.0.0.0 so the Zetaris containers reach it via host.docker.internal. Read-only, GET only."""
 from __future__ import annotations
@@ -6,12 +6,13 @@ import argparse, json, os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from _zetaris_common import ROOT
 
-SERVED = ("v_tickets", "v_promotions")
+SERVED = ("v_tickets", "v_promotions", "ol_sellers")
+OLIST = ROOT / "data" / "olist" / "olist.duckdb"  # ol_sellers (Olist demo, CC BY-NC-SA 4.0), built by scripts/olist_fetch.py
 
 
 def payload(snapshot, view):
     import duckdb
-    con = duckdb.connect(str(snapshot), read_only=True)
+    con = duckdb.connect(str(OLIST if view.startswith("ol_") else snapshot), read_only=True)
     cur = con.execute(f"SELECT * FROM {view}")
     cols = [d[0] for d in cur.description]
     return {"rows": [{c: (str(x) if x is not None and not isinstance(x, (int, float, bool, str)) else x)
@@ -22,7 +23,7 @@ def make_handler(snapshot):
     class H(BaseHTTPRequestHandler):
         def do_GET(self):
             v = self.path.strip("/").split("?")[0]
-            if v not in SERVED:
+            if v not in SERVED or (v.startswith("ol_") and not OLIST.exists()):
                 self.send_response(404); self.end_headers(); return
             body = json.dumps(payload(snapshot, v)).encode()
             self.send_response(200); self.send_header("Content-Type", "application/json")

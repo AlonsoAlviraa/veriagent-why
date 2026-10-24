@@ -1,0 +1,53 @@
+{
+  "rule": "(written before computing any AURC or risk; only the value ranges of the fields were inspected):\n- Candidate signals, all available at answer time for agent_mk with the critic/calibration OFF:\n  conf_raw (model self-reported confidence), conf_det (deterministic gate/trace confidence),\n  lex = conf_det first, conf_raw as tie-break (conf_det + conf_raw/100). Missing values -> 0.\n- Signal = lowest AURC on the pooled train+dev rows.\n- Operating point = answer iff signal >= t, where t minimises selective risk (1-EM on answered)\n  subject to coverage >= 0.80; ties -> higher coverage.",
+  "inputs": {
+    "train": {
+      "file": "tatqa-train-post-agent_mk.jsonl",
+      "sha256": "cc1ba7333651dc5dfac8b227843ee4eac8ff2968a5b1608861b6ed82cfb9f49a"
+    },
+    "dev": {
+      "file": "tatqa-fix-agent_mk.jsonl",
+      "sha256": "3c1577f25d05fdd1be2b2996f46624d58517c19dccbc1823070faf65de7bef67"
+    }
+  },
+  "aurc": {
+    "conf_raw": {
+      "train": 0.4777,
+      "dev": 0.4891,
+      "pooled": 0.484
+    },
+    "conf_det": {
+      "train": 0.6398,
+      "dev": 0.5782,
+      "pooled": 0.6052
+    },
+    "lex": {
+      "train": 0.4654,
+      "dev": 0.4402,
+      "pooled": 0.45
+    }
+  },
+  "signal": "lex",
+  "operating_point": {
+    "threshold": 0.809,
+    "coverage": 0.828,
+    "selective_risk": 0.2802,
+    "selective_em": 0.7198,
+    "answered": 207,
+    "n": 250
+  },
+  "per_split_at_threshold": {
+    "train": {
+      "coverage": 0.82,
+      "selective_em": 0.6951,
+      "full_em": 0.65,
+      "n": 100
+    },
+    "dev": {
+      "coverage": 0.8333,
+      "selective_em": 0.736,
+      "full_em": 0.6933,
+      "n": 150
+    }
+  }
+}

@@ -1,0 +1,332 @@
+{
+ "run_id": "olist_q1-snapshot-20261024-104230",
+ "question_id": "olist_q1",
+ "question": {
+  "title": "Why did the late-delivery rate jump in Feb-Mar 2018 compared with Jan 2018?",
+  "dataset": "olist"
+ },
+ "kpi": {
+  "metric": "olist.late_rate",
+  "period": 16.631,
+  "baseline": 5.701
+ },
+ "status": {
+  "H_transit": "supported",
+  "H_volume": "refuted",
+  "H_handling": "refuted",
+  "H_rj_only": "refuted"
+ },
+ "top_cause": "H_transit",
+ "findings": [
+  {
+   "hyp": "H_transit",
+   "evidence_id": "q1_transit",
+   "label": "avg transit days",
+   "treatment": 13.17,
+   "control": 10.483,
+   "ratio": 1.2563,
+   "outcome": "supports"
+  },
+  {
+   "hyp": "H_volume",
+   "evidence_id": "q1_volume",
+   "label": "delivered orders per day",
+   "treatment": 229.814,
+   "control": 228.032,
+   "ratio": 1.0078,
+   "outcome": "refutes"
+  },
+  {
+   "hyp": "H_handling",
+   "evidence_id": "q1_handling",
+   "label": "avg seller handling days",
+   "treatment": 3.444,
+   "control": 3.597,
+   "ratio": 0.9573,
+   "outcome": "refutes"
+  },
+  {
+   "hyp": "H_rj_only",
+   "evidence_id": "q1_rest",
+   "label": "late rate outside RJ (if it also rose, the rise is NOT RJ-only)",
+   "treatment": 14.032,
+   "control": 4.695,
+   "ratio": 2.9885,
+   "outcome": "refutes"
+  }
+ ],
+ "claims": [
+  {
+   "id": "kpi_period",
+   "metric": "olist.late_rate",
+   "params": {
+    "window": [
+     "2018-02-01",
+     "2018-03-31"
+    ]
+   },
+   "value": 16.631,
+   "row_ids": [
+    "0032d07457ae9c806c79368d7d9ce96b",
+    "003f201cdd39cdd59b6447cff2195456",
+    "004f5d8f238e8908e6864b874eda3391"
+   ],
+   "label": "KPI in the period"
+  },
+  {
+   "id": "kpi_baseline",
+   "metric": "olist.late_rate",
+   "params": {
+    "window": [
+     "2018-01-01",
+     "2018-01-31"
+    ]
+   },
+   "value": 5.701,
+   "row_ids": [
+    "00b9e0f8f588d0406a3de447eb606970",
+    "01015fb6493ea5b9ba105c80b5452da1",
+    "013bc77d3ca5fba084a241fdcb307393"
+   ],
+   "label": "KPI in the baseline"
+  },
+  {
+   "id": "q1_transit_t",
+   "metric": "olist.avg_transit_days",
+   "params": {
+    "window": [
+     "2018-02-01",
+     "2018-03-31"
+    ]
+   },
+   "value": 13.17,
+   "row_ids": [
+    "0005a1a1728c9d785b8e2b08b904576c",
+    "00061f2a7bc09da83e415a52dc8a4af1",
+    "0008288aa423d2a3f00fcb17cd7d8719"
+   ],
+   "label": "avg transit days (treatment)"
+  },
+  {
+   "id": "q1_transit_c",
+   "metric": "olist.avg_transit_days",
+   "params": {
+    "window": [
+     "2018-01-01",
+     "2018-01-31"
+    ]
+   },
+   "value": 10.483,
+   "row_ids": [
+    "000229ec398224ef6ca0657da4fc703e",
+    "0011d82c4b53e22e84023405fb467e57",
+    "0015ebb40fb17286bea51d4607c4733c"
+   ],
+   "label": "avg transit days (control)"
+  },
+  {
+   "id": "q1_volume_t",
+   "metric": "olist.orders_per_day",
+   "params": {
+    "window": [
+     "2018-02-01",
+     "2018-03-31"
+    ]
+   },
+   "value": 229.814,
+   "row_ids": [
+    "0005a1a1728c9d785b8e2b08b904576c",
+    "00061f2a7bc09da83e415a52dc8a4af1",
+    "0008288aa423d2a3f00fcb17cd7d8719"
+   ],
+   "label": "delivered orders per day (treatment)"
+  },
+  {
+   "id": "q1_volume_c",
+   "metric": "olist.orders_per_day",
+   "params": {
+    "window": [
+     "2018-01-01",
+     "2018-01-31"
+    ]
+   },
+   "value": 228.032,
+   "row_ids": [
+    "000229ec398224ef6ca0657da4fc703e",
+    "0011d82c4b53e22e84023405fb467e57",
+    "0015ebb40fb17286bea51d4607c4733c"
+   ],
+   "label": "delivered orders per day (control)"
+  },
+  {
+   "id": "q1_handling_t",
+   "metric": "olist.avg_handling_days",
+   "params": {
+    "window": [
+     "2018-02-01",
+     "2018-03-31"
+    ]
+   },
+   "value": 3.444,
+   "row_ids": [
+    "0005a1a1728c9d785b8e2b08b904576c",
+    "00061f2a7bc09da83e415a52dc8a4af1",
+    "0008288aa423d2a3f00fcb17cd7d8719"
+   ],
+   "label": "avg seller handling days (treatment)"
+  },
+  {
+   "id": "q1_handling_c",
+   "metric": "olist.avg_handling_days",
+   "params": {
+    "window": [
+     "2018-01-01",
+     "2018-01-31"
+    ]
+   },
+   "value": 3.597,
+   "row_ids": [
+    "000229ec398224ef6ca0657da4fc703e",
+    "0011d82c4b53e22e84023405fb467e57",
+    "0015ebb40fb17286bea51d4607c4733c"
+   ],
+   "label": "avg seller handling days (control)"
+  },
+  {
+   "id": "q1_rest_t",
+   "metric": "olist.late_rate",
+   "params": {
+    "window": [
+     "2018-02-01",
+     "2018-03-31"
+    ],
+    "not_state": "RJ"
+   },
+   "value": 14.032,
+   "row_ids": [
+    "004f5d8f238e8908e6864b874eda3391",
+    "005e5166e99d1e4d0c4f808b0540ba94",
+    "0084e195fbd72ae51599af47f04afede"
+   ],
+   "label": "late rate outside RJ (if it also rose, the rise is NOT RJ-only) (treatment)"
+  },
+  {
+   "id": "q1_rest_c",
+   "metric": "olist.late_rate",
+   "params": {
+    "window": [
+     "2018-01-01",
+     "2018-01-31"
+    ],
+    "not_state": "RJ"
+   },
+   "value": 4.695,
+   "row_ids": [
+    "01015fb6493ea5b9ba105c80b5452da1",
+    "013bc77d3ca5fba084a241fdcb307393",
+    "014e78d1239f19fdcafd760d3e52f923"
+   ],
+   "label": "late rate outside RJ (if it also rose, the rise is NOT RJ-only) (control)"
+  }
+ ],
+ "why_diff": {
+  "prior_first": "H_transit",
+  "final_top": "H_transit",
+  "hypotheses": [
+   {
+    "hyp": "H_transit",
+    "prior_rank": 1,
+    "before": "open",
+    "after": "supported",
+    "moved_by": [
+     "q1_transit"
+    ]
+   },
+   {
+    "hyp": "H_volume",
+    "prior_rank": 2,
+    "before": "open",
+    "after": "refuted",
+    "moved_by": [
+     "q1_volume"
+    ]
+   },
+   {
+    "hyp": "H_handling",
+    "prior_rank": 3,
+    "before": "open",
+    "after": "refuted",
+    "moved_by": [
+     "q1_handling"
+    ]
+   },
+   {
+    "hyp": "H_rj_only",
+    "prior_rank": 4,
+    "before": "open",
+    "after": "refuted",
+    "moved_by": [
+     "q1_rest"
+    ]
+   }
+  ],
+  "n_updates": 8,
+  "source": "trace-olist_q1-snapshot-20261024-104230.jsonl: hypothesis_update events only"
+ },
+ "sensitivity": {
+  "top_cause": "H_transit",
+  "by_source": [
+   {
+    "drop_source": "ol_orders",
+    "top_cause": null,
+    "conclusion_changes": true,
+    "status_changes": {
+     "H_transit": [
+      "supported",
+      "open"
+     ],
+     "H_volume": [
+      "refuted",
+      "open"
+     ],
+     "H_handling": [
+      "refuted",
+      "open"
+     ],
+     "H_rj_only": [
+      "refuted",
+      "open"
+     ]
+    }
+   },
+   {
+    "drop_source": "ol_items",
+    "top_cause": "H_transit",
+    "conclusion_changes": false,
+    "status_changes": {}
+   },
+   {
+    "drop_source": "ol_reviews",
+    "top_cause": "H_transit",
+    "conclusion_changes": false,
+    "status_changes": {}
+   },
+   {
+    "drop_source": "ol_sellers",
+    "top_cause": "H_transit",
+    "conclusion_changes": false,
+    "status_changes": {}
+   }
+  ],
+  "method": "deterministic replay of recorded outcomes without one source table"
+ },
+ "backend": "snapshot",
+ "attribution": "Data: Brazilian E-Commerce Public Dataset by Olist (https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), CC BY-NC-SA 4.0. Non-commercial demo; derived memos and traces are shared under the same license.",
+ "hyp_text": {
+  "H_transit": "Carrier transit time (handed to carrier -> delivered) got longer",
+  "H_volume": "Order volume rose and overloaded the network",
+  "H_handling": "Sellers took longer to hand orders to the carrier",
+  "H_rj_only": "The rise is confined to Rio de Janeiro (RJ) customers; the rest of Brazil did not get worse"
+ },
+ "system_seconds": 0.048
+}

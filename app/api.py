@@ -1,5 +1,6 @@
 """FastAPI on :8000. POST /run (sync JSON), POST /runs (async, for the UI), GET /runs/{id}/trace,
-GET /runs/{id}, GET /memo/{id}.md|.pdf, POST /runs/{id}/whatif (ESTIMATE). The UI is a separate app (app/ui.py)."""
+GET /runs/{id}, GET /memo/{id}.md|.pdf, POST /runs/{id}/whatif (ESTIMATE),
+POST /verify (re-executes every claim's SQL now; see app/verify.py). The UI is a separate app (app/ui.py)."""
 from __future__ import annotations
 import json, threading, time, uuid
 from fastapi import FastAPI, HTTPException
@@ -103,3 +104,28 @@ def row(view: str, row_id: str, dataset: str | None = None):
     if not rows:
         raise HTTPException(404, "not found")
     return json.loads(json.dumps(rows[0], default=str))
+
+
+@app.post("/verify")
+def verify_ep(req: dict):
+    """Body: {"run_id": "..."} (verifies the stored memo's claims) or {"claims": [...]}.
+    Always re-executes the SQL on the current backend and logs `verify` events to the run trace."""
+    from .adapters.zetaris import get_backend
+    from .verify import verify_claims
+    rid = req.get("run_id")
+    if rid:
+        r = result(_rid(rid))
+        claims, dataset = r.get("claims", []), r.get("question", {}).get("dataset")
+    else:
+        claims, dataset = req.get("claims"), req.get("dataset")
+        if not isinstance(claims, list) or not claims:
+            raise HTTPException(400, "provide run_id or a non-empty claims list")
+    try:
+        if dataset == "olist":
+            from .olist.backend import olist_backend
+            db = olist_backend()
+        else:
+            db = get_backend(dataset)
+    except Exception as e:
+        raise HTTPException(503, f"backend unavailable: {type(e).__name__}")
+    return verify_claims(db, claims, run_id=rid, log_dir=LOGS)
