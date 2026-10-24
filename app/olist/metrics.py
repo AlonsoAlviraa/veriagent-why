@@ -80,7 +80,7 @@ def witnesses(db, metric: str, p: dict, k: int = 3) -> list[str]:
     """First k order ids (sorted, deterministic) that satisfy the filter and the witness predicate."""
     s = spec(metric, p)
     r = db.query(f"SELECT DISTINCT o.order_id AS id FROM {s['from']} WHERE {s['where']} AND {s['witness']} "
-                 f"ORDER BY o.order_id LIMIT {int(k)}", s["params"])
+                 f"ORDER BY id LIMIT {int(k)}", s["params"])
     return [x["id"] for x in r]
 
 

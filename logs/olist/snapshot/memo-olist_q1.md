@@ -1,6 +1,6 @@
 # Why did the late-delivery rate jump in Feb-Mar 2018 compared with Jan 2018?
 
-_Run `olist_q1-snapshot-20261024-103408` · backend **snapshot** · $0 (no model calls)_
+_Run `olist_q1-snapshot-20261024-103624` · backend **snapshot** · $0 (no model calls)_
 
 > Data: Brazilian E-Commerce Public Dataset by Olist (https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), CC BY-NC-SA 4.0. Non-commercial demo; derived memos and traces are shared under the same license.
 
@@ -47,6 +47,6 @@ _Run `olist_q1-snapshot-20261024-103408` · backend **snapshot** · $0 (no model
 | q1_rest_t (late rate outside RJ (if it also rose, the rise is NOT RJ-only) (treatment)) | 14.032 | GREEN | snapshot | 14.032 |
 | q1_rest_c (late rate outside RJ (if it also rose, the rise is NOT RJ-only) (control)) | 4.695 | GREEN | snapshot | 4.695 |
 
-System time (trace, investigation): 0.046 s; verify: 0.033 s
+System time (trace, investigation): 0.053 s; verify: 0.034 s
 
 No accuracy metric: Olist has no ground truth for these questions.
