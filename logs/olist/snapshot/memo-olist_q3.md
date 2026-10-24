@@ -1,6 +1,6 @@
 # What drives 1-2 star reviews (orders purchased Jan 2017 - Aug 2018)?
 
-_Run `olist_q3-snapshot-20261024-103822` · backend **snapshot** · $0 (no model calls)_
+_Run `olist_q3-snapshot-20261024-104230` · backend **snapshot** · $0 (no model calls)_
 
 > Data: Brazilian E-Commerce Public Dataset by Olist (https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), CC BY-NC-SA 4.0. Non-commercial demo; derived memos and traces are shared under the same license.
 
@@ -46,6 +46,6 @@ _Run `olist_q3-snapshot-20261024-103822` · backend **snapshot** · $0 (no model
 | q3_multi_t (1-2 star share, multi-seller vs single (treatment)) | 47.248 | GREEN | snapshot | 47.248 |
 | q3_multi_c (1-2 star share, multi-seller vs single (control)) | 12.341 | GREEN | snapshot | 12.341 |
 
-System time (trace, investigation): 0.435 s; verify: 0.352 s
+System time (trace, investigation): 0.426 s; verify: 0.322 s
 
 No accuracy metric: Olist has no ground truth for these questions.
