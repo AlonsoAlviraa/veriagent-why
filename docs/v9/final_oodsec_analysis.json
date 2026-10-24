@@ -1,0 +1,274 @@
+{
+ "n": 368,
+ "n_design_fit": 600,
+ "n_tables": 92,
+ "v7": {
+  "em": 99.18,
+  "f1": 99.18,
+  "sem": 99.46
+ },
+ "I3b_answer_arm_reported_only": {
+  "em": 99.18,
+  "fixed": 0,
+  "broken": 0,
+  "delta_em": 0.0,
+  "ci95": [
+   0.0,
+   0.0
+  ],
+  "mcnemar_p": 1.0
+ },
+ "lex_frozen_coverage": 0.7826,
+ "conf": {
+  "lex_frozen": {
+   "auroc": 0.6329,
+   "ece": 0.2456,
+   "brier": 0.0953,
+   "aurc": 0.0085,
+   "threshold": 0.809,
+   "coverage": 0.7826,
+   "selective_em": 0.9931
+  },
+  "I1_msp_raw": {
+   "auroc": 0.7452,
+   "ece": 0.0993,
+   "brier": 0.0434,
+   "aurc": 0.0025,
+   "threshold": 0.7826,
+   "coverage": 0.7826,
+   "selective_em": 0.9931
+  },
+  "I2_ptrue_raw": {
+   "auroc": 0.8575,
+   "ece": 0.5724,
+   "brier": 0.4637,
+   "aurc": 0.0013,
+   "threshold": 0.0953,
+   "coverage": 0.7826,
+   "selective_em": 1.0
+  },
+  "lex_platt": {
+   "auroc": 0.6329,
+   "ece": 0.355,
+   "brier": 0.1345,
+   "aurc": 0.0085,
+   "threshold": 0.6472,
+   "coverage": 0.7826,
+   "selective_em": 0.9931
+  },
+  "V8_refit": {
+   "auroc": 0.8091,
+   "ece": 0.3725,
+   "brier": 0.1628,
+   "aurc": 0.002,
+   "threshold": 0.4947,
+   "coverage": 0.7826,
+   "selective_em": 0.9965
+  },
+  "V9_cheap": {
+   "auroc": 0.8146,
+   "ece": 0.2726,
+   "brier": 0.0978,
+   "aurc": 0.0018,
+   "threshold": 0.6411,
+   "coverage": 0.7826,
+   "selective_em": 0.9965
+  },
+  "V9_full": {
+   "auroc": 0.8155,
+   "ece": 0.2519,
+   "brier": 0.0868,
+   "aurc": 0.0018,
+   "threshold": 0.6732,
+   "coverage": 0.7826,
+   "selective_em": 0.9965
+  }
+ },
+ "tests": {
+  "P1 V9_cheap vs lex_frozen (primary, amended)": {
+   "auroc_diff_ci95": [
+    -0.0095,
+    0.4932
+   ],
+   "neg_ece_diff_ci95": [
+    -0.0444,
+    -0.0106
+   ],
+   "neg_aurc_diff_ci95": [
+    -0.0001,
+    0.0151
+   ],
+   "auroc_diff_ci95_table_cluster": [
+    -0.0054,
+    0.4945
+   ],
+   "auroc_improves": false,
+   "ece_improves": false
+  },
+  "P2 V9_full vs V8_refit (primary)": {
+   "auroc_diff_ci95": [
+    -0.0749,
+    0.0736
+   ],
+   "neg_ece_diff_ci95": [
+    0.1086,
+    0.1321
+   ],
+   "neg_aurc_diff_ci95": [
+    -0.0006,
+    0.001
+   ],
+   "auroc_diff_ci95_table_cluster": [
+    -0.0763,
+    0.0777
+   ],
+   "auroc_improves": false,
+   "ece_improves": true
+  },
+  "P1-orig V9_cheap vs lex_platt (original H1, reported)": {
+   "auroc_diff_ci95": [
+    -0.0095,
+    0.4932
+   ],
+   "neg_ece_diff_ci95": [
+    0.0695,
+    0.0944
+   ],
+   "neg_aurc_diff_ci95": [
+    -0.0001,
+    0.0151
+   ],
+   "auroc_diff_ci95_table_cluster": [
+    -0.0054,
+    0.4945
+   ],
+   "auroc_improves": false,
+   "ece_improves": true
+  },
+  "s: V9_cheap vs V8_refit": {
+   "auroc_diff_ci95": [
+    -0.0861,
+    0.0941
+   ],
+   "neg_ece_diff_ci95": [
+    0.0813,
+    0.1166
+   ],
+   "neg_aurc_diff_ci95": [
+    -0.0008,
+    0.0012
+   ],
+   "auroc_diff_ci95_table_cluster": [
+    -0.0858,
+    0.097
+   ],
+   "auroc_improves": false,
+   "ece_improves": true
+  },
+  "s: V9_full vs lex_frozen": {
+   "auroc_diff_ci95": [
+    0.0,
+    0.5068
+   ],
+   "neg_ece_diff_ci95": [
+    -0.0208,
+    0.0078
+   ],
+   "neg_aurc_diff_ci95": [
+    -0.0,
+    0.0153
+   ],
+   "auroc_diff_ci95_table_cluster": [
+    0.0,
+    0.5068
+   ],
+   "auroc_improves": false,
+   "ece_improves": false
+  }
+ },
+ "I4_conformal_design_threshold": {
+  "lex_platt": {
+   "alpha": 0.1,
+   "lambda": Infinity,
+   "realized_risk_answered_and_wrong": 0.0,
+   "coverage": 0.0,
+   "selective_em": 0.0,
+   "risk_controlled": true
+  },
+  "V8_refit": {
+   "alpha": 0.1,
+   "lambda": 0.6971,
+   "realized_risk_answered_and_wrong": 0.0,
+   "coverage": 0.3451,
+   "selective_em": 1.0,
+   "risk_controlled": true
+  },
+  "V9_cheap": {
+   "alpha": 0.1,
+   "lambda": 0.6935,
+   "realized_risk_answered_and_wrong": 0.0,
+   "coverage": 0.6413,
+   "selective_em": 1.0,
+   "risk_controlled": true
+  },
+  "V9_full": {
+   "alpha": 0.1,
+   "lambda": 0.6833,
+   "realized_risk_answered_and_wrong": 0.0027,
+   "coverage": 0.7446,
+   "selective_em": 0.9964,
+   "risk_controlled": true
+  }
+ },
+ "cost": {
+  "V7": {
+   "calls_per_item": 2.66,
+   "sec_per_item": 3.84,
+   "tokens_per_item": 1809.2,
+   "cost_usd": 0.0561
+  },
+  "V9_cheap": {
+   "calls_per_item": 3.66,
+   "sec_per_item": 4.61,
+   "tokens_per_item": 2309.5,
+   "cost_usd": 0.0682
+  },
+  "V8_refit": {
+   "calls_per_item": 9.0,
+   "sec_per_item": 10.0,
+   "tokens_per_item": 6181.8,
+   "cost_usd": 0.1717
+  },
+  "V9_full": {
+   "calls_per_item": 13.0,
+   "sec_per_item": 14.34,
+   "tokens_per_item": 9348.2,
+   "cost_usd": 0.26
+  }
+ },
+ "by_type": {
+  "arithmetic/table": [
+   119,
+   119
+  ],
+  "arithmetic/text": [
+   54,
+   53
+  ],
+  "arithmetic/table-text": [
+   96,
+   94
+  ],
+  "span/text": [
+   59,
+   59
+  ],
+  "span/table": [
+   40,
+   40
+  ]
+ },
+ "diag": {
+  "lp_ok_rate": 1.0
+ }
+}
