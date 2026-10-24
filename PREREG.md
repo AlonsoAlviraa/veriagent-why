@@ -12,13 +12,13 @@ Committed **before any run on this split**. The config freeze is pending (V7 app
 - No tuning, calibration fitting or error inspection on these 500 items, ever. Calibration maps are fit on TAT-QA train only.
 
 ## Frozen config (filled at V7 freeze, before the run)
-- Frozen code sha: `<TBD_CODE_SHA>`
-- Config hash (sha256 of the canonical JSON of model, endpoint, arms, env flags, max_calls, rpm and calib file hashes): `<TBD_CONFIG_SHA256>`
-- Freeze commit: `<TBD_FREEZE_COMMIT>`, at `<TBD_TIMESTAMP>`
+- Frozen code sha: `39a928540dc883d9fd3e97a9a4f016c0ea37eb84` (the run executes from the next commit, which only edits PREREG.md)
+- Config hash (sha256 of the canonical JSON of model, endpoint, arms, env flags, max_calls, rpm and calib file hashes): `50c2864f57f39a9ddea222896e12676e1d75ec37cea9e9c8ab00504ab485c4c4` = sha256 of canonical JSON (sort_keys, no spaces) of `bench/freeze/test500_v1.json`
+- Freeze commit: `39a928540dc883d9fd3e97a9a4f016c0ea37eb84`, at `2026-10-24T10:45:39+02:00` (Europe/Madrid)
 
 ## Run
 - One run per arm, at T=0, from a clean commit. Rows carry `code_rev` and `dirty=false`. Dirty runs abort.
-- FREEZE: commit sha, model id + endpoint, max calls, rpm, env flags (`CR_USE_CALIB`, …).
+- Frozen: model `nvidia/nemotron-3.5-lightning-30b-a3b` on NVIDIA free (`https://integrate.api.nvidia.com/v1`), max calls 6000/arm, 40/item, rpm 8.5, env flags in `bench/freeze/test500_v1.json`; runner `bench_test500.sh`.
 - Errored items are retried up to 3 resume passes. Items that are still failing count as wrong and are reported.
 
 ## Arms
@@ -27,7 +27,7 @@ Committed **before any run on this split**. The config freeze is pending (V7 app
 - `agent_mk`: #7 baseline config.
 - `agent_mk` + trace fixes.
 - `agent_cr` + trace fixes.
-- FREEZE: the exact arm list and their code_revs.
+- FREEZE (V7): arms run = `agent_mk` (shipped; #7 config: no critic, no calibration map, no verify-retry, no S1/S2, raw confidence) and `rag` (reference). `react`, `agent_mk`+fixes and `agent_cr` are not run on test500.
 
 ## Metrics
 - Primary metric: EM, using the official TAT-QA scorer with scale.
@@ -48,7 +48,7 @@ Fixed before any test500 run, using ONLY TAT-QA train and dev rows (no test_gold
 - Reported on test500, whatever the outcome: the full risk-coverage curve and AURC for the shipped arm, plus coverage and selective EM at this single operating point. No other threshold is reported as a result.
 
 ## Analysis (`python -m bench.heldout_report`)
-- Primary comparison: FREEZE (e.g. `agent_cr`+fixes vs `rag`).
+- Primary comparison (frozen): `rag` → `agent_mk`.
   - Paired exact McNemar on per-item EM, two-sided, α=0.05.
   - Paired bootstrap 95% CI of ΔEM (10,000 resamples, seed 2026).
 - Secondary comparisons: all other pairs, reported with Holm correction and labelled exploratory.
