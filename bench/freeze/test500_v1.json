@@ -1,0 +1,50 @@
+{
+ "abstention": {
+  "code": "bench/abstention.py",
+  "code_sha256": "a9eae452450c3ec065b3c86b15e365657f545a4cc92a338939b78474ca33016b",
+  "fit": "bench/calib/abstention_v7.json",
+  "fit_sha256": "6f21693c9abcc049316e6b0307d63bbe65205f74ec002b455fd26c996a24394f",
+  "signal": "lex",
+  "threshold": 0.809
+ },
+ "agent_mk": "no critic, no calibration map, no verify-retry, no S1/S2 split, raw model confidence shipped",
+ "analysis": "HELDOUT_SPLIT=bench/splits/tatqa_test500_v1.json python -m bench.heldout_report bench/results/test500 --md",
+ "arms": [
+  "agent_mk",
+  "rag"
+ ],
+ "endpoint": "NVIDIA API Catalog (integrate.api.nvidia.com/v1), free tier",
+ "env": {
+  "AUDIT_TRACE": "1",
+  "BENCH_SINGLE_MODEL": "1",
+  "CR_USE_CALIB": "0",
+  "DEEP_MODEL": "nvidia/nemotron-3.5-lightning-30b-a3b",
+  "FAST_MODEL": "nvidia/nemotron-3.5-lightning-30b-a3b",
+  "LLM_CACHE": "0",
+  "LLM_PROVIDER": "nvidia",
+  "MODEL_TIMEOUT_S": "120",
+  "NEBIUS_STRICT": "1",
+  "REASONING_MODEL": "nvidia/nemotron-3.5-lightning-30b-a3b",
+  "SAMPLE_MODE": "false"
+ },
+ "max_calls": 6000,
+ "max_calls_item": 40,
+ "model": "nvidia/nemotron-3.5-lightning-30b-a3b (all tiers; BENCH_SINGLE_MODEL=1)",
+ "primary_comparison": "rag -> agent_mk, paired exact McNemar + paired bootstrap 95% CI (10000, seed 2026)",
+ "provider": "nvidia",
+ "reference_arm": "rag",
+ "repeats": 1,
+ "resume_passes": 3,
+ "rpm": 8.5,
+ "runner": {
+  "file": "bench_test500.sh",
+  "sha256": "dd35ae2a9167388b9fd1babb1166d666f8387e250dd75de9a9c27b1b222e38b1"
+ },
+ "shipped_arm": "agent_mk",
+ "split": {
+  "file": "bench/splits/tatqa_test500_v1.json",
+  "ids_sha256": "02b8820dcc24918f3394cc610dfeb89b81ba1bbc23eaba08db7443a241991f74",
+  "sha256": "226699d0786209749deabef62a000ab63fe87a6e211252ad3225119e870f3bab"
+ },
+ "temperature": 0
+}

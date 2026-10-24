@@ -8,7 +8,9 @@ import json, math, random, re, statistics as st, sys
 from collections import defaultdict
 from pathlib import Path
 
-HOLD = Path(__file__).resolve().parent / "splits" / "holdout_v1.json"
+import os
+# split under analysis: HELDOUT_SPLIT=bench/splits/tatqa_test500_v1.json (default: the holdout_v1 pilot)
+HOLD = Path(os.environ.get("HELDOUT_SPLIT") or Path(__file__).resolve().parent / "splits" / "holdout_v1.json")
 
 
 def load(d: Path):
