@@ -327,3 +327,10 @@ def item_em(data_dir: Path, it: dict, pred: dict) -> tuple[float, float]:
     em(ground_truth=it["q"], prediction=pred.get("answer"), pred_scale=pred.get("scale"))
     e, f, _, _ = em.get_overall_metric()
     return e, f
+import os as _os  # noqa: E402
+if _os.environ.get("V71") == "1":  # V7.1 (development after the pre-registered run); never active in the frozen V7 config
+    from .v71 import agent_mk71 as _mk71
+    SYSTEMS["agent_mk71"] = _mk71
+if _os.environ.get("V71") == "1":  # V7.1 ablation arms (docs/V71_ABLATION.md)
+    from .v71x import systems as _v71x_systems
+    SYSTEMS.update(_v71x_systems())
