@@ -50,7 +50,7 @@ def literal(v) -> str:
     return "'" + str(v).replace("\\", "\\\\").replace("'", "\\'") + "'"  # Spark SQL string literal
 
 
-def render(sql: str, params: list | None, prefix: str = "") -> str:
+def render(sql: str, params: list | None, prefix: str = "", views: tuple = VIEWS) -> str:
     """Inline escaped literals (one plain statement per call), translate DuckDB-isms to Lightning
     (Spark) SQL and qualify the 5 view names."""
     parts = sql.split("?")
@@ -59,7 +59,7 @@ def render(sql: str, params: list | None, prefix: str = "") -> str:
     out = parts[0] + "".join(literal(p) + rest for p, rest in zip(params or [], parts[1:]))
     out = re.sub(r"\bAS\s+VARCHAR\b", "AS STRING", out, flags=re.I)
     if prefix:
-        out = re.sub(r"(?<![\w.])(" + "|".join(VIEWS) + r")\b", lambda m: prefix + m.group(1), out)
+        out = re.sub(r"(?<![\w.])(" + "|".join(views) + r")\b", lambda m: prefix + m.group(1), out)
     return out.strip().rstrip(";")
 
 
@@ -94,6 +94,7 @@ def jdbc_connect():
 
 class ZetarisJdbcBackend:
     name = "zetaris-jdbc"
+    views = VIEWS
 
     def __init__(self, dataset: str | None = None, conn=None):
         if dataset:
@@ -115,7 +116,7 @@ class ZetarisJdbcBackend:
             cur.close()
 
     def query(self, sql: str, params: list | None = None) -> list[dict]:
-        return self.execute(render(sql, params, self.prefix)) or []
+        return self.execute(render(sql, params, self.prefix, self.views)) or []
 
 
 class SnapshotBackend(SampleBackend):

@@ -31,8 +31,13 @@ def verify_claim(db, claim: dict) -> dict:
         return {**base, "status": "unverifiable", "reasons": ["claim has no metric/SQL to re-execute"],
                 "sql": None, "params": None, "db_value": None}
     try:
-        sql, params = metric_sql(claim["metric"], claim.get("segment") or {}, claim["window"])
-        chk = check_claim(db, claim)  # executes metric SQL + cited-row SQL now
+        if str(claim["metric"]).startswith("olist."):
+            from .olist import metrics as om
+            sql, params = om.metric_sql(claim["metric"], claim["params"])
+            chk = om.check(db, claim)
+        else:
+            sql, params = metric_sql(claim["metric"], claim.get("segment") or {}, claim["window"])
+            chk = check_claim(db, claim)  # executes metric SQL + cited-row SQL now
     except Exception as e:  # backend down / bad claim -> red with reason, never green
         return {**base, "status": "red", "reasons": [f"{type(e).__name__}: {e}"], "sql": None, "params": None,
                 "db_value": None, "elapsed_ms": round((time.time() - t0) * 1000, 1)}

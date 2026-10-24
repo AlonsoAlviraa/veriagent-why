@@ -31,3 +31,7 @@ logs/report-*.json
 data/bench/
 bench/results/
 logs/*/
+
+# Olist (CC BY-NC-SA, downloaded by scripts/olist_fetch.py)
+data/olist/*
+!data/olist/LICENSE_OLIST.md

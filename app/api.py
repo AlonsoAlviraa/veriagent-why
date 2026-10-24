@@ -121,7 +121,11 @@ def verify_ep(req: dict):
         if not isinstance(claims, list) or not claims:
             raise HTTPException(400, "provide run_id or a non-empty claims list")
     try:
-        db = get_backend(dataset)
+        if dataset == "olist":
+            from .olist.backend import olist_backend
+            db = olist_backend()
+        else:
+            db = get_backend(dataset)
     except Exception as e:
         raise HTTPException(503, f"backend unavailable: {type(e).__name__}")
     return verify_claims(db, claims, run_id=rid, log_dir=LOGS)

@@ -4,8 +4,8 @@
 # Python 3.11+, Java 8+, git. Credentials live only in .env (gitignored) - never typed into chat.
 #
 # Usage (from the repo root, venv active):
-#   .\scripts\windows\zetaris_v7.ps1 -Step all        # or: prereq | postgres | rest | load | check | demo | record
-param([ValidateSet("prereq","postgres","rest","load","check","demo","record","all")][string]$Step = "all")
+#   .\scripts\windows\zetaris_v7.ps1 -Step all        # or: prereq | postgres | rest | load | check | demo | record | olist
+param([ValidateSet("prereq","postgres","rest","load","check","demo","record","olist","all")][string]$Step = "all")
 $ErrorActionPreference = "Stop"
 $Repo = (Resolve-Path "$PSScriptRoot\..\..").Path
 Set-Location $Repo
@@ -52,7 +52,22 @@ function Record {
   Write-Host "Traces in $out. Review, then: git add -f $out; git commit -m 'Zetaris live session traces'" -ForegroundColor Green
 }
 
+function Olist {
+  # V7 P4: Olist real data (CC BY-NC-SA 4.0) -> Postgres (orders/items/reviews) + REST (sellers) -> Zetaris container `olist`.
+  # Needs the Postgres container (step postgres) and the REST window (step rest) running (the REST source
+  # serves /ol_sellers as soon as data/olist/olist.duckdb exists; no restart needed).
+  python scripts\olist_fetch.py
+  python scripts\olist_zetaris_load.py
+  if ($LASTEXITCODE -ne 0) { throw "olist load failed" }
+  python scripts\olist_demo.py --backend zetaris --mutate
+  if ($LASTEXITCODE -ne 0) { throw "olist demo failed" }
+  $out = "logs\olist_zetaris_session_$(Get-Date -Format yyyyMMdd_HHmm)"
+  Copy-Item -Recurse logs\olist\zetaris $out
+  python scripts\secret_scan.py
+  Write-Host "Olist memos + traces in $out (CC BY-NC-SA). Review, then: git add -f $out; git commit -m 'Olist Zetaris session'" -ForegroundColor Green
+}
+
 switch ($Step) {
-  "prereq" { Prereq } "postgres" { Postgres } "rest" { Rest } "load" { Load } "check" { Check } "demo" { Demo } "record" { Record }
+  "prereq" { Prereq } "postgres" { Postgres } "rest" { Rest } "load" { Load } "check" { Check } "demo" { Demo } "record" { Record } "olist" { Olist }
   "all" { Prereq; Postgres; Rest; Load; Check; Demo; Record }
 }
