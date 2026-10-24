@@ -137,3 +137,29 @@ python run.py --ui         # UI on http://localhost:8501
 - `CREATE DATASOURCE` connection error — Postgres container not running, or host.docker.internal not
   resolvable from Zetaris; try your PC's LAN IP in `VA_PG_HOST_FROM_ZETARIS`.
 - Count `MISMATCH` on v_tickets/v_promotions — the REST source window is not running.
+
+## V7: proof-carrying receipts over Zetaris (priority 1)
+
+Status: code path and runbook prepared; **not yet run on the PC** (the build box cannot reach it).
+
+One script does every step: `scripts\windows\zetaris_v7.ps1`.
+
+```powershell
+cd C:\Users\Mariano\veriagent-why
+git fetch origin; git checkout feat/v7-verify
+.\.venv\Scripts\Activate.ps1
+.\scripts\windows\zetaris_v7.ps1 -Step all
+```
+
+Or step by step: `prereq`, `postgres`, `rest` (opens a window that must stay open), `load`, `check`, `demo`, `record`.
+
+`demo` runs `scripts\verify_live_demo.py --backend zetaris`:
+1. runs example 1 against Zetaris and calls the verifier, expecting GREEN with `backend=zetaris`;
+2. flips `on_time` for the claim's cited rows **in Postgres**, the source behind the Zetaris datasource;
+3. re-verifies through Zetaris JDBC, expecting RED;
+4. restores the rows and re-verifies, expecting GREEN.
+
+It prints `DEMO OK` only for that exact sequence. Record the screen during `demo`.
+
+To show the same thing over HTTP in the UI: `python run.py --serve`, then
+`Invoke-RestMethod -Method Post http://localhost:8000/verify -ContentType application/json -Body '{"run_id":"<id>"}'`.
