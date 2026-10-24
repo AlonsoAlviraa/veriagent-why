@@ -34,6 +34,19 @@ Committed **before any run on this split**. The config freeze is pending (V7 app
 - Secondary metric: F1.
 - Confidence metrics on the shipped confidence: Brier, ECE (10 equal-width bins), AUROC and AURC.
 
+## Abstention (pre-registered, V7)
+Fixed before any test500 run, using ONLY TAT-QA train and dev rows (no test_gold, test500 or holdout_v1 id; the fit script refuses them). $0, no model calls.
+- Fit: `python -m bench.abstention_fit` → `bench/calib/abstention_v7.json`.
+  - train: `tatqa-train-post-agent_mk.jsonl` (n=100, TAT-QA train; sha256 `cc1ba733…f49a`, pre-trace-fix code).
+  - dev: `tatqa-fix-agent_mk.jsonl` (n=150, TAT-QA dev; sha256 `3c1577f2…ef67`, trace-fix code).
+  - Caveat: dev was used during development (#7/#9), so the dev numbers are optimistic. Only test500 is clean.
+- Rule (declared before computing AURC or risk): candidate signals `conf_raw`, `conf_det`, `lex`; pick the lowest pooled AURC; the operating point minimises selective risk subject to coverage ≥ 0.80.
+- AURC (pooled train+dev, lower is better): conf_raw 0.484, conf_det 0.605, **lex 0.450**.
+- **Signal:** `lex = confidence_det + confidence_raw/100` (deterministic gate/trace confidence first, model self-reported confidence as tie-break; missing → 0). Critic and calibration map OFF.
+- **Threshold / operating point:** answer iff `lex ≥ 0.809`, i.e. `confidence_det ≥ 0.8` AND `confidence_raw ≥ 0.9`. Otherwise the agent abstains ("I don't know"). Frozen in `bench/abstention.py`.
+- What this gave on train+dev (fit data, not a result): coverage 0.828, selective EM 0.720 (train 0.82 / 0.695, full EM 0.65; dev 0.833 / 0.736, full EM 0.693).
+- Reported on test500, whatever the outcome: the full risk-coverage curve and AURC for the shipped arm, plus coverage and selective EM at this single operating point. No other threshold is reported as a result.
+
 ## Analysis (`python -m bench.heldout_report`)
 - Primary comparison: FREEZE (e.g. `agent_cr`+fixes vs `rag`).
   - Paired exact McNemar on per-item EM, two-sided, α=0.05.
