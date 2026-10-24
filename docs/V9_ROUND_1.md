@@ -26,7 +26,7 @@ pre-training exposure. All comparisons below are on the same 600 items.
 | lex Platt | 0 | 0.471 | 0.020 | 0.234 | 0.378 | 0.645 |
 | I1 answer-token MSP (raw) | 0 | 0.698 | 0.155 | 0.224 | 0.255 | 0.708 |
 | I2 P(True) (raw) | 1 | 0.639 | 0.324 | 0.352 | 0.261 | 0.681 |
-| I2 verbalized (raw) | 1 | 0.613 | 0.328 | 0.334 | 0.268 | — (95% of items say ≥0.95) |
+| I2 verbalized (raw) | 1 | 0.613 | 0.328 | 0.334 | 0.268 | — (99.7% of items say ≥0.95) |
 | I3 V7 share of 4 answers (raw) | 3 | 0.669 | 0.270 | 0.276 | 0.264 | 0.681 |
 | **V8 refit** (pointer feats + lex) | 6.1 | 0.653 | 0.012 | 0.216 | 0.267 | 0.671 |
 | **V9 cheap** (lex + I1 + I2) | 1 | **0.731** | 0.034 | 0.190 | 0.224 | 0.706 |
