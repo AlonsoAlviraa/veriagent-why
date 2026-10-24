@@ -118,6 +118,31 @@ class ZetarisJdbcBackend:
         return self.execute(render(sql, params, self.prefix)) or []
 
 
+class SnapshotBackend(SampleBackend):
+    """DuckDB snapshot at an explicit path (same 5 views as the demo/Zetaris schema). Used by the
+    public SAMPLE_MODE Space and by the CI mutation test (writable copy)."""
+    name = "snapshot-duckdb"
+
+    def __init__(self, path, read_only: bool = True):
+        import duckdb
+        self.path = str(path)
+        self.con = duckdb.connect(self.path, read_only=read_only)
+
+
+def badge(db) -> str:
+    """Backend badge shown on every receipt: 'zetaris' only when the query really went over JDBC."""
+    return "zetaris" if isinstance(db, ZetarisJdbcBackend) else "snapshot"
+
+
+def schema(db) -> dict[str, list[str]]:
+    """View -> column names, by querying each view (works for DuckDB and Zetaris)."""
+    out = {}
+    for v in VIEWS:
+        r = db.query(f"SELECT * FROM {v} LIMIT 1")
+        out[v] = sorted(r[0].keys()) if r else []
+    return out
+
+
 def get_backend(dataset: str | None = None):
     if sample_mode() or env("ZETARIS_BACKEND", "sample") == "sample":
         return SampleBackend(dataset)
