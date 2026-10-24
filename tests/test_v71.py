@@ -153,3 +153,11 @@ def test_frozen_config_does_not_mention_v71():
 ])
 def test_semantic(pred, ps, gold, gs, at, exp):
     assert semantic_correct(pred, ps, gold, gs, at)[0] is exp
+
+
+def test_numeric_table_span_gets_scale_and_format():
+    d = doc([["(in millions)", "2019"], ["Aerospace and Defense", "$1,327.9"]], ["Segment sales."])
+    o = {"answer_type": "span", "value": "1327.9", "quote": "$1,327.9", "scale": None, "evidence": ["| Aerospace and Defense | $1,327.9 |"]}
+    m = FakeM([o, o])  # scale check fails -> one retry; final scale filled deterministically from the evidence unit
+    r = V.agent_mk71(it(d, "What is the Aerospace and Defense value in 2019?"), m)
+    assert r["answer"] == "1327.9" and r["scale"] == "million"

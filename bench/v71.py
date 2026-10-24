@@ -168,7 +168,8 @@ def gate71(ans: dict, question: str, doc: dict, log_extract: list[dict]) -> list
     else:
         add("single_number", "SKIP", "not arithmetic/count")
     # scale vs evidence
-    if at == "arithmetic" and items:
+    numeric_span = at in ("span", "multi-span") and bool(items) and all(_clean_num(x) is not None for x in items)
+    if (at == "arithmetic" or numeric_span) and items:
         pct_q = bool(_PCT_Q.search(question)) or bool(re.search(r"\bratio\b|\brate\b", question, re.I))
         u = _evidence_unit(ev, doc)
         if pct_q:
@@ -291,14 +292,16 @@ def agent_mk71(it: dict, m) -> dict:
         a_final = a_final[0]
     raw = {"answer": a_final, "scale": ans["scale"], "expression": ans["expression"]}
     p_answer, p_scale = a_final, (ans["scale"] if not blocked else "")
-    if ans.get("answer_type") in ("arithmetic", "count") and not blocked:  # same deterministic V7 scale/format post-step
+    _its = a_final if isinstance(a_final, list) else [a_final]
+    numeric = bool(_its) and all(_clean_num(x) is not None for x in _its)
+    if not blocked and (ans.get("answer_type") in ("arithmetic", "count") or numeric):  # same deterministic V7 scale/format post-step
         from .tat_post import postprocess
         pp = postprocess(raw, q["question"], doc)
         p_answer, p_scale, src = pp["answer"], pp["scale"], "v7_infer_scale"
         sc_ok = any(d["check"] == "scale_vs_evidence" and d["verdict"] == "PASS" for d in D)
         if ans["scale"] and sc_ok and ans["scale"] != pp["scale"]:
             p_scale, src = ans["scale"], "model_structured_scale (gate scale check PASS)"
-        elif not p_scale and ans.get("answer_type") == "arithmetic" and not _PCT_Q.search(q["question"]):
+        elif not p_scale and ans.get("answer_type") != "count" and not _PCT_Q.search(q["question"]):
             u = _evidence_unit(ans["evidence"], doc)
             if u:
                 p_scale, src = u, "evidence_unit (V7 inference empty)"
