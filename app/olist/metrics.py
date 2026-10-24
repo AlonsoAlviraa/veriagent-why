@@ -17,8 +17,9 @@ RATE_TOL_PP, REL_TOL = 0.5, 0.01
 GROUPS = {
     "late": "o.late",
     "freight_heavy": "o.order_id IN (SELECT order_id FROM ol_items GROUP BY order_id HAVING SUM(freight) >= 0.3 * SUM(price))",
-    "interstate": ("o.order_id IN (SELECT i.order_id FROM ol_items i JOIN ol_sellers s ON i.seller_id = s.seller_id "
-                   "JOIN ol_orders o2 ON o2.order_id = i.order_id WHERE s.seller_state <> o2.customer_state)"),
+    # correlated EXISTS (no second scan of ol_orders: Spark/Zetaris rejects the self-referencing view)
+    "interstate": ("EXISTS (SELECT 1 FROM ol_items i JOIN ol_sellers s ON i.seller_id = s.seller_id "
+                   "WHERE i.order_id = o.order_id AND s.seller_state <> o.customer_state)"),
     "multi_seller": "o.order_id IN (SELECT order_id FROM ol_items GROUP BY order_id HAVING COUNT(DISTINCT seller_id) > 1)",
 }
 SOURCES_OF_GROUP = {"late": ["ol_orders"], "freight_heavy": ["ol_items"], "interstate": ["ol_items", "ol_sellers"],
