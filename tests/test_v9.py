@@ -56,3 +56,22 @@ def test_duplicate_top_tokens_deduped():
     assert math.isclose(f["ptrue"], 0.95 / 1.0)
     g = v9.lp_features([{"t": "5", "lp": math.log(0.9), "top": x["top"]}])
     assert math.isclose(g["ans_min_margin"], 0.85)
+
+
+def test_crc_controls_risk_offline():
+    from bench.v9_report import crc
+    y = [1] * 70 + [0] * 30
+    s = [0.9] * 70 + [0.1] * 30
+    fo = [list(range(i, 100, 5)) for i in range(5)]
+    o = crc(s, y, fo, alpha=0.1)
+    assert o["realized_risk_answered_and_wrong"] <= 0.1 and o["coverage"] == 0.7
+
+
+def test_gfolds_table_disjoint():
+    import json
+    from bench.v9_report import gfolds, table_of
+    ids = json.load(open("docs/v9/design.json"))["ids"][:120]
+    t = table_of(); fo = gfolds(ids)
+    tabs = [{t[ids[n]] for n in f} for f in fo]
+    assert sum(len(f) for f in fo) == len(ids)
+    assert all(not (tabs[a] & tabs[b]) for a in range(5) for b in range(a + 1, 5))
