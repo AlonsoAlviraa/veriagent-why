@@ -7,7 +7,7 @@ from SEC 10-Ks filed 2026-06-01..2026-10-24 (see `docs/V9_FINAL_SET.md`, prereg 
 ## Run integrity
 - Exactly one run of `agent_v9`, 4 deterministic shards (`ids[k::4]` of `docs/v9/final_oodsec.json`), 92 rows each, 368 unique ids.
 - 0 error rows, 0 retries, 0 errors/429s in logs. All rows `code_rev=bdcc49d`, `dirty=false`, data sha256 332cd992...
-- 1171+ model calls per shard log total; all other arms (V7, V8, lex) are derived from the same traces, no extra runs.
+- ~13 model calls per item (~4.8k total; shard 0 log: 1171); all other arms (V7, V8, lex) are derived from the same traces, no extra runs.
 - Nebius spend for this run: ~$0.26 (ledger 7.7512 -> 8.0129 USD cumulative; cap $20).
 - No tuning or re-running after seeing results.
 
