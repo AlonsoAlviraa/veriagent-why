@@ -1,0 +1,50 @@
+"""Offline unit tests for V9 (no network, no writes to bench/results)."""
+import math
+from bench import v9
+
+
+def _lp(tokens):
+    return [{"t": t, "lp": l, "top": [[t, l], ["x", l - 1.0]]} for t, l in tokens]
+
+
+def test_lp_features_answer_span():
+    lp = _lp([('{"', -0.01), ('answer', -0.01), ('":', -0.01), (' "', -0.01), ('12', -0.5), ('.5', -0.2), ('",', -0.01),
+              (' "scale', -0.01), ('":', -0.01), (' ""', -0.9), ('}', -0.01)])
+    f = v9.lp_features(lp, "")
+    assert f["lp_ok"] and f["n_ans_tok"] == 2
+    assert math.isclose(f["ans_min_lp"], -0.5) and math.isclose(f["ans_msp"], math.exp(-0.7))
+    assert f["ans_min_margin"] is not None
+
+
+def test_lp_features_missing():
+    assert v9.lp_features(None) == {"lp_ok": False}
+
+
+def test_ptrue_renormalises():
+    lp = [{"t": '{"verdict": "', "lp": 0, "top": []}, {"t": "A", "lp": math.log(0.6), "top": [["A", math.log(0.6)], ["B", math.log(0.2)]]}]
+    f = v9.ptrue_from(lp, {"verdict": "A", "confidence": 90})
+    assert math.isclose(f["ptrue"], 0.75) and f["verbal"] == 0.9
+
+
+def test_ptrue_fallback_no_lp():
+    assert v9.ptrue_from(None, {"verdict": "B", "confidence": "x"})["ptrue"] == 0.0
+
+
+def test_sc_features_ties_keep_v7():
+    f = v9.sc_features("a", ["b", "a", "b"])
+    assert f["sc_pick"] == "a" and f["n_clusters"] == 2
+    f = v9.sc_features("a", ["b", "b", "b"])
+    assert f["sc_pick"] == "b" and f["sample_agree_v7"] == 0
+    assert v9.sc_features("a", ["a", "a", "a"])["sem_entropy"] == 0
+
+
+def test_logprobs_context_restores():
+    from bench import nebius
+    assert nebius.LOGPROBS is False
+    with v9.logprobs():
+        assert nebius.LOGPROBS is True
+    assert nebius.LOGPROBS is False
+
+
+def test_akey_normalises_numbers():
+    assert v9.akey("1,000.0", "million") == v9.akey("1000", "million")

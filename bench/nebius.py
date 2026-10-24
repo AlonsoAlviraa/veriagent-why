@@ -91,6 +91,7 @@ def settle(rid: str, model: str, usage: dict | None, book_worst: bool) -> float:
         return c
 
 
+LOGPROBS = False  # V9: set via bench.v9.logprobs() context; never changes the request otherwise
 TEMPERATURE = 0.0  # verify-v2 self-consistency samples set this temporarily (bench/verify2.py: sampling())
 
 
@@ -106,6 +107,9 @@ def complete(messages: list[dict], model: str | None = None, max_tokens: int = 1
         body["chat_template_kwargs"] = {"enable_thinking": False}  # same as app.llm for NVIDIA
     if os.environ.get("NEBIUS_JSON_MODE", "1") == "1" and any("JSON" in m["content"] for m in messages):
         body["response_format"] = {"type": "json_object"}  # Lightning without thinking often ignores "JSON only"
+    if LOGPROBS:  # V9 (docs/V9_RESEARCH.md): token log-probs for sample-free confidence; off by default
+        body["logprobs"] = True
+        body["top_logprobs"] = 5
     req = urllib.request.Request(BASE + "/chat/completions", data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"})
     usage, book_worst = None, True
@@ -116,7 +120,10 @@ def complete(messages: list[dict], model: str | None = None, max_tokens: int = 1
         ch = out["choices"][0]
         from app.llm import clean_content
         return {"provider": "nebius", "model": model, "content": clean_content(ch["message"].get("content")),
-                "usage": usage, "finish_reason": ch.get("finish_reason")}
+                "usage": usage, "finish_reason": ch.get("finish_reason"),
+                **({"logprobs": [{"t": x.get("token"), "lp": x.get("logprob"),
+                                  "top": [[y.get("token"), y.get("logprob")] for y in (x.get("top_logprobs") or [])]}
+                                 for x in ((ch.get("logprobs") or {}).get("content") or [])]} if LOGPROBS else {})}
     except urllib.error.HTTPError as e:
         book_worst = e.code >= 500 or e.code == 408  # 4xx (auth, 429, bad request) are not billed
         raise

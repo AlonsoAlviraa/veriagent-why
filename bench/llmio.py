@@ -98,6 +98,8 @@ class Meter:
             else:
                 r = _live(messages, tier, max_tokens, model)
                 out, usage = r.get("content") or "", r.get("usage") or {}
+                if r.get("logprobs") is not None:  # V9 only (nebius.LOGPROBS); kept in memory, not traced
+                    self.__dict__.setdefault("lp_log", []).append({"tag": tag, "content": out, "lp": r["logprobs"]})
                 self.finish.append(r.get("finish_reason"))
                 pk = f'{r.get("provider")}:{r.get("model")}'
                 self.providers[pk] = self.providers.get(pk, 0) + 1
