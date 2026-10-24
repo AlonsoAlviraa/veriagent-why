@@ -1,0 +1,46 @@
+# V8 round 1 — design slice (n=648, seed 8008, sha256 2728213a…), paired, same V7 run per item
+
+Model nvidia/Nemotron-3_5-Lightning on Nebius, NEBIUS_STRICT=1, V7/pointer-0 at T=0, K=5 samples at T=0.7.
+Ledger 6.716 → 7.083 USD (round cost ≈ 0.37 USD incl. smoke). Hold-out 720–1019 NOT run; test500 untouched.
+
+## Diff
+- `bench/v8.py`: pointer prompt → `execute()` (args must be literal context text; arithmetic in Python via safe_eval over a0..an;
+  span = literal; count = #args; scale only from a literal `scale_source`), majority vote over 6 samples, repair only when no
+  sample validates, all samples + features logged. Registered as `agent_v8` only with V8=1.
+- `bench/v8_report.py`: official EM/F1, semantic, McNemar, bootstrap, cost/latency/calls, AUROC/ECE/Brier/AURC, OOF logistic.
+- `tests/test_v8.py` (23 tests incl. gold-deletion leakage over pointer/executor/SC). `bench/calib/v8_conf.json` (frozen candidate).
+
+## Answers (official EM, %)
+| arm | EM | F1 | sem | calls/item | s/item | USD | USD/correct | fixed/broken vs V7 | ΔEM [95% CI] | accept |
+|---|---|---|---|---|---|---|---|---|---|---|
+| V7 | 68.06 | 76.09 | 79.94 | 2.27 | 4.17 | 0.112 | 0.000254 | — | — | — |
+| A pointer+exec | 57.72 | 66.29 | 75.15 | 3.27 | 5.18 | 0.153 | 0.000408 | 27/94 | −10.34 [−13.4, −7.1] | no |
+| B SC vote | 51.70 | 59.53 | 71.14 | 8.27 | 11.23 | 0.357 | 0.001064 | 36/142 | −16.36 [−20.1, −12.5] | no |
+| B+C repair | 49.69 | 57.29 | 69.91 | 8.38 | 11.64 | 0.363 | 0.001127 | 36/155 | −18.36 [−22.4, −14.4] | no |
+Post-hoc offline (exploratory, not acceptable evidence): A with V7's infer_scale −5.25 (26/60); A only for arithmetic −0.77 (10/15, CI crosses 0).
+
+Why A/B lose (read from traces): (1) `scale_source` names the unit of the ARGS, not the answer (percent change → "thousand");
+(2) "which year…" questions answered with the cell value instead of the header; (3) span boundaries: whole sentence or
+truncated subject; (4) multi-span picks up "Total" rows; (5) sign of parenthesised numbers. Voting amplifies the pointer's
+systematic errors (it's consistent but wrong), so B < A. Pointer valid rate 69.8%, repair rate 10.8%.
+
+## Confidence (target = V7 correctness, V7 answer unchanged → ΔEM = 0, OOF 5-fold on design)
+| signal | AUROC | ECE | Brier | AURC | coverage | selective EM |
+|---|---|---|---|---|---|---|
+| frozen lex @0.809 | 0.575 | 0.153 | 0.248 | 0.271 | 82.3% | 69.2% |
+| lex recalibrated (OOF logistic, fair ECE baseline) | 0.493 | 0.016 | 0.219 | 0.329 | — | — |
+| V8 logistic (agreement features + lex) | **0.670** | 0.037 | **0.200** | **0.226** | 82.4% | **73.2%** |
+AUROC(V8 − lex) bootstrap 95% CI [+0.037, +0.147] (excludes 0). ECE: better than frozen lex, but NOT better than a recalibrated
+lex (ECE diff CI [−0.058, +0.009] crosses 0) → the honest claim is ranking (AUROC/AURC/Brier), not calibration.
+Strongest feature: v7_agrees_vote (w=0.88). K ablation (OOF AUROC): k=0 0.646, 1 0.654, 2 0.663, 3 0.671, 5 0.671 →
+k=2–3 gives most of the gain at ~half the extra cost (k=5 kept, as pre-registered).
+
+## Candidate (frozen, NOT run on hold-out)
+"V7 answer + pointer-SC agreement confidence": `bench/calib/v8_conf.json` sha256[:16] `c35339eb7eb86d39`, threshold 0.519
+(coverage matched to frozen lex). Cost: +6 calls/item, USD/correct 0.000254 → ≈0.00052 (k=5) (~0.00035 if k=2, would need re-prereg).
+Pass status: AUROC criterion passes with CI excluding 0, EM unchanged; ECE passes vs frozen lex only. Waiting for Code Reviewer.
+
+## Questions for an expert
+1. Accept "ranking-only" confidence improvement, or require ECE vs a recalibrated baseline?
+2. Re-preregister K=2 for cost before hold-out?
+3. Next round for answers: pointer only as a *verifier* (disagreement → targeted re-ask of V7) rather than replacer; type head for "which year" questions; answer-unit scale (not arg unit).
