@@ -1,6 +1,6 @@
 # Why did the late-delivery rate spike in November 2017 (Black Friday month) compared with October 2017?
 
-_Run `olist_q2-snapshot-20261024-104230` · backend **snapshot** · $0 (no model calls)_
+_Run `olist_q2-snapshot-20261024-104247` · backend **snapshot** · $0 (no model calls)_
 
 > Data: Brazilian E-Commerce Public Dataset by Olist (https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), CC BY-NC-SA 4.0. Non-commercial demo; derived memos and traces are shared under the same license.
 
@@ -43,6 +43,6 @@ _Run `olist_q2-snapshot-20261024-104230` · backend **snapshot** · $0 (no model
 | q2_transit_t (avg transit days (treatment)) | 11.095 | GREEN | snapshot | 11.095 |
 | q2_transit_c (avg transit days (control)) | 8.407 | GREEN | snapshot | 8.407 |
 
-System time (trace, investigation): 0.028 s; verify: 0.026 s
+System time (trace, investigation): 0.029 s; verify: 0.025 s
 
 No accuracy metric: Olist has no ground truth for these questions.

@@ -1,6 +1,6 @@
 # What drives 1-2 star reviews (orders purchased Jan 2017 - Aug 2018)?
 
-_Run `olist_q3-snapshot-20261024-104230` · backend **snapshot** · $0 (no model calls)_
+_Run `olist_q3-snapshot-20261024-104247` · backend **snapshot** · $0 (no model calls)_
 
 > Data: Brazilian E-Commerce Public Dataset by Olist (https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), CC BY-NC-SA 4.0. Non-commercial demo; derived memos and traces are shared under the same license.
 
@@ -46,6 +46,8 @@ _Run `olist_q3-snapshot-20261024-104230` · backend **snapshot** · $0 (no model
 | q3_multi_t (1-2 star share, multi-seller vs single (treatment)) | 47.248 | GREEN | snapshot | 47.248 |
 | q3_multi_c (1-2 star share, multi-seller vs single (control)) | 12.341 | GREEN | snapshot | 12.341 |
 
-System time (trace, investigation): 0.426 s; verify: 0.322 s
+System time (trace, investigation): 0.433 s; verify: 0.345 s
 
 No accuracy metric: Olist has no ground truth for these questions.
+
+**Caveat:** these are associations, not causes. Groups overlap (multi-seller orders are also more often late), so a supported hypothesis means the low-review rate differs between groups, not that the factor causes it. Reviews are counted per review row (an order with several reviews counts several times).

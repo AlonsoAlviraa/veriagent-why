@@ -183,7 +183,7 @@ def render_memo(r: dict, receipts: dict | None = None) -> str:
     L += ["", f"System time (trace, investigation): {r['system_seconds']} s" +
           (f"; verify: {receipts['elapsed_s']} s" if receipts and receipts.get("elapsed_s") is not None else ""),
           "", "No accuracy metric: Olist has no ground truth for these questions."]
-    if r.get("question_id") == "q3":
+    if str(r.get("question_id", "")).endswith("q3"):
         L += ["", "**Caveat:** these are associations, not causes. Groups overlap (multi-seller orders are also more often "
               "late), so a supported hypothesis means the low-review rate differs between groups, not that the factor causes it. "
               "Reviews are counted per review row (an order with several reviews counts several times)."]

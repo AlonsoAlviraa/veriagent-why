@@ -1,6 +1,6 @@
 # Why did the late-delivery rate jump in Feb-Mar 2018 compared with Jan 2018?
 
-_Run `olist_q1-snapshot-20261024-104230` · backend **snapshot** · $0 (no model calls)_
+_Run `olist_q1-snapshot-20261024-104247` · backend **snapshot** · $0 (no model calls)_
 
 > Data: Brazilian E-Commerce Public Dataset by Olist (https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), CC BY-NC-SA 4.0. Non-commercial demo; derived memos and traces are shared under the same license.
 
