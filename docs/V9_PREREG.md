@@ -41,3 +41,21 @@ Spend cap for V9: +$6 over the ledger at start (7.2535); hard ledger cap $20.
 ## Hold-out
 One single run of the frozen config on `docs/v9/holdout.json`, **only after Alonso's explicit OK**; no tuning afterwards.
 Design-slice results may only choose *which* pre-declared arm goes to hold-out (recorded in V9_ROUND_1.md before the hold-out).
+
+## Amendment 1 (24 Oct 2026, ~23:00 Madrid) — made BEFORE the hold-out is opened and before any hold-out data is looked at
+Decided with Alonso after the design-slice round (docs/V9_ROUND_1.md). Nothing in the frozen code/config hash `ee774546ef9ccf14`
+changes; the files it covers are byte-identical.
+1. **Primary baseline for H1.** The pre-registered baseline `lex_platt` turned out degenerate on the design slice (AUROC 0.471:
+   lex takes 19 distinct values and 84% of items sit at 0.809/0.81, so a fitted Platt map scrambles its ranking). The **primary**
+   comparison becomes **V9_cheap vs lex_frozen** (the system actually shipped in V7). V9_cheap vs lex_platt (original H1) is still
+   reported. H2 (V9_full vs V8_refit) is unchanged. This was decided after seeing design results, and is recorded as such.
+2. **Final test set.** At Alonso's request (no leakage; out-of-distribution), the single final run uses the new set `oodsec`
+   (docs/V9_FINAL_SET.md; 368 questions, 92 tables, SEC 10-Ks filed 2026-06-01..2026-10-24, after the model's May-2026
+   post-training cutoff) instead of `docs/v9/holdout.json` (TAT-QA train), which stays unopened.
+3. **How the frozen models are applied** (`bench/v9_final.py`, committed before the run): lex_platt, V8_refit, V9_cheap and V9_full
+   logistic models are fitted once on all 600 design rows and applied unchanged; the conformal (I4) threshold is calibrated on the
+   600 design rows at α = 0.10 and applied as-is; lex_frozen keeps 0.809. No hold-out refit, no retuning. On a new distribution
+   these thresholds may not transfer; that is reported, not fixed.
+4. **Run:** one run, `TATQA_SPLIT=oodsec`, same env as above, system `agent_v9`, all V9 flags on; API errors/429s are retried
+   item-by-item (resume of the same file), never by re-running arms. Spend cap: ledger ≤ $20 (start ≈ $7.75; expected ≈ $0.35).
+5. Bootstrap stays 2000 item resamples (seed 2026); a table-cluster bootstrap is added as a declared sensitivity check.
