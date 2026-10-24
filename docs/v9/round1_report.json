@@ -1,0 +1,255 @@
+{
+ "n": 600,
+ "n_tables": 103,
+ "v7": {
+  "em": 63.67,
+  "f1": 71.11,
+  "sem": 77.33,
+  "calls_per_item": 2.22,
+  "sec_per_item": 3.02,
+  "tokens_per_item": 2045.5,
+  "cost_usd": 0.0979
+ },
+ "I3b_answer_arm": {
+  "em": 63.5,
+  "f1": 71.07,
+  "changed": 10,
+  "fixed": 1,
+  "broken": 2,
+  "delta_em": -0.17,
+  "ci95": [
+   -0.83,
+   0.33
+  ],
+  "mcnemar_p": 1.0,
+  "accept(dEM>0 and broken<=fixed/3)": false,
+  "calls_per_item": 6.23,
+  "sec_per_item": 7.6,
+  "tokens_per_item": 5998.0,
+  "cost_usd": 0.2733
+ },
+ "conf": {
+  "lex_frozen": {
+   "auroc": 0.6367,
+   "ece": 0.1786,
+   "brier": 0.2636,
+   "aurc": 0.2807,
+   "threshold": 0.809,
+   "coverage": 0.84,
+   "selective_em": 0.6548
+  },
+  "lex_platt": {
+   "auroc": 0.4709,
+   "ece": 0.0195,
+   "brier": 0.2344,
+   "aurc": 0.3777,
+   "threshold": 0.6273,
+   "coverage": 0.86,
+   "selective_em": 0.6453
+  },
+  "I1_msp_raw": {
+   "auroc": 0.6981,
+   "ece": 0.1545,
+   "brier": 0.2243,
+   "aurc": 0.2554,
+   "threshold": 0.5092,
+   "coverage": 0.84,
+   "selective_em": 0.7083
+  },
+  "I2_ptrue_raw": {
+   "auroc": 0.6392,
+   "ece": 0.3237,
+   "brier": 0.3524,
+   "aurc": 0.2614,
+   "threshold": 0.018,
+   "coverage": 0.84,
+   "selective_em": 0.6806
+  },
+  "I2_verbal_raw": {
+   "auroc": 0.6129,
+   "ece": 0.3277,
+   "brier": 0.3338,
+   "aurc": 0.2676,
+   "threshold": 0.95,
+   "coverage": 0.9967,
+   "selective_em": 0.6388
+  },
+  "I3_v7share_raw": {
+   "auroc": 0.6687,
+   "ece": 0.2704,
+   "brier": 0.2764,
+   "aurc": 0.2643,
+   "threshold": 0.75,
+   "coverage": 0.8883,
+   "selective_em": 0.6811
+  },
+  "V8_refit": {
+   "auroc": 0.6527,
+   "ece": 0.0122,
+   "brier": 0.2164,
+   "aurc": 0.2667,
+   "threshold": 0.4757,
+   "coverage": 0.845,
+   "selective_em": 0.6706
+  },
+  "V9_cheap": {
+   "auroc": 0.7312,
+   "ece": 0.0343,
+   "brier": 0.1902,
+   "aurc": 0.2236,
+   "threshold": 0.4587,
+   "coverage": 0.84,
+   "selective_em": 0.7063
+  },
+  "V9_full": {
+   "auroc": 0.7855,
+   "ece": 0.0379,
+   "brier": 0.1745,
+   "aurc": 0.1903,
+   "threshold": 0.3263,
+   "coverage": 0.84,
+   "selective_em": 0.7222
+  }
+ },
+ "tests": {
+  "H1 V9_cheap vs lex_platt": {
+   "auroc_diff_ci95": [
+    0.1987,
+    0.3227
+   ],
+   "neg_ece_diff_ci95": [
+    -0.0548,
+    0.0072
+   ],
+   "auroc_improves": true,
+   "ece_improves": false
+  },
+  "H2 V9_full vs V8_refit": {
+   "auroc_diff_ci95": [
+    0.0929,
+    0.1732
+   ],
+   "neg_ece_diff_ci95": [
+    -0.0452,
+    0.017
+   ],
+   "auroc_improves": true,
+   "ece_improves": false
+  },
+  "s: V9_cheap vs V8_refit": {
+   "auroc_diff_ci95": [
+    0.028,
+    0.1298
+   ],
+   "neg_ece_diff_ci95": [
+    -0.0442,
+    0.0199
+   ],
+   "auroc_improves": true,
+   "ece_improves": false
+  },
+  "s: V9_full vs lex_platt": {
+   "auroc_diff_ci95": [
+    0.2493,
+    0.3725
+   ],
+   "neg_ece_diff_ci95": [
+    -0.0578,
+    0.0055
+   ],
+   "auroc_improves": true,
+   "ece_improves": false
+  },
+  "s: I1_msp_raw vs lex_frozen": {
+   "auroc_diff_ci95": [
+    -0.0023,
+    0.1236
+   ],
+   "neg_ece_diff_ci95": [
+    -0.0247,
+    0.0557
+   ],
+   "auroc_improves": false,
+   "ece_improves": false
+  },
+  "s: I2_ptrue_raw vs lex_frozen": {
+   "auroc_diff_ci95": [
+    -0.0562,
+    0.0592
+   ],
+   "neg_ece_diff_ci95": [
+    -0.2069,
+    -0.083
+   ],
+   "auroc_improves": false,
+   "ece_improves": false
+  },
+  "s: I3_v7share_raw vs lex_frozen": {
+   "auroc_diff_ci95": [
+    -0.0267,
+    0.0858
+   ],
+   "neg_ece_diff_ci95": [
+    -0.1248,
+    -0.0638
+   ],
+   "auroc_improves": false,
+   "ece_improves": false
+  }
+ },
+ "I4_conformal": {
+  "lex_platt": {
+   "alpha": 0.1,
+   "realized_risk_answered_and_wrong": 0.08,
+   "coverage": 0.1817,
+   "selective_em": 0.5596
+  },
+  "V8_refit": {
+   "alpha": 0.1,
+   "realized_risk_answered_and_wrong": 0.0983,
+   "coverage": 0.3967,
+   "selective_em": 0.7521
+  },
+  "V9_cheap": {
+   "alpha": 0.1,
+   "realized_risk_answered_and_wrong": 0.095,
+   "coverage": 0.4683,
+   "selective_em": 0.7972
+  },
+  "V9_full": {
+   "alpha": 0.1,
+   "realized_risk_answered_and_wrong": 0.095,
+   "coverage": 0.525,
+   "selective_em": 0.819
+  }
+ },
+ "cost": {
+  "V7/I1 (0 extra)": 2.22,
+  "V9_cheap (+P(True))": {
+   "calls_per_item": 3.22,
+   "sec_per_item": 3.74,
+   "tokens_per_item": 2746.3,
+   "cost_usd": 0.1249
+  },
+  "V8_refit (+pointer)": {
+   "calls_per_item": 8.32,
+   "sec_per_item": 8.62,
+   "tokens_per_item": 7393.0,
+   "cost_usd": 0.3211
+  },
+  "V9_full (all)": {
+   "calls_per_item": 12.33,
+   "sec_per_item": 13.19,
+   "tokens_per_item": 11345.5,
+   "cost_usd": 0.4965
+  }
+ },
+ "diag": {
+  "lp_ok_rate": 1.0,
+  "ptrue_src": {
+   "lp": 600,
+   "verdict": 0,
+   "null": 0
+  }
+ }
+}
