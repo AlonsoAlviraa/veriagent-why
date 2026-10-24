@@ -22,3 +22,15 @@ AUROC, ECE(10 bins), Brier, AURC, coverage/selective EM at frozen 0.809 (lex) an
 
 **Acceptance**: ΔEM > 0 AND broken ≤ fixed/3. Confidence change: AUROC and ECE improve, EM not hurt, bootstrap CI of the
 AUROC difference excludes 0. When a combined candidate exists: freeze config hash, STOP before hold-out, wait for Code Reviewer.
+
+## Final config before hold-out (round 2, after review of PR #13)
+- Answer: V7 unchanged. PRIMARY confidence `bench/calib/v8_conf.json` (sha256[:16] 70926c2c67b1f17a), K=5, threshold 0.5189.
+  SECONDARY `bench/calib/v8_conf_k0.json` (ceaed3cbc6de5dc4), K=0 (pointer-0 only), threshold 0.4901. Both from `python -m bench.v8_freeze`
+  (full-design refit; threshold = OOF cut matching frozen-lex@0.809 coverage). Features `bench/v8_r2.py:feats_k`:
+  [agree, ptr0_valid, ptr0_agrees_vote, v7_agrees_vote, v7_gate_passed, lex].
+- Baselines on hold-out: frozen lex@0.809; lex Platt and lex isotonic fitted on the whole design slice; raw agreement (`agree`).
+- Claim limited to ranking/abstention (AUROC, AURC, Brier, selective EM at matched coverage, paired bootstrap ΔAUROC CI). ECE reported, no calibration claim.
+- Hold-out: ONE run of agent_v8 on docs/v71/holdout300.json (dev 720–1019, n=300), same provider/model/env as V7 (Nebius
+  Lightning, NEBIUS_STRICT=1). No tuning afterwards; results published as-is in docs/V8_HOLDOUT_RESULTS.md. If V8 does not beat
+  lex, V7's confidence is kept.
+- Folds were by question (648 q / 260 tables); disclosed. Config commit SHA: see the commit that adds this line's successor note.

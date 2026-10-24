@@ -52,3 +52,8 @@ Diagnostic fixtures from eval400 (`tests/fixtures/v71_diag_eval400.json`, never 
 Note: 3 pre-existing tests fail only when live-run env vars (LLM_CACHE=0, LLM_PROVIDER, …) are exported; they pass in a clean env.
 
 Cost: ledger 6.119 → 6.716 USD (≈ $0.60 for 3,300 rows), cap 15.
+
+## Disclosure (added during V8): abstention-fit overlap
+The frozen abstention fit (`bench/calib/abstention_v7.json`) used dev rows = dev positions 0–149 of the seed-2026 order; 130 of
+them (positions 20–149) are inside eval400 (20–419). Coverage / selective EM for V7 and V7.1 on eval400 are therefore optimistic
+(in-sample threshold) for those 130 items; EM/F1 are unaffected. Cite selective metrics on eval400 excluding them.
