@@ -34,3 +34,4 @@ AUROC difference excludes 0. When a combined candidate exists: freeze config has
   Lightning, NEBIUS_STRICT=1). No tuning afterwards; results published as-is in docs/V8_HOLDOUT_RESULTS.md. If V8 does not beat
   lex, V7's confidence is kept.
 - Folds were by question (648 q / 260 tables); disclosed. Config commit SHA: see the commit that adds this line's successor note.
+- Frozen config commit: `4e43fbbbe5c9ef963d27280493acf4d7104592d0` (clean tree).
