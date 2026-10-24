@@ -33,6 +33,15 @@ def logprobs():
         nebius.LOGPROBS = old
 
 
+def _top(x: dict) -> dict:
+    """Unique top-k {token: logprob}; Nebius repeats the sampled token in top_logprobs (observed in the probe)."""
+    d: dict = {}
+    for t in x.get("top") or []:
+        if t and t[0] is not None and t[1] is not None and t[1] > -1000 and t[0] not in d:
+            d[t[0]] = t[1]
+    return d
+
+
 # ---------- I1: token log-prob features (pure, unit-tested) ----------
 def _answer_span(lp: list[dict], content: str) -> list[dict]:
     """Tokens that belong to the value of the "answer" key in the JSON reply (best effort; falls back to all tokens)."""
@@ -63,7 +72,7 @@ def lp_features(lp: list[dict] | None, content: str = "") -> dict:
     allv = [x["lp"] for x in lp if x.get("lp") is not None]
     margins = []
     for x in a:
-        top = sorted((t[1] for t in (x.get("top") or []) if t and t[1] is not None), reverse=True)
+        top = sorted(_top(x).values(), reverse=True)
         if len(top) >= 2:
             margins.append(math.exp(top[0]) - math.exp(top[1]))
     if not v:
@@ -87,18 +96,21 @@ def ptrue_from(lp: list[dict] | None, out: dict) -> dict:
         verbal = max(0.0, min(1.0, float(out.get("confidence")) / 100))
     except (TypeError, ValueError):
         verbal = None
-    p = None
+    p, src = None, None
     for x in lp or []:
         t = (x.get("t") or "").strip(' "')
         if t in ("A", "B"):
-            d = {str(tok).strip(' "'): l for tok, l in (x.get("top") or []) if tok is not None and l is not None}
-            pa, pb = math.exp(d["A"]) if "A" in d else 0.0, math.exp(d["B"]) if "B" in d else 0.0
+            pa = pb = 0.0
+            for tok, l in _top(x).items():  # merge surface variants ("A", " A", ...) by summing probability
+                k2 = str(tok).strip(' "')
+                pa += math.exp(l) if k2 == "A" else 0.0
+                pb += math.exp(l) if k2 == "B" else 0.0
             if pa + pb > 0:
-                p = pa / (pa + pb)
+                p, src = pa / (pa + pb), "lp"
             break
     if p is None and verdict in ("A", "B"):
-        p = 1.0 if verdict == "A" else 0.0
-    return {"ptrue": p, "verdict": verdict or None, "verbal": verbal, "ptrue_from_lp": p not in (None, 0.0, 1.0) or bool(lp)}
+        p, src = (1.0 if verdict == "A" else 0.0), "verdict"
+    return {"ptrue": p, "verdict": verdict or None, "verbal": verbal, "ptrue_src": src}
 
 
 # ---------- I3: semantic entropy over answer clusters ----------

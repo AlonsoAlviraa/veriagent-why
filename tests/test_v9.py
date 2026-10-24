@@ -48,3 +48,11 @@ def test_logprobs_context_restores():
 
 def test_akey_normalises_numbers():
     assert v9.akey("1,000.0", "million") == v9.akey("1000", "million")
+
+
+def test_duplicate_top_tokens_deduped():
+    x = {"t": "A", "lp": math.log(0.9), "top": [["A", math.log(0.9)], ["A", math.log(0.9)], [" A", math.log(0.05)], ["B", math.log(0.05)], ["", -9999.0]]}
+    f = v9.ptrue_from([x], {"verdict": "A"})
+    assert math.isclose(f["ptrue"], 0.95 / 1.0)
+    g = v9.lp_features([{"t": "5", "lp": math.log(0.9), "top": x["top"]}])
+    assert math.isclose(g["ans_min_margin"], 0.85)
