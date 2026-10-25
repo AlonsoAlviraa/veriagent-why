@@ -1,0 +1,189 @@
+{
+ "n_items": 20,
+ "values_found": 867,
+ "values_total": 896,
+ "items": [
+  {
+   "uid": "gensecq-1dc6fc452220cbf8",
+   "entity": "Aquestive Therapeutics, Inc.",
+   "accession": "0001398733-26-000042",
+   "question": "What was the current ratio as of 2026-06-30?",
+   "gold": 7.19,
+   "scale": "",
+   "source_values_found": "48/48"
+  },
+  {
+   "uid": "gensecq-b9e9e58e8937f841",
+   "entity": "DigitalOcean Holdings, Inc.",
+   "accession": "0001628280-26-052556",
+   "question": "What was free cash flow (operating cash flow minus capital expenditures) for the 6 months ended 2026-06-30?",
+   "gold": 75313,
+   "scale": "thousand",
+   "source_values_found": "48/48"
+  },
+  {
+   "uid": "gensecq-02d67f8595c6de55",
+   "entity": "INFINITY NATURAL RESOURCES, INC.",
+   "accession": "0002029118-26-000098",
+   "question": "What was operating cash flow as a percentage of net income (loss) for the 6 months ended 2026-06-30?",
+   "gold": 656.73,
+   "scale": "percent",
+   "source_values_found": "34/34"
+  },
+  {
+   "uid": "gensecq-882a7768bcdb856d",
+   "entity": "PICARD MEDICAL, INC.",
+   "accession": "0001437749-26-028565",
+   "question": "What was the current ratio as of 2026-06-30?",
+   "gold": 1.02,
+   "scale": "",
+   "source_values_found": "52/52"
+  },
+  {
+   "uid": "gensecq-8b5122489c6abef4",
+   "entity": "SEZZLE INC.",
+   "accession": "0001662991-26-000126",
+   "question": "What was the difference, in percentage points, between year-over-year revenue growth for the three-month period and for the 6-month period ended 2026-06-30?",
+   "gold": 11.57,
+   "scale": "percent",
+   "source_values_found": "36/36"
+  },
+  {
+   "uid": "gensecq-6ed739eb9bfb59be",
+   "entity": "Liberty Live Holdings,\u00a0Inc.",
+   "accession": "0001104659-26-092020",
+   "question": "What was the current ratio as of 2026-06-30?",
+   "gold": 0.25,
+   "scale": "",
+   "source_values_found": "38/38"
+  },
+  {
+   "uid": "gensecq-b18d2e0e8d6c8566",
+   "entity": "NABORS INDUSTRIES LTD",
+   "accession": "0001104659-26-089087",
+   "question": "What was operating cash flow as a percentage of net income (loss) for the 6 months ended 2026-06-30?",
+   "gold": -662.95,
+   "scale": "percent",
+   "source_values_found": "40/40"
+  },
+  {
+   "uid": "gensecq-e38b3b9ef284be18",
+   "entity": "RTX CORPORATION",
+   "accession": "0000101829-26-000027",
+   "question": "By how many percentage points did selling, general and administrative expense as a percentage of revenue change in the three months ended 2026-06-30 versus the prior-year quarter?",
+   "gold": -0.58,
+   "scale": "percent",
+   "source_values_found": "44/44"
+  },
+  {
+   "uid": "gensecq-26d77416914d279d",
+   "entity": "Warner Bros. Discovery, Inc.",
+   "accession": "0001437107-26-000075",
+   "question": "By how many percentage points did selling, general and administrative expense as a percentage of revenue change in the three months ended 2026-06-30 versus the prior-year quarter?",
+   "gold": 4.17,
+   "scale": "percent",
+   "source_values_found": "40/40"
+  },
+  {
+   "uid": "gensecq-825d5cc4a9a68a3e",
+   "entity": "IOVANCE BIOTHERAPEUTICS,\u00a0INC.",
+   "accession": "0001104659-26-091716",
+   "question": "What was cash and cash equivalents as of 2026-06-30 as a multiple of revenue for the three months ended 2026-06-30?",
+   "gold": 1.12,
+   "scale": "",
+   "source_values_found": "44/44"
+  },
+  {
+   "uid": "gensecq-aee802d74e93b505",
+   "entity": "Mueller Water Products, Inc.",
+   "accession": "0001350593-26-000036",
+   "question": "What was the current ratio as of 2026-06-30?",
+   "gold": 4.64,
+   "scale": "",
+   "source_values_found": "42/42"
+  },
+  {
+   "uid": "gensecq-c14d21b4e7f18098",
+   "entity": "FIGS, Inc.",
+   "accession": "0001628280-26-054342",
+   "question": "What was the ratio of total liabilities to total stockholders' equity as of 2026-06-30?",
+   "gold": 0.32,
+   "scale": "",
+   "source_values_found": "44/44"
+  },
+  {
+   "uid": "gensecq-d7be5859d74fb060",
+   "entity": "MOOG Inc.",
+   "accession": "0001628280-26-051294",
+   "question": "What was free cash flow (operating cash flow minus capital expenditures) for the 9 months ended 2026-06-27?",
+   "gold": 151229,
+   "scale": "thousand",
+   "source_values_found": "52/52"
+  },
+  {
+   "uid": "gensecq-63284e977963d222",
+   "entity": "Rivian Automotive, Inc. / DE",
+   "accession": "0001874178-26-000054",
+   "question": "What was the gross margin (gross profit as a percentage of revenue) for the three months ended 2026-06-30?",
+   "gold": 10.8,
+   "scale": "percent",
+   "source_values_found": "50/50"
+  },
+  {
+   "uid": "gensecq-25c2b54464455bc6",
+   "entity": "NovoCure Limited",
+   "accession": "0001645113-26-000062",
+   "question": "What was the percentage change in net income (loss) for the 6 months ended 2026-06-30 compared with the prior-year period?",
+   "gold": -16.57,
+   "scale": "percent",
+   "source_values_found": "48/48"
+  },
+  {
+   "uid": "gensecq-c2cb97c15fbd8ec9",
+   "entity": "GENTEX CORPORATION",
+   "accession": "0000355811-26-000048",
+   "question": "What was operating cash flow as a percentage of net income (loss) for the 6 months ended 2026-06-30?",
+   "gold": 150.91,
+   "scale": "percent",
+   "source_values_found": "19/48"
+  },
+  {
+   "uid": "gensecq-f270c03e697466e9",
+   "entity": "Meta Platforms, Inc.",
+   "accession": "0001628280-26-050705",
+   "question": "What was operating cash flow as a percentage of net income (loss) for the 6 months ended 2026-06-30?",
+   "gold": 150.37,
+   "scale": "percent",
+   "source_values_found": "44/44"
+  },
+  {
+   "uid": "gensecq-fffb24e343580933",
+   "entity": "USANA HEALTH SCIENCES, INC.",
+   "accession": "0000896264-26-000056",
+   "question": "What was the current ratio as of 2026-07-04?",
+   "gold": 2.66,
+   "scale": "",
+   "source_values_found": "48/48"
+  },
+  {
+   "uid": "gensecq-7deb8281d982da40",
+   "entity": "SS&C TECHNOLOGIES HOLDINGS, INC.",
+   "accession": "0001193125-26-326105",
+   "question": "What was the ratio of total liabilities to total stockholders' equity as of 2026-06-30?",
+   "gold": 2.09,
+   "scale": "",
+   "source_values_found": "48/48"
+  },
+  {
+   "uid": "gensecq-0341bfc3d0c06d2c",
+   "entity": "NovoCure Limited",
+   "accession": "0001645113-26-000062",
+   "question": "What was cash and cash equivalents as of 2026-06-30 as a multiple of revenue for the three months ended 2026-06-30?",
+   "gold": 0.51,
+   "scale": "",
+   "source_values_found": "48/48"
+  }
+ ],
+ "note": "GENTEX (0000355811-26-000048) presents whole US dollars; the first pass searched thousand/million forms only (19/48). Re-check rounding every whole-dollar number in the filing to thousands: 48/48 found. Corrected total 896/896 source values found in the filing HTML. Gold arithmetic is computed by code from these displayed values (not re-derived by hand).",
+ "values_found_corrected": 896
+}
