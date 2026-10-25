@@ -19,7 +19,7 @@ from app.config import load_dotenv  # noqa: E402
 
 BOXES = {("planner", "hypotheses"): "Planner", ("retriever", "retrieved"): "Zetaris SQL + BM25",
          ("s1_filter", "filtered"): "S1 Filter", ("evidence_evaluator", "verdicts"): "Evidence Eval",
-         ("cause_analyst", "ranked"): "Cause Analyst", ("writer", "claims"): "Writer", ("claim_gate", "checked"): "Claim Gate",
+         ("cause_analyst", "ranked"): "Cause Analyst", ("writer", "claims"): "Writer", ("claim_gate", "checked"): "Traceability Check",
          ("markovian", "run"): "Meterless Markovian", ("observability", "run_report"): "Observability report",
          ("orchestrator", "end"): "Memo"}
 

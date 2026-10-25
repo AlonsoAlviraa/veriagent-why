@@ -1,5 +1,5 @@
 """Orchestrator: Planner -> Retriever -> S1 Filter -> Evidence Evaluator (loop to Planner, max 3)
--> Cause Analyst -> Writer -> Claim Gate (loop to Cause Analyst, max 2) -> memo + confidence."""
+-> Cause Analyst -> Writer -> Traceability Check (loop to Cause Analyst, max 2) -> memo + confidence."""
 from __future__ import annotations
 import os
 import re, sys, time, uuid

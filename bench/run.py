@@ -190,6 +190,9 @@ def main(argv=None):
                 rec["scores"]["sem"], rec["scores"]["sem_rule"] = float(ok), why
                 rec["gold"] = {"answer": t["q"]["answer"], "scale": t["q"]["scale"], "answer_type": t["q"]["answer_type"], "answer_from": t["q"]["answer_from"]}
             rec["output"], rec["meter"] = res, sys_meter
+            if a.bench == "tatqa":
+                from app.v9conf import row_decision  # frozen V9_full signal, never verbal confidence
+                rec["decision"] = row_decision(res)
             # fix (audit #4): "model" is the configured default; models_used is what was actually called (Super on routed items)
             rec["models_used"] = dict(sys_meter.get("providers") or {})
             rec["question"] = (t.get("metadata") or {}).get("goal") if a.bench == "insightbench" else t["q"]["question"]  # audit trace

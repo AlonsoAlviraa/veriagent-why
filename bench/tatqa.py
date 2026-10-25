@@ -1,7 +1,7 @@
 """TAT-QA adapter (hybrid table + text financial QA) -> thin VeriAgent Why path.
 
 - agent: Evidence step (model quotes the cells/sentences it uses and gives an arithmetic expression)
-  -> deterministic Claim Gate: every quote must occur in the context, every number in the expression
+  -> deterministic Traceability Check: every quote must occur in the context, every number in the expression
   must be a context number, and eval(expression) must equal the answer. On failure, one feedback
   round (max 2 gate rounds); the final answer is then kept but counted as gate-failed.
 - rag:   BM25 top paragraphs + full table, one answer call. No checks.
@@ -74,15 +74,25 @@ _FUNCS = {"abs": abs, "calc": float, "round": lambda x: float(round(x, 2))}
 
 
 def _norm(s: str) -> str:
-    """Quote normaliser shared by the Claim Gate and the citation scorer. Fix B3: thousands commas are removed
+    """Quote normaliser shared by the Traceability Check and the citation scorer. Fix B3: thousands commas are removed
     (was: replaced by a space, so a quote '4351' never matched context '4,351') and table '|' separators are
     ignored (a row quoted without pipes never matched the '| a | b |' table rendering)."""
     s = re.sub(r"(?<=\d),(?=\d{3}\b)", "", str(s).lower()).replace("|", " ")
     return re.sub(r"[\s$,()]+", " ", s).strip()
 
 
+def _is_empty_answer(ans) -> bool:
+    """None, '', whitespace, or a list holding only those (TRACE_AUDIT P1-2: 70/70 empty gen answers passed)."""
+    items = ans if isinstance(ans, (list, tuple)) else [ans]
+    return not any(x is not None and str(x).strip() for x in items)
+
+
 def gate(out: dict, ctx: str) -> list[str]:
+    """Traceability check (NOT a correctness check): cited evidence and numbers must be re-findable in the same context
+    the model saw, and the expression must reproduce the answer. A pass means 'traceable', never 'verified true'."""
     reasons, nctx, cnums = [], _norm(ctx), nums(ctx)
+    if _is_empty_answer(out.get("answer")):
+        reasons.append("empty answer: blocked")
     for e in out.get("evidence") or []:
         if _norm(e) and _norm(e) not in nctx:
             reasons.append(f"evidence not found in context: {str(e)[:80]}")
@@ -136,7 +146,7 @@ def agent(it: dict, m: Meter) -> dict:
         if not reasons:
             break
         msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
-                       {"role": "user", "content": "Claim gate rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS}]
+                       {"role": "user", "content": "Traceability check rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS}]
     p = _pred(out, it)
     # deterministic confidence (declared in docs/BENCHMARKS.md): gate outcome x traceability, no model input
     det = tat_det(len(log), not reasons, traceable(str(p["answer"]), ctx), None)
@@ -207,7 +217,7 @@ QUOTE_RULE = (' QUOTING: each "evidence" item must be copied character-for-chara
 def agent_markov(it: dict, m: Meter, use_nv: bool = False, use_rerank: bool = False) -> dict:
     """agent + Markovian control (bench/markov.py): route NUMERIC (calculator steps, react's strength) or EVIDENCE
     (single call), optional DEEP final model from the NVIDIA classifier, expected-gain gate retry.
-    Both routes keep the agent's quoted evidence, expression, Claim Gate and deterministic confidence."""
+    Both routes keep the agent's quoted evidence, expression, Traceability Check and deterministic confidence."""
     from .markov import Controller, load_features, RELEVANCE_MIN
     doc, q = it["doc"], it["q"]
     ctl = Controller(use_nv, load_features("tatqa") if use_nv else None, "tatqa")
@@ -257,7 +267,7 @@ def agent_markov(it: dict, m: Meter, use_nv: bool = False, use_rerank: bool = Fa
         if not retry:
             break
         msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
-                       {"role": "user", "content": "Claim gate rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS + QUOTE_RULE}]
+                       {"role": "user", "content": "Traceability check rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS + QUOTE_RULE}]
     p = _pred(out, it)
     rp = rel[-1] if rel else None
     tr = traceable(str(p["answer"]), ctx)

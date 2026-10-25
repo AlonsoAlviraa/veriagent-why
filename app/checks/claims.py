@@ -1,4 +1,4 @@
-"""Deterministic claim checker, shared by the Claim Gate and (later) the eval harness.
+"""Deterministic claim checker, shared by the Traceability Check and (later) the eval harness.
 
 A claim: {id, metric, segment: {col: val}, window: [start, end], value, row_ids: [...]}.
 Checks: cited row IDs exist in v_logistics and match the claim's segment and window; the
@@ -13,7 +13,7 @@ FROM = "v_logistics l JOIN v_orders o USING(order_id)"
 
 
 def metric_sql(metric: str, segment: dict, window: list[str]) -> tuple[str, list]:
-    """The exact SQL (and bound params) that defines a claim's value. Used by the Claim Gate and by
+    """The exact SQL (and bound params) that defines a claim's value. Used by the Traceability Check and by
     POST /verify, so the receipt re-executes the same statement the claim was built from."""
     where, params = ["l.ship_date BETWEEN ? AND ?"], [window[0], window[1]]
     for c, v in segment.items():

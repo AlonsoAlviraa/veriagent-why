@@ -11,7 +11,7 @@ The mandatory seed step per hypothesis is the deterministic tool the Evidence Ev
 so the rule path is always covered. In SAMPLE_MODE, or when a model step fails or proposes an
 invalid tool, the deterministic policy is used and the trace says so. Sufficiency here only
 stops retrieval; support/refute is still decided by the Evidence Evaluator (with its own requery
-loop, max 3 rounds) and claims by the deterministic Claim Gate.
+loop, max 3 rounds) and claims by the deterministic Traceability Check.
 """
 from __future__ import annotations
 import json, re

@@ -1,4 +1,4 @@
-"""Decision memo (Markdown). Only Claim-Gate-approved claims appear as findings."""
+"""Decision memo (Markdown). Only claims that pass the traceability check appear as findings (traceability, not correctness)."""
 from __future__ import annotations
 
 
@@ -23,8 +23,8 @@ def render_memo(o: dict, run_id: str) -> str:
          *(["- SAMPLE MODE: no Zetaris; local DuckDB snapshot with the same views and SQL"] if str((o.get("backends") or {}).get("data", "")).startswith("sample") else []),
          ""]
     if o.get("narrative"):
-        L += ["## Summary (model-written, numbers checked by the Claim Gate)", o["narrative"], ""]
-    L += ["## Findings (each verified by the Claim Gate)"]
+        L += ["## Summary (model-written, numbers re-found by the traceability check)", o["narrative"], ""]
+    L += ["## Findings (each passed the traceability check: cited rows and numbers re-found in the data; not independently verified as true)"]
     L += [f"- {cl['text']} Rows: {', '.join(cl['row_ids'])}" for cl in o["claims"]] or ["- none"]
     if sc:
         L += ["", "## Secondary cause", f"- {sc['label']} in {seg(sc['segment'])}: estimated share of the excess {k['bad']} {round(100*sc['raw_share_of_excess_late'])}%."]

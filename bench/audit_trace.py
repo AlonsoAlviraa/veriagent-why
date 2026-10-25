@@ -239,7 +239,7 @@ def tat_trace(row: dict, run: str, data: Path, fail: dict | None) -> dict:
                           model=row.get("model")))
         d = next((x for x in gdec if (x.get("state") or {}).get("gate_round") == r), None)
         verdict = "PASS" if not g.get("reasons") else "REJECT"
-        steps.append(step("claim_gate", f"Claim Gate round {r}: {verdict}" + (": " + "; ".join(g["reasons"]) if g.get("reasons") else ""),
+        steps.append(step("claim_gate", f"Traceability Check round {r}: {verdict}" + (": " + "; ".join(g["reasons"]) if g.get("reasons") else ""),
                           outputs={"verdict": verdict, "reasons": g.get("reasons", [])},
                           decision=mk_decision(d) if d else (policy_decision(out, g, last) if decisions is None else None),
                           retries=r))
@@ -324,7 +324,7 @@ def ib_trace(row: dict, run: str, data: Path, fail: dict | None) -> dict:
                           outputs={"drafts": g["drafts"]} if g.get("drafts") else NL,
                           prompt=prompt_block(None, "bench/insightbench.py:write"), model=row.get("model")))
         d = next((x for x in rw if (x.get("state") or {}).get("gate_round") == r), None)
-        steps.append(step("claim_gate", f"Claim Gate round {r}: {g.get('failed', NL)} of {g.get('insights', NL)} insights had numbers not in the cited results"
+        steps.append(step("claim_gate", f"Traceability Check round {r}: {g.get('failed', NL)} of {g.get('insights', NL)} insights had numbers not in the cited results"
                           + (f"; summary numbers unsupported: {g['summary_unsupported']}" if g.get("summary_unsupported") else "")
                           + (f" ({g['note']})" if g.get("note") else ""),
                           outputs=g, decision=mk_decision(d) if d else None, retries=r or 0))
@@ -346,7 +346,7 @@ def ib_trace(row: dict, run: str, data: Path, fail: dict | None) -> dict:
     kept = [c for c in claims if c["gate_verdict"] == "KEPT"]
     final = {"insights": out.get("insights", NL), "summary": out.get("summary", NL),
              "composed_from": {"claims": [c["id"] for c in kept], "evidence": sorted({e for c in kept for e in c["cited_evidence"]}, key=lambda s: (len(s), s))},
-             "post_format": [{"rule": "claim gate drop", "before": f"{len(claims)} insights", "after": f"{len(kept)} insights"}] if len(kept) != len(claims) else []}
+             "post_format": [{"rule": "traceability check drop", "before": f"{len(claims)} insights", "after": f"{len(kept)} insights"}] if len(kept) != len(claims) else []}
     n_err = sum(v.startswith("ERROR") for v in store.values())
     conf = {"deterministic": out.get("confidence_det", NL), "model_self_reported": out.get("confidence", NL),
             "formula": "0.1 if no results or no kept claims; else min(0.9, 0.2 + 0.7 * share_sql_ok * share_claims_kept)",
@@ -377,7 +377,7 @@ def narrative(t: dict) -> str:
         parts.append(f"It ran {len(sq)} SQL queries; {len(bad)} returned errors.")
     gates = [s for s in st if s["type"] == "claim_gate"]
     if gates:
-        parts.append(f"The Claim Gate ran {len(gates)} round(s); last: {gates[-1]['summary'].split(': ', 1)[-1][:160]}.")
+        parts.append(f"The Traceability Check ran {len(gates)} round(s); last: {gates[-1]['summary'].split(': ', 1)[-1][:160]}.")
     pf = next((s for s in st if s["type"] == "post_format"), None)
     if pf and pf["outputs"]["changes"]:
         parts.append("Post-format changed " + ", ".join(f"{x['field']} {x['before']!r}->{x['after']!r}" for x in pf["outputs"]["changes"]) + ".")
@@ -541,7 +541,10 @@ def write_item_trace(row: dict, results_path: Path, data: Path, root: Path, min_
     if isinstance(row.get("output"), dict) and row["output"].get("v71"):  # V7.1: every gate decision with its reason
         t["v71"] = row["output"]["v71"]
     p = d / f"{safe}.audit.json"
-    p.write_text(json.dumps(t, indent=1, ensure_ascii=False, default=str))
+    body = json.dumps(t, indent=1, ensure_ascii=False, default=str)
+    p.write_text(body)
+    import hashlib
+    sha = hashlib.sha256(body.encode()).hexdigest()  # TRACE_AUDIT P1-4: hash logged so a later edit/deletion is detectable
     gz = None
     if any(f["prompt"] for f in full) and _disk_free_gb(root) > min_free_gb:
         clean, _ = secret_scan(full)
@@ -552,7 +555,7 @@ def write_item_trace(row: dict, results_path: Path, data: Path, root: Path, min_
     idx = {"id": row["id"], "config": row["system"], "bench": row["bench"],
            "score": sc.get("em") if row["bench"] == "tatqa" else sc.get("summary_judge"),
            "failure_cause": failure_cause(row), "path": str(p), "prompts_gz": str(gz) if gz else None,
-           "redactions": t["secret_scan"]["redactions"]}
+           "redactions": t["secret_scan"]["redactions"], "sha256": sha}
     with (root / run / "audit_index.jsonl").open("a") as f:
         f.write(json.dumps(idx) + "\n")
     return idx

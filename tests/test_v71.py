@@ -1,4 +1,4 @@
-"""V7.1 (development after the pre-registered run): structured output, extractive spans, expanded claim gate,
+"""V7.1 (development after the pre-registered run): structured output, extractive spans, expanded traceability check,
 semantic-correctness metric. Fixtures are SYNTHETIC docs reproducing the failure shapes of test500 audit items
 0a5bf43b11e9, 2238ca90aabc, 4ae88a16a8a9, 4c309d1eb940, c3ef3efb4a4e (trace_audit/TEST500_ERRORS.csv)."""
 import importlib, json

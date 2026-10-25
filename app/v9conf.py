@@ -61,3 +61,23 @@ def assess(o: dict, run_id: str | None = None, item_id: str | None = None) -> di
         finally:
             NS._RUN.update(prev)
     return r
+
+
+def row_decision(o: dict) -> dict:
+    """Abstention decision stored on every benchmark answer row (TRACE_AUDIT P1-3/P2-6).
+    Signal = the frozen V9_full p_correct vs the frozen CRC lambda; the model's verbal `confidence` is never used.
+    An empty answer is always 'abstain'. Rows without V9 features get decision=None with the reason (no fallback signal)."""
+    o = o or {}
+    a = o.get("answer")
+    items = a if isinstance(a, (list, tuple)) else [a]
+    empty = not any(x is not None and str(x).strip() for x in items)
+    base = {"signal": "V9_full_frozen", "verbal_confidence_used": False, "gate_passed": o.get("gate_passed")}
+    if empty:
+        return {**base, "decision": "abstain", "reason": "empty answer", "p_correct": None}
+    if not isinstance(o.get("v9"), dict) or "features" not in o["v9"]:
+        return {**base, "decision": None, "reason": "no frozen V9 features on this system", "p_correct": None}
+    if not enabled():
+        return {**base, "decision": None, "reason": "V9_CONFIDENCE=off", "p_correct": None}
+    p, lam = prob(vector(o)), model()["crc"]["lambda"]
+    return {**base, "decision": "answer" if p >= lam else "abstain", "reason": "p_correct >= crc_lambda" if p >= lam else "p_correct < crc_lambda",
+            "p_correct": round(p, 4), "crc_lambda": round(lam, 4)}

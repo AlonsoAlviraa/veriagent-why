@@ -1,6 +1,6 @@
 """Per-run audit trace for the main app: logs/<run_id>/audit.json next to a copy of the memo.
 Built from the Tracer events (every agent step) and the final result: planner, SQL, evidence evaluation, requery,
-cause analyst, writer, claim gate, verify-retry attempts (if any), confidence and the narrative. Long strings are
+cause analyst, writer, traceability check, verify-retry attempts (if any), confidence and the narrative. Long strings are
 truncated (AUDIT_PROMPT_CHARS, default 2000); secrets are redacted with the same scanner as the bench traces."""
 from __future__ import annotations
 import json, os, shutil

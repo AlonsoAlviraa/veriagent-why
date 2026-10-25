@@ -3,7 +3,7 @@
 **Status: DEVELOPMENT, post pre-registered run.** This does not modify or reinterpret the pre-registered V7 result (65.8%). No test500 / pilot / gold-test items were used.
 
 ## Setup
-- Arms: `agent_mk` (frozen V7) vs `agent_mk71` (`V71=1`: structured `{answer_type,value,scale}`, extractive spans w/ fuzzy match, expanded claim gate, semantic metric).
+- Arms: `agent_mk` (frozen V7) vs `agent_mk71` (`V71=1`: structured `{answer_type,value,scale}`, extractive spans w/ fuzzy match, expanded traceability check, semantic metric).
 - Items: 400 TAT-QA **dev** items, seeded dev order (seed 2026) positions 20..419 (`docs/v71/eval400.json`). Positions 0..19 were reserved for smoke/debug (one fix — numeric table spans get the V7 scale/format post-step — was made after the 3-item smoke, before this run; no changes after it).
 - Nebius, `NEBIUS_STRICT=1`, `nvidia/Nemotron-3_5-Lightning`, T=0, 4 shards, paired on identical items, no cache.
 - Run cost: ≈ $0.17 (ledger 5.944 → 6.119 USD cumulative; cap 15).

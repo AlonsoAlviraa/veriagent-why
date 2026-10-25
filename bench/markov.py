@@ -11,12 +11,12 @@ No model call is made here; all decisions are pure functions of the state -> det
 Decisions:
   route         TAT-QA: NUMERIC (calculator steps, react-style) vs EVIDENCE (single quoted-evidence answer);
                 optional DEEP flag (final answer on a bigger model) from the NVIDIA classifier features.
-  gate_retry    retry the Claim Gate only when expected gain >= GAIN_MIN (per-reason gain table), else stop.
+  gate_retry    retry the Traceability Check only when expected gain >= GAIN_MIN (per-reason gain table), else stop.
   sql_repair    repair a failed SQL only for repairable error classes and never twice on the same error.
   requery       skip the Evidence Evaluator call when the evidence is already sufficient, or stop when the
                 last round added nothing.
   rewrite       InsightBench gate: drop few unsupported insights instead of paying a rewrite call.
-Both paths always keep the agent's evidence quotes, Claim Gate and citations.
+Both paths always keep the agent's evidence quotes, Traceability Check and citations.
 """
 from __future__ import annotations
 import json, re
@@ -26,7 +26,7 @@ FEAT = Path(__file__).resolve().parent / "features"
 GAIN_MIN = 0.25
 RELEVANCE_MIN = 0.001  # TAT-QA TRAIN calibration (scripts/calib_relevance.py, n=150): 5th pct of gold-evidence p; was 0.05 (dev-tuned)
 # Expected gain of one more gate round, by rejection reason (declared priors, fixed; not fitted on test items).
-GATE_GAIN = {"answer_mismatch": 0.5, "number_not_in_context": 0.4, "no_expression": 0.3, "bad_expression": 0.4, "evidence_quote": 0.4}
+GATE_GAIN = {"empty_answer": 0.5, "answer_mismatch": 0.5, "number_not_in_context": 0.4, "no_expression": 0.3, "bad_expression": 0.4, "evidence_quote": 0.4}
 # fix B1: evidence_quote was 0.1 (< GAIN_MIN), so a quote-format rejection STOPPED the gate instead of retrying;
 # one re-quote round recovers most of them (baseline agent always retried), and quotes ARE the Track 02 citations.
 REPAIRABLE = ("Binder Error", "Catalog Error", "Parser Error", "Conversion Error", "syntax error", "does not exist", "not found")
@@ -75,6 +75,8 @@ class Controller:
 
     @staticmethod
     def reason_kind(r: str) -> str:
+        if r.startswith("empty answer"):
+            return "empty_answer"
         if r.startswith("evidence not found"):
             return "evidence_quote"
         if r.startswith("answer "):
