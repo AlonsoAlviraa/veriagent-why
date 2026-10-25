@@ -1,6 +1,6 @@
 {
   "project_name": "VeriAgent Why",
-  "description": "Multi-agent KPI-drop investigator: competing hypotheses tested against Zetaris views, a deterministic Claim Gate, an evidence graph in Meterless H-MEM, and a decision memo with row-level citations and a formula-based confidence.",
+  "description": "Multi-agent KPI-drop investigator: competing hypotheses tested against Zetaris views, a deterministic Claim Gate, an evidence graph in Meterless H-MEM, model calls through Meterless Nightshift with per-call receipts, and a decision memo with row-level citations. Financial-QA final system: V7 answers + V9_full calibrated confidence.",
   "track": "The Agent That Can Explain Why",
   "team": [
     {
@@ -19,21 +19,28 @@
     "zetaris": "Default data layer: five views (v_orders, v_returns, v_tickets, v_logistics, v_promotions) queried over JDBC (Zetaris Lightning) by the Retriever and re-queried by the Evidence Evaluator and Claim Gate. When Zetaris is not configured the same SQL runs on a local DuckDB snapshot (SAMPLE_MODE, the explicit fallback), which is logged and shown in the memo.",
     "meterless": {
       "engines_used": [
+        "Nightshift",
         "H-MEM",
         "Markovian"
       ],
-      "where": "H-MEM stores hypotheses, retrieval calls, evidence and support/refute edges (trust ledger exported per run); Markovian drives the Evaluator->Planner investigation rounds. Open-source reference engines vendored (Apache-2.0) and run via a node bridge; a missing node is logged and can be made fatal with METERLESS_REQUIRED=1. Meterless Nightshift was not available; a labelled local Nightshift-compatible simulator is included."
+      "where": "Nightshift 1.2.7 is the primary model provider: S1 meterless/fast pinned to Nemotron 3.5 Lightning 30B (reasoning off), S2 meterless/deep pinned to Nemotron 3 Ultra; startup pin check and logs/receipts-<run_id>.jsonl from the meterless response block; NVIDIA fallback off by default and flagged in receipts. H-MEM stores hypotheses, retrieval calls, evidence and support/refute edges (trust ledger per run); Markovian drives the Evaluator->Planner rounds (vendored Apache-2.0 reference engines via a node bridge). Live Nightshift receipts pending the cloud key in the Nightshift app."
     },
-    "nvidia": "Nemotron 3.5 Super VL (S2: Planner, Cause Analyst, Writer), Nemotron 3.5 Lightning (S1: agentic retriever, relevance filter, Evidence Evaluator) and nemotron-3-embed-1b embeddings via the NVIDIA endpoint; live dev-split results in eval/RESULTS_dev_nvidia.md.",
+    "nvidia": "Nemotron 3.5 Lightning 30B (S1: agentic retriever, relevance filter, Evidence Evaluator) and Nemotron 3 Ultra (S2: Planner, Cause Analyst, Writer) via Nightshift routing to NVIDIA cloud; nemotron-3-embed-1b embeddings. Earlier live dev-split results with Super VL on the direct NVIDIA endpoint in eval/RESULTS_dev_nvidia.md.",
     "unique": "The Evidence Evaluator re-queries the data itself and can send the Planner back; a deterministic Claim Gate blocks any claim or model-written number that the data does not support."
   },
   "models": [
-    "nvidia/nemotron-3.5-super-vl-120b-a12b",
     "nvidia/nemotron-3.5-lightning-30b-a3b",
+    "nvidia/nemotron-3-ultra (via Meterless Nightshift meterless/deep)",
     "nvidia/nemotron-3-embed-1b"
   ],
   "pre_existing_components": "See docs/PRE_EXISTING_WORK.md",
   "sample_mode": "fallback when Zetaris is not configured (SAMPLE_MODE=true forces it)",
   "data": "Synthetic only (scripts/make_data.py, seeded); no real customer data.",
-  "ai_usage": "Code written during the build window by AI coding agents (Grok Bot) under the author's direction; see README 'AI and Model Usage'."
+  "ai_usage": "Code written during the build window by AI coding agents (Grok Bot) under the author's direction; see README 'AI and Model Usage'.",
+  "final_system": "V7 answers + V9_full confidence (app/v9conf.py, V9_CONFIDENCE=on by default); results in docs/TEST500_RESULTS.md, docs/V9_HOLDOUT_RESULTS.md, docs/V9_GENERALIZATION_RESULTS.md",
+  "sample_io": [
+    "input_examples/example_1.json -> output_examples/example_1.json",
+    "input_examples/example_2.json -> output_examples/example_2.json",
+    "input_examples/example_3.json -> output_examples/example_3.json"
+  ]
 }
