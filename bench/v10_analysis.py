@@ -32,7 +32,7 @@ def extra(name, rows, models, ds, dy, split, base):
     base["paired_auroc_diff"]["V9_full - raw_answer_token_prob"] = {
         "item": diff_ci(y, [S[i]["raw_answer_token_prob"] for i in ids], [S[i]["V9_full"] for i in ids], G.AU)}
     if name == "hard_docfinqa":
-        flag = {q["uid"]: q.get("operands_in_context") for d in json.load(open(f"{D}/tatqa_dataset_{name}.json")) for q in d["questions"]}
+        flag = {q["uid"]: (d.get("source") or {}).get("operands_in_context") for d in json.load(open(f"{D}/tatqa_dataset_{name}.json")) for q in d["questions"]}  # fix: flag lives on the document source
         lam = G.crc_lambda(ds["V9_full"], dy)
         st = {}
         for v in (True, False):
@@ -60,6 +60,8 @@ def main(runs, design_glob, oodsec):
         g = {q["uid"]: d["table"]["uid"] for d in json.load(open(f"{D}/tatqa_dataset_{s}.json")) for q in d["questions"]}
         b = G.analyse(s, rows, rag, models, ds, dy, split, g)
         res["sets"][s] = extra(s, rows, models, ds, dy, split, b)
+        res["sets"][s]["coverage_of_split"] = {"cal_rows": len(set(split["cal_ids"]) & set(rows)), "cal_ids": len(split["cal_ids"]),
+                                               "test_rows": len(set(split["test_ids"]) & set(rows)), "test_ids": len(split["test_ids"])}
     # V10_PREREG section 5 decision rule for V9_full
     per = res["sets"]; k = "V9_full"
     lo = {s: per[s]["signals"][k]["auroc_ci_item"][0] for s in per}
@@ -68,7 +70,7 @@ def main(runs, design_glob, oodsec):
     if per and all(lo[s] > .5 and crc[s] for s in per): lab = "HOLDS"
     elif per and all(lo[s] <= .5 <= ci_hi[s] for s in per): lab = "FAILS"
     else: lab = "PARTIAL"
-    res["decision_V9_full"] = {"label": lab, "auroc_lower": lo, "cal_refit_crc_within_alpha+0.03": crc, "complete": len(per) == 2}
+    res["decision_V9_full"] = {"label": lab, "auroc_lower": lo, "cal_refit_crc_within_alpha+0.03": crc, "complete": len(per) == 2 and all(per[s]["coverage_of_split"]["cal_rows"] == per[s]["coverage_of_split"]["cal_ids"] and per[s]["coverage_of_split"]["test_rows"] == per[s]["coverage_of_split"]["test_ids"] for s in per)}
     return res
 
 
