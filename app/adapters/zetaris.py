@@ -1,7 +1,8 @@
 """Zetaris adapter with two backends behind one interface (`query(sql, params) -> list[dict]`):
 
-- sample (default): local DuckDB snapshot built by scripts/make_data.py (same view names, same SQL).
-- zetaris: Zetaris Lightning over JDBC (JayDeBeApi + JPype), ZETARIS_BACKEND=zetaris.
+- zetaris (default when configured): Zetaris Lightning over JDBC (JayDeBeApi + JPype), ZETARIS_BACKEND=zetaris.
+- sample (explicit fallback, SAMPLE_MODE): local DuckDB snapshot of SYNTHETIC data built by
+  scripts/make_data.py (same view names, same SQL). Used when Zetaris is not configured.
   Config: ZETARIS_JDBC_URL, ZETARIS_USER, ZETARIS_PASSWORD, ZETARIS_JDBC_JAR (path to the driver jar,
   kept OUTSIDE the repo). Follows the official getting-started guidance: driver class
   com.zetaris.lightning.jdbc.LightningDriver, one statement per call, verify with SELECT 1.
@@ -10,7 +11,7 @@
 """
 from __future__ import annotations
 import re, subprocess, sys
-from ..config import ROOT, env, sample_mode
+from ..config import ROOT, env, sample_mode, zetaris_configured
 
 SNAPSHOT = ROOT / "data" / "snapshot.duckdb"
 VIEWS = ("v_orders", "v_returns", "v_tickets", "v_logistics", "v_promotions")
@@ -119,6 +120,6 @@ class ZetarisJdbcBackend:
 
 
 def get_backend(dataset: str | None = None):
-    if sample_mode() or env("ZETARIS_BACKEND", "sample") == "sample":
-        return SampleBackend(dataset)
+    if sample_mode() or not zetaris_configured() or env("ZETARIS_BACKEND") == "sample":
+        return SampleBackend(dataset)  # explicit fallback; the pipeline logs it as data_fallback
     return ZetarisJdbcBackend(dataset)

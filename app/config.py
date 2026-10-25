@@ -10,8 +10,35 @@ def env(name: str, default: str = "") -> str:
     return os.environ.get(name, "").strip() or default
 
 
+def zetaris_configured() -> bool:
+    """Zetaris is the default data path whenever it is configured (ZETARIS_BACKEND=zetaris or a JDBC URL)."""
+    return env("ZETARIS_BACKEND").lower() == "zetaris" or bool(env("ZETARIS_JDBC_URL"))
+
+
 def sample_mode() -> bool:
-    return env("SAMPLE_MODE", "true").lower() in ("1", "true", "yes")
+    """SAMPLE_MODE is the explicit offline fallback (rules: "fallback/sample mode").
+    Set explicitly: honoured. Unset: false when Zetaris is configured, else true (fallback, announced
+    on stderr and in the trace/memo as "SAMPLE MODE: no Zetaris, synthetic DuckDB snapshot")."""
+    v = env("SAMPLE_MODE").lower()
+    if v:
+        return v in ("1", "true", "yes")
+    return not zetaris_configured()
+
+
+def sample_mode_reason() -> str:
+    if env("SAMPLE_MODE"):
+        return "SAMPLE_MODE set explicitly"
+    return "Zetaris not configured (no ZETARIS_BACKEND=zetaris / ZETARIS_JDBC_URL): automatic fallback"
+
+
+def log_dir() -> Path:
+    """Run artefacts directory. VA_LOG_DIR overrides logs/ (the test suite points it at a temp dir)."""
+    return Path(env("VA_LOG_DIR")) if env("VA_LOG_DIR") else ROOT / "logs"
+
+
+def meterless_required() -> bool:
+    """METERLESS_REQUIRED=1: fail loudly if the Meterless bridge (node) is unavailable instead of falling back."""
+    return env("METERLESS_REQUIRED").lower() in ("1", "true", "yes")
 
 
 def provider() -> str:

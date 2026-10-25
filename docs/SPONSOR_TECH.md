@@ -1,12 +1,9 @@
-# Sponsor technology explanation (submission component; Sponsor Tech = 10 points)
-Be specific about what each technology does in the build. Fill in during the build.
+# Sponsor technology
 
-**Zetaris (data), required.** TODO: how it is integrated (REST/SQL), which sources, what role it plays; every claim traces back to rows retrieved through Zetaris.
+**Zetaris (data, default backend).** `app/adapters/zetaris.py` connects to Zetaris Lightning over JDBC (JayDeBeApi + the Zetaris JDBC driver). The synthetic data is loaded by `scripts/zetaris_load.py` into a Postgres datasource and REST tables federated into a SchemaStore container, exposed as five views: `v_orders`, `v_returns`, `v_tickets`, `v_logistics`, `v_promotions`. The Retriever's SQL templates, the Evidence Evaluator's re-queries and the Claim Gate's checks all run through this adapter, and every citation in the memo points to rows it returned. When Zetaris is not configured, the same SQL runs on a local DuckDB snapshot (SAMPLE_MODE); this fallback is explicit, logged (`data_fallback`) and printed in the memo.
 
-**Meterless (cognition), required.** TODO: which engines are mounted (H-MEM / Markovian / World Model) and where; JSONL evidence in logs/.
+**Meterless (cognition).** The open-source H-MEM and Markovian reference engines (Apache-2.0, pinned commit, vendored in `vendor/meterless/`) run in node through `meterless_bridge/`. H-MEM holds the evidence graph: hypotheses, retrieval calls, evidence and support/refute edges, with a per-run trust ledger (`hmem-ledger-<run_id>.jsonl`); the Planner recalls from it. Markovian runs the Evaluator → Planner investigation rounds (one chunk per round, `[STATE_CHECKPOINT]` carryover, `[TASK_COMPLETE]` stop). If node is missing, a local non-Meterless graph is used and the fallback is logged; `METERLESS_REQUIRED=1` makes it fatal. Meterless Nightshift was not available to us; `app/nightshift_sim.py` is a labelled local simulator of its OpenAI-compatible contract, not Nightshift itself.
 
-**NVIDIA (models).** TODO: which Nemotron models, for which agents, and how they are reached (hosted API; no local GPU).
+**NVIDIA (models).** Hosted NVIDIA endpoint, no local GPU. `nvidia/nemotron-3.5-super-vl-120b-a12b` (S2: Planner, Cause Analyst, Writer), `nvidia/nemotron-3.5-lightning-30b-a3b` (S1: agentic retriever tool loop, relevance filter, Evidence Evaluator), `nvidia/nemotron-3-embed-1b` (retrieval and H-MEM embeddings). Model outputs are schema-validated; numbers come only from SQL.
 
-**Cursor (development), required environment.** TODO: how Cursor was used (Agent chat, scaffolding, adapters, tests, review).
-
-**What was unique.** TODO
+**What is unique.** The Evidence Evaluator re-queries the data itself and can send the Planner back for another round, and a deterministic Claim Gate blocks any claim, or any model-written number, that the data does not support. Confidence is a formula over evidence, not a model guess.
