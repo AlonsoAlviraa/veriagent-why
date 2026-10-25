@@ -24,9 +24,14 @@ class LLMCtx:
             lat = round(time.time() - t, 3)
             for m in metas:
                 self.calls.append({"agent": agent, "provider": m.get("provider"), "model": m.get("model"), "ok": True,
+                                   "request_id": m.get("request_id"), "requested_model": m.get("requested_model"),
+                                   "fallback": m.get("fallback", False),
                                    "usage": m.get("usage"), "latency_s": lat, "batch": len(metas)})
             return out
         except Exception as e:  # fall back to the deterministic path, logged
+            from ..nightshift import PinMismatch
+            if isinstance(e, PinMismatch):  # wrong model answered: fail loudly, never hide it behind a fallback
+                raise
             self.calls.append({"agent": agent, "ok": False, "error": f"{type(e).__name__}: {str(e)[:200]}", "fallback": "deterministic",
                                "latency_s": round(time.time() - t, 3)})
             return None
