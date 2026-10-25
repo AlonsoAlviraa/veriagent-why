@@ -1,0 +1,39 @@
+﻿{
+  "run_id": "example-003",
+  "status": "partial",
+  "output": {
+    "summary": "No cause could be confirmed. Resolution: unresolved.",
+    "artifacts": [
+      "logs\\memo-example-003.md",
+      "logs\\hmem-ledger-example-003.jsonl",
+      "logs\\report-example-003.json",
+      "logs\\memo-example-003.pdf"
+    ]
+  },
+  "agents": [
+    {
+      "name": "planner"
+    },
+    {
+      "name": "retriever"
+    },
+    {
+      "name": "s1_filter"
+    },
+    {
+      "name": "evidence_evaluator"
+    },
+    {
+      "name": "cause_analyst"
+    },
+    {
+      "name": "writer"
+    },
+    {
+      "name": "claim_gate"
+    }
+  ],
+  "trace_id": "53c4affcf2d14cfd",
+  "log_file": "logs\\trace-example-003.jsonl",
+  "execution_time_seconds": 56.13
+}
