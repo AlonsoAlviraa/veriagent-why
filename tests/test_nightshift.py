@@ -133,3 +133,13 @@ def test_s2_body_thinking_off_by_default(monkeypatch):
     monkeypatch.delenv("NIGHTSHIFT_S2_THINKING", raising=False)
     b = ns.body("s2", [{"role": "user", "content": "x"}], 300)
     assert b["model"] == ULTRA and b["chat_template_kwargs"] == {"enable_thinking": False} and "reasoning_effort" not in b
+
+
+def test_receipt_names_agent_and_request_id(ns):
+    seen, d = ns()
+    from app.agents import llm_steps as LS
+    LS._agent_call("planner", [{"role": "system", "content": "plan"}, {"role": "user", "content": "q"}], tier="s2", max_tokens=50)
+    r = receipts(d)[-1]
+    assert r["agent"] == "planner" and r["purpose"] == "planner"
+    assert len(r["client_request_id"]) == 32 and seen[-1]["headers"]["x-request-id"] == r["client_request_id"]
+    assert "test-token-not-real" not in json.dumps(r)

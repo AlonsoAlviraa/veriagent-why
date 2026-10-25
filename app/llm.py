@@ -25,7 +25,7 @@ def remaining() -> float | None:
     return None if _DEADLINE[0] is None else _DEADLINE[0] - time.time()
 
 
-def complete(messages: list[dict], tier: str = "s2", max_tokens: int = 1024, purpose: str = "") -> dict:
+def complete(messages: list[dict], tier: str = "s2", max_tokens: int = 1024, purpose: str = "", agent: str = "") -> dict:
     """One model call. On nightshift every call writes a receipt (logs/receipts-<run_id>.jsonl) and the routed
     model must match the pin (app.nightshift.PinMismatch otherwise). If Nightshift is unreachable/times out/5xx
     and LLM_FALLBACK=nvidia, the call goes to NVIDIA and the receipt says fallback=true with the reason."""
@@ -38,11 +38,13 @@ def complete(messages: list[dict], tier: str = "s2", max_tokens: int = 1024, pur
         t0 = time.time()
         msgs, truncated = NS.bound_messages(messages)
         body = NS.body(tier, msgs, max_tokens)
-        rec = {"provider": "nightshift", "tier": tier, "purpose": purpose, "requested": body["model"], "pin": NS.pin(tier),
+        import uuid
+        client_rid = uuid.uuid4().hex  # sent as X-Request-Id; Nightshift 1.2.7 returned request_id=null, so we keep our own id too
+        rec = {"provider": "nightshift", "tier": tier, "agent": agent or None, "purpose": purpose or agent, "client_request_id": client_rid, "requested": body["model"], "pin": NS.pin(tier),
                "max_tokens": body["max_tokens"], "prompt_chars": sum(len(m.get("content") or "") for m in msgs),
                "truncated": truncated, "fallback": False}
         base = env("NIGHTSHIFT_BASE_URL", "http://127.0.0.1:8088/v1")
-        req = urllib.request.Request(base.rstrip("/") + "/chat/completions", data=json.dumps(body).encode(), headers=NS.headers())
+        req = urllib.request.Request(base.rstrip("/") + "/chat/completions", data=json.dumps(body).encode(), headers={**NS.headers(), "X-Request-Id": client_rid})
         try:
             out = _post(req, _bounded_timeout(int(env(f"NIGHTSHIFT_TIMEOUT_{tier.upper()}_S", str(NS.TIMEOUT_S[tier])))), p)
         except (urllib.error.URLError, TimeoutError, OSError) as e:
@@ -59,7 +61,7 @@ def complete(messages: list[dict], tier: str = "s2", max_tokens: int = 1024, pur
         meta = NS.meta_of(out)
         ok = NS.pin_ok(tier, meta["routed_model"])
         ch = (out.get("choices") or [{}])[0]
-        NS.write_receipt({**rec, **meta, "ok": ok, "pin_ok": ok, "latency_s": round(time.time() - t0, 3),
+        NS.write_receipt({**rec, **meta, "response_id": out.get("id"), "ok": ok, "pin_ok": ok, "latency_s": round(time.time() - t0, 3),
                           "usage": out.get("usage"), "finish_reason": ch.get("finish_reason")})
         if not ok and NS.enforce():
             raise NS.PinMismatch(f"{tier}: Nightshift routed {meta['routed_model']!r}, pinned {NS.pin(tier)!r} "

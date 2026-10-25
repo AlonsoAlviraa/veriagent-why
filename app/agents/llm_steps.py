@@ -12,6 +12,11 @@ HYP_CATALOG = {"H_carrier": "On-time drop concentrated in one carrier", "H_regio
                "H_seasonal": "A broad rise across almost all segments (calendar/seasonal pattern)"}
 
 
+
+def _agent_call(agent: str, *a, **k):
+    """Every model call carries the name of the agent that made it (written to the Nightshift receipt)."""
+    return llm.complete(*a, agent=agent, **k)
+
 def _json(text: str | None):
     if not text:
         raise ValueError("empty model response")
@@ -22,7 +27,7 @@ def _json(text: str | None):
 
 
 def plan(question: str, memory_context: str) -> tuple[list[str], dict]:
-    r = llm.complete([{"role": "system", "content": "You plan a KPI-drop investigation. Reply with JSON only: {\"hypotheses\": [ids]} choosing 3-5 competing ids from the catalog, most likely first."},
+    r = _agent_call("planner", [{"role": "system", "content": "You plan a KPI-drop investigation. Reply with JSON only: {\"hypotheses\": [ids]} choosing 3-5 competing ids from the catalog, most likely first."},
                       {"role": "user", "content": f"Question: {question}\nCatalog: {json.dumps(HYP_CATALOG)}\nMemory: {memory_context[:1500]}"}], "s2", 300)
     ids = [h for h in _json(r["content"]).get("hypotheses", []) if h in HYP_CATALOG]
     if not ids:
@@ -32,7 +37,7 @@ def plan(question: str, memory_context: str) -> tuple[list[str], dict]:
 
 def s1_scores(texts: list[str], question: str) -> tuple[list[float], list[dict]]:
     def one(t):
-        r = llm.complete([{"role": "system", "content": "Rate how relevant this evidence chunk is to the question. Reply with JSON only: {\"score\": number between 0 and 1}."},
+        r = _agent_call("s1_filter", [{"role": "system", "content": "Rate how relevant this evidence chunk is to the question. Reply with JSON only: {\"score\": number between 0 and 1}."},
                           {"role": "user", "content": f"Question: {question}\nChunk: {t[:1200]}"}], "s1", 30)
         s = float(_json(r["content"])["score"])
         return max(0.0, min(1.0, s)), r
@@ -42,7 +47,7 @@ def s1_scores(texts: list[str], question: str) -> tuple[list[float], list[dict]]
 
 
 def verdict(hyp_text: str, stats: dict) -> tuple[str, dict]:
-    r = llm.complete([{"role": "system", "content": "You verify one hypothesis against computed statistics. Reply with JSON only: {\"verdict\": \"supports\"|\"refutes\"|\"gap\"}."},
+    r = _agent_call("evidence_evaluator", [{"role": "system", "content": "You verify one hypothesis against computed statistics. Reply with JSON only: {\"verdict\": \"supports\"|\"refutes\"|\"gap\"}."},
                       {"role": "user", "content": f"Hypothesis: {hyp_text}\nStatistics (from SQL): {json.dumps(stats, default=str)}"}], "s1", 30)
     v = _json(r["content"]).get("verdict")
     if v not in ("supports", "refutes", "gap"):
@@ -51,7 +56,7 @@ def verdict(hyp_text: str, stats: dict) -> tuple[str, dict]:
 
 
 def label(causes: list[dict]) -> tuple[str, dict]:
-    r = llm.complete([{"role": "system", "content": f"Pick the top cause label. Reply with JSON only: {{\"label\": one of {TAXONOMY}}}."},
+    r = _agent_call("cause_analyst", [{"role": "system", "content": f"Pick the top cause label. Reply with JSON only: {{\"label\": one of {TAXONOMY}}}."},
                       {"role": "user", "content": f"Supported causes (with computed contributions): {json.dumps(causes, default=str)}"}], "s2", 60)
     lab = _json(r["content"]).get("label")
     if lab not in TAXONOMY:
@@ -60,7 +65,7 @@ def label(causes: list[dict]) -> tuple[str, dict]:
 
 
 def narrative(claims: list[dict], discarded: list[dict]) -> tuple[str, dict]:
-    r = llm.complete([{"role": "system", "content": "Write a 3-sentence executive summary for a decision memo. Use ONLY the facts and numbers given. Do not add any other number."},
+    r = _agent_call("writer", [{"role": "system", "content": "Write a 3-sentence executive summary for a decision memo. Use ONLY the facts and numbers given. Do not add any other number."},
                       {"role": "user", "content": json.dumps({"claims": [c["text"] for c in claims], "discarded": discarded}, default=str)}], "s2", 300)
     if not r["content"] or not r["content"].strip():
         raise ValueError("empty model response")
@@ -71,7 +76,7 @@ def retrieval_step(question: str, hypothesis: str, gap: str, observations: str, 
     """Agentic Retriever step (S1, thinking off). Output schema:
     {"sufficient": bool, "tool": one of tools | null, "args": {...}, "why": str}. Validated again by the
     retriever's whitelist; the model never writes SQL."""
-    r = llm.complete([{"role": "system", "content": (
+    r = _agent_call("retriever", [{"role": "system", "content": (
         "You are the retrieval agent of a KPI root-cause investigation. For ONE hypothesis, decide whether the evidence "
         "gathered so far is sufficient to test it; if not, choose ONE next tool call that would best confirm or refute it "
         "(e.g. drill into the most suspicious segment or date range, or search complaint text with a reformulated query). "
