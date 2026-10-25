@@ -12,7 +12,12 @@ from .abstention import signal as lex, THRESHOLD
 from .v8_report import logistic_fit, conf
 from .v8_r2 import diff_ci
 from .v9_report import I1, I2, I3, f, v8f, load, cost, ALPHA, gfolds, oof
-from .v9_final import score, crc_lambda, cluster_ci
+from .v9_final import score, cluster_ci, crc_lambda as _crc
+
+
+def crc_lambda(s, y, alpha=ALPHA):
+    try: return _crc(s, y, alpha)
+    except StopIteration: return math.inf  # infeasible: abstain on everything
 
 SETS = ["gen_secq", "gen_jfinqa", "gen_finqa"]
 FITTED = {"lex_platt": lambda O: [lex(O)], "V8_refit": lambda O: v8f(O) + [lex(O)],
@@ -147,7 +152,7 @@ def main(runs, design_glob, oodsec):
     oy = [int(score(O[i], {"answer": O[i]["output"]["answer"], "scale": O[i]["output"]["scale"]})[2]) for i in oid]
     res["oodsec_reference_auroc"] = {k: round(AU(oy, [scores(O[i]["output"], models)[k] for i in oid]), 4) for k in ARMS}
     for s in SETS:
-        rows = load(f"{runs}/{s}_v9*.jsonl", "agent_v9"); rag = load(f"{runs}/{s}_rag*.jsonl", "rag")
+        rows = load(f"{runs}/{s}_*.jsonl", "agent_v9"); rag = load(f"{runs}/{s}_*.jsonl", "rag")
         if not rows: continue
         split = json.load(open(f"docs/v9/gen/split_{s}.json"))
         g = {q["uid"]: d["table"]["uid"] for d in json.load(open(f"docs/v9/gen/tatqa_dataset_{s}.json")) for q in d["questions"]}
