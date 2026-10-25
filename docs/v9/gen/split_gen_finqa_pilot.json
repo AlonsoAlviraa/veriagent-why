@@ -1,0 +1,22 @@
+{
+"name": "v9gen_gen_finqa_pilot",
+"tatqa_split": "gen_finqa",
+"dataset_sha256": "c0fff5baf9d45c74e13b966b8b326ac931239645bdd3c8b6819e5a0d1093eaf8",
+"ids": [
+"genfinqa-2042492c746cc837",
+"genfinqa-1aa6583926f093e5",
+"genfinqa-b2a620a8dfee3f6a",
+"genfinqa-5c73b682dc6d016a",
+"genfinqa-9e6d9182754bae78",
+"genfinqa-c1c065edc2266278",
+"genfinqa-a250b65e9698ab7e",
+"genfinqa-f8ff4d7502396b83",
+"genfinqa-cf88a95a15b53535",
+"genfinqa-56e8daa4fa4e46f3",
+"genfinqa-3581d73ba404b1b9",
+"genfinqa-54dbf1344e6d1ff0",
+"genfinqa-fa9aa69aa38fe76e",
+"genfinqa-e293ff0e9f840ff4",
+"genfinqa-6efcdaadb0e0eb5a"
+]
+}

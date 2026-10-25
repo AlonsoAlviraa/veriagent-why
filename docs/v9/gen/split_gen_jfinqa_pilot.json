@@ -1,0 +1,22 @@
+{
+"name": "v9gen_gen_jfinqa_pilot",
+"tatqa_split": "gen_jfinqa",
+"dataset_sha256": "45f3cd1dcabafe1023dc9eafc2775a47d8c6a64c3d5857bf640ec6997418bcd0",
+"ids": [
+"genjfinqa-93392b943c6bbf85",
+"genjfinqa-b4ed7b185ceacf2d",
+"genjfinqa-bc39c29fd765d830",
+"genjfinqa-124ffe7069e03ddc",
+"genjfinqa-4a0e86f291183e9d",
+"genjfinqa-cf04d114ccb6b5e9",
+"genjfinqa-fc507999099c74ef",
+"genjfinqa-47a54b8d3ab5466a",
+"genjfinqa-76aec9260a45ba8a",
+"genjfinqa-fbb309edb2330d3b",
+"genjfinqa-7b25860a311a60dc",
+"genjfinqa-4f46241d53b69856",
+"genjfinqa-193e6a8a7c29020d",
+"genjfinqa-d320ff1740a18e20",
+"genjfinqa-5b1f3df7de329761"
+]
+}

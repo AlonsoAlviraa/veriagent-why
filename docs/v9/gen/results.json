@@ -1,0 +1,1848 @@
+{
+ "design_oof_auroc": {
+  "lex_platt": 0.4709,
+  "V8_refit": 0.6527,
+  "V9_cheap": 0.7312,
+  "V9_full": 0.7855,
+  "abl_logprobs_only": 0.6898,
+  "abl_ptrue_only": 0.6006,
+  "abl_semantic_entropy_only": 0.6532,
+  "lex_frozen": 0.6367,
+  "raw_answer_token_prob": 0.6981,
+  "raw_ptrue": 0.6392
+ },
+ "sets": {
+  "gen_secq": {
+   "n_test": 300,
+   "n_cal": 100,
+   "missing_test": 0,
+   "answers": {
+    "V7_agent": {
+     "n": 300,
+     "em": 48.0,
+     "f1": 48.0,
+     "semantic": 74.67,
+     "errors_semantic": 76
+    },
+    "plain_RAG": {
+     "n": 300,
+     "em": 14.33,
+     "f1": 14.33,
+     "semantic": 48.33,
+     "errors_semantic": 155
+    }
+   },
+   "n_errors_primary": 76,
+   "signals": {
+    "lex_frozen": {
+     "auroc": 0.6734,
+     "ece": 0.2029,
+     "brier": 0.2514,
+     "aurc": 0.1343,
+     "auroc_ci_item": [
+      0.611,
+      0.7336
+     ],
+     "auroc_ci_table": [
+      0.615,
+      0.7325
+     ],
+     "auroc_official_em_label": 0.5965,
+     "selective_acc_cov50": 0.8667,
+     "selective_acc_cov80": 0.7667,
+     "coverage_at_selective_risk_10pct": 0.48,
+     "crc_design_lambda": {
+      "lambda": 0.809,
+      "realized_risk": 0.0133,
+      "coverage": 0.4333,
+      "selective_acc": 0.9692,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.8095,
+      "realized_risk": 0.0133,
+      "coverage": 0.4333,
+      "selective_acc": 0.9692,
+      "risk_controlled": true
+     }
+    },
+    "raw_answer_token_prob": {
+     "auroc": 0.6122,
+     "ece": 0.1699,
+     "brier": 0.2193,
+     "aurc": 0.1999,
+     "auroc_ci_item": [
+      0.5326,
+      0.6846
+     ],
+     "auroc_ci_table": [
+      0.5457,
+      0.6768
+     ],
+     "auroc_official_em_label": 0.5434,
+     "selective_acc_cov50": 0.8,
+     "selective_acc_cov80": 0.775,
+     "coverage_at_selective_risk_10pct": 0.0,
+     "crc_design_lambda": {
+      "lambda": 0.926,
+      "realized_risk": 0.0933,
+      "coverage": 0.47,
+      "selective_acc": 0.8014,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.9028,
+      "realized_risk": 0.1033,
+      "coverage": 0.5233,
+      "selective_acc": 0.8025,
+      "risk_controlled": false
+     }
+    },
+    "raw_ptrue": {
+     "auroc": 0.6634,
+     "ece": 0.6795,
+     "brier": 0.6432,
+     "aurc": 0.1536,
+     "auroc_ci_item": [
+      0.5955,
+      0.7272
+     ],
+     "auroc_ci_table": [
+      0.5996,
+      0.724
+     ],
+     "auroc_official_em_label": 0.7258,
+     "selective_acc_cov50": 0.9067,
+     "selective_acc_cov80": 0.7417,
+     "coverage_at_selective_risk_10pct": 0.5067,
+     "crc_design_lambda": {
+      "lambda": 0.5622,
+      "realized_risk": 0.0,
+      "coverage": 0.0,
+      "selective_acc": 0.0,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.011,
+      "realized_risk": 0.1233,
+      "coverage": 0.6833,
+      "selective_acc": 0.8195,
+      "risk_controlled": false
+     }
+    },
+    "lex_platt": {
+     "auroc": 0.6734,
+     "ece": 0.1282,
+     "brier": 0.2053,
+     "aurc": 0.1343,
+     "auroc_ci_item": [
+      0.611,
+      0.7336
+     ],
+     "auroc_ci_table": [
+      0.615,
+      0.7325
+     ],
+     "auroc_official_em_label": 0.5965,
+     "selective_acc_cov50": 0.8667,
+     "selective_acc_cov80": 0.7667,
+     "coverage_at_selective_risk_10pct": 0.48,
+     "crc_design_lambda": {
+      "lambda": null,
+      "realized_risk": 0.0,
+      "coverage": 0.0,
+      "selective_acc": 0.0,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.6472,
+      "realized_risk": 0.0133,
+      "coverage": 0.4333,
+      "selective_acc": 0.9692,
+      "risk_controlled": true
+     }
+    },
+    "V8_refit": {
+     "auroc": 0.7718,
+     "ece": 0.1842,
+     "brier": 0.1912,
+     "aurc": 0.1044,
+     "auroc_ci_item": [
+      0.7138,
+      0.826
+     ],
+     "auroc_ci_table": [
+      0.7203,
+      0.8225
+     ],
+     "auroc_official_em_label": 0.5859,
+     "selective_acc_cov50": 0.88,
+     "selective_acc_cov80": 0.8,
+     "coverage_at_selective_risk_10pct": 0.4833,
+     "crc_design_lambda": {
+      "lambda": 0.6971,
+      "realized_risk": 0.0067,
+      "coverage": 0.2467,
+      "selective_acc": 0.973,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.5218,
+      "realized_risk": 0.0733,
+      "coverage": 0.55,
+      "selective_acc": 0.8667,
+      "risk_controlled": true
+     }
+    },
+    "V9_cheap": {
+     "auroc": 0.5894,
+     "ece": 0.1926,
+     "brier": 0.2244,
+     "aurc": 0.2007,
+     "auroc_ci_item": [
+      0.5068,
+      0.666
+     ],
+     "auroc_ci_table": [
+      0.5146,
+      0.6612
+     ],
+     "auroc_official_em_label": 0.5359,
+     "selective_acc_cov50": 0.78,
+     "selective_acc_cov80": 0.8,
+     "coverage_at_selective_risk_10pct": 0.1367,
+     "crc_design_lambda": {
+      "lambda": 0.6935,
+      "realized_risk": 0.0967,
+      "coverage": 0.3633,
+      "selective_acc": 0.7339,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.7086,
+      "realized_risk": 0.0833,
+      "coverage": 0.2767,
+      "selective_acc": 0.6988,
+      "risk_controlled": true
+     }
+    },
+    "V9_full": {
+     "auroc": 0.7499,
+     "ece": 0.2285,
+     "brier": 0.2218,
+     "aurc": 0.1243,
+     "auroc_ci_item": [
+      0.6823,
+      0.8098
+     ],
+     "auroc_ci_table": [
+      0.6822,
+      0.8121
+     ],
+     "auroc_official_em_label": 0.6457,
+     "selective_acc_cov50": 0.8933,
+     "selective_acc_cov80": 0.8208,
+     "coverage_at_selective_risk_10pct": 0.46,
+     "crc_design_lambda": {
+      "lambda": 0.6833,
+      "realized_risk": 0.03,
+      "coverage": 0.3567,
+      "selective_acc": 0.9159,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.4853,
+      "realized_risk": 0.06,
+      "coverage": 0.55,
+      "selective_acc": 0.8909,
+      "risk_controlled": true
+     }
+    },
+    "abl_logprobs_only": {
+     "auroc": 0.6748,
+     "ece": 0.1175,
+     "brier": 0.2081,
+     "aurc": 0.1447,
+     "auroc_ci_item": [
+      0.6086,
+      0.736
+     ],
+     "auroc_ci_table": [
+      0.614,
+      0.7315
+     ],
+     "auroc_official_em_label": 0.5922,
+     "selective_acc_cov50": 0.86,
+     "selective_acc_cov80": 0.7833,
+     "coverage_at_selective_risk_10pct": 0.3833,
+     "crc_design_lambda": {
+      "lambda": 0.7343,
+      "realized_risk": 0.01,
+      "coverage": 0.1567,
+      "selective_acc": 0.9362,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.7098,
+      "realized_risk": 0.12,
+      "coverage": 0.6,
+      "selective_acc": 0.8,
+      "risk_controlled": false
+     }
+    },
+    "abl_ptrue_only": {
+     "auroc": 0.6633,
+     "ece": 0.1965,
+     "brier": 0.2235,
+     "aurc": 0.1536,
+     "auroc_ci_item": [
+      0.5954,
+      0.7272
+     ],
+     "auroc_ci_table": [
+      0.5995,
+      0.7239
+     ],
+     "auroc_official_em_label": 0.7259,
+     "selective_acc_cov50": 0.9067,
+     "selective_acc_cov80": 0.7417,
+     "coverage_at_selective_risk_10pct": 0.5067,
+     "crc_design_lambda": {
+      "lambda": 0.6947,
+      "realized_risk": 0.0,
+      "coverage": 0.0,
+      "selective_acc": 0.0,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.534,
+      "realized_risk": 0.1233,
+      "coverage": 0.6833,
+      "selective_acc": 0.8195,
+      "risk_controlled": false
+     }
+    },
+    "abl_semantic_entropy_only": {
+     "auroc": 0.6654,
+     "ece": 0.1295,
+     "brier": 0.1933,
+     "aurc": 0.1851,
+     "auroc_ci_item": [
+      0.6018,
+      0.7295
+     ],
+     "auroc_ci_table": [
+      0.6003,
+      0.7251
+     ],
+     "auroc_official_em_label": 0.6415,
+     "selective_acc_cov50": 0.82,
+     "selective_acc_cov80": 0.8208,
+     "coverage_at_selective_risk_10pct": 0.0033,
+     "crc_design_lambda": {
+      "lambda": null,
+      "realized_risk": 0.0,
+      "coverage": 0.0,
+      "selective_acc": 0.0,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": null,
+      "realized_risk": 0.0,
+      "coverage": 0.0,
+      "selective_acc": 0.0,
+      "risk_controlled": true
+     }
+    }
+   },
+   "paired_auroc_diff": {
+    "raw_answer_token_prob - lex_frozen": {
+     "item": [
+      -0.1638,
+      0.0393
+     ],
+     "table": [
+      -0.156,
+      0.0304
+     ]
+    },
+    "raw_ptrue - lex_frozen": {
+     "item": [
+      -0.1048,
+      0.0816
+     ],
+     "table": [
+      -0.0978,
+      0.0772
+     ]
+    },
+    "lex_platt - lex_frozen": {
+     "item": [
+      0.0,
+      0.0
+     ],
+     "table": [
+      0.0,
+      0.0
+     ]
+    },
+    "V8_refit - lex_frozen": {
+     "item": [
+      0.0296,
+      0.168
+     ],
+     "table": [
+      0.023,
+      0.1682
+     ]
+    },
+    "V9_cheap - lex_frozen": {
+     "item": [
+      -0.1654,
+      -0.0032
+     ],
+     "table": [
+      -0.1604,
+      -0.0123
+     ]
+    },
+    "V9_full - lex_frozen": {
+     "item": [
+      -0.0016,
+      0.1541
+     ],
+     "table": [
+      -0.0035,
+      0.1547
+     ]
+    },
+    "abl_logprobs_only - lex_frozen": {
+     "item": [
+      -0.0955,
+      0.0933
+     ],
+     "table": [
+      -0.0842,
+      0.0887
+     ]
+    },
+    "abl_ptrue_only - lex_frozen": {
+     "item": [
+      -0.1048,
+      0.0816
+     ],
+     "table": [
+      -0.0978,
+      0.0771
+     ]
+    },
+    "abl_semantic_entropy_only - lex_frozen": {
+     "item": [
+      -0.1079,
+      0.0907
+     ],
+     "table": [
+      -0.1052,
+      0.0893
+     ]
+    },
+    "lex_frozen - V9_cheap": {
+     "item": [
+      0.0032,
+      0.1654
+     ],
+     "table": [
+      0.0123,
+      0.1604
+     ]
+    },
+    "raw_answer_token_prob - V9_cheap": {
+     "item": [
+      -0.0443,
+      0.0883
+     ],
+     "table": [
+      -0.0423,
+      0.0908
+     ]
+    },
+    "raw_ptrue - V9_cheap": {
+     "item": [
+      -0.0361,
+      0.1889
+     ],
+     "table": [
+      -0.0201,
+      0.1744
+     ]
+    },
+    "lex_platt - V9_cheap": {
+     "item": [
+      0.0032,
+      0.1654
+     ],
+     "table": [
+      0.0123,
+      0.1604
+     ]
+    },
+    "V8_refit - V9_cheap": {
+     "item": [
+      0.0955,
+      0.2708
+     ],
+     "table": [
+      0.0975,
+      0.2732
+     ]
+    },
+    "V9_full - V9_cheap": {
+     "item": [
+      0.0888,
+      0.232
+     ],
+     "table": [
+      0.086,
+      0.2343
+     ]
+    },
+    "abl_logprobs_only - V9_cheap": {
+     "item": [
+      0.0128,
+      0.1554
+     ],
+     "table": [
+      0.0145,
+      0.1569
+     ]
+    },
+    "abl_ptrue_only - V9_cheap": {
+     "item": [
+      -0.0362,
+      0.1889
+     ],
+     "table": [
+      -0.0202,
+      0.1743
+     ]
+    },
+    "abl_semantic_entropy_only - V9_cheap": {
+     "item": [
+      -0.032,
+      0.1842
+     ],
+     "table": [
+      -0.0248,
+      0.1789
+     ]
+    }
+   },
+   "cost": {
+    "V7": {
+     "calls_per_item": 3.07,
+     "sec_per_item": 5.93,
+     "tokens_per_item": 4350.1,
+     "cost_usd": 0.1132
+    },
+    "V9_cheap": {
+     "calls_per_item": 4.07,
+     "sec_per_item": 6.66,
+     "tokens_per_item": 5359.2,
+     "cost_usd": 0.1322
+    },
+    "V8_refit": {
+     "calls_per_item": 9.32,
+     "sec_per_item": 12.56,
+     "tokens_per_item": 11983.4,
+     "cost_usd": 0.2749
+    },
+    "V9_full": {
+     "calls_per_item": 13.7,
+     "sec_per_item": 21.74,
+     "tokens_per_item": 19126.0,
+     "cost_usd": 0.4569
+    }
+   },
+   "lp_ok_rate": 1.0
+  },
+  "gen_jfinqa": {
+   "n_test": 305,
+   "n_cal": 95,
+   "missing_test": 0,
+   "answers": {
+    "V7_agent": {
+     "n": 305,
+     "em": 18.69,
+     "f1": 18.69,
+     "semantic": 71.8,
+     "errors_semantic": 86
+    },
+    "plain_RAG": {
+     "n": 305,
+     "em": 14.1,
+     "f1": 14.1,
+     "semantic": 64.59,
+     "errors_semantic": 108
+    }
+   },
+   "n_errors_primary": 86,
+   "signals": {
+    "lex_frozen": {
+     "auroc": 0.9385,
+     "ece": 0.1563,
+     "brier": 0.1174,
+     "aurc": 0.0628,
+     "auroc_ci_item": [
+      0.9098,
+      0.9605
+     ],
+     "auroc_ci_table": [
+      0.9134,
+      0.9609
+     ],
+     "auroc_official_em_label": 0.5067,
+     "selective_acc_cov50": 0.9868,
+     "selective_acc_cov80": 0.8525,
+     "coverage_at_selective_risk_10pct": 0.7311,
+     "crc_design_lambda": {
+      "lambda": 0.809,
+      "realized_risk": 0.0098,
+      "coverage": 0.5311,
+      "selective_acc": 0.9815,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.2098,
+      "realized_risk": 0.0656,
+      "coverage": 0.718,
+      "selective_acc": 0.9087,
+      "risk_controlled": true
+     }
+    },
+    "raw_answer_token_prob": {
+     "auroc": 0.6222,
+     "ece": 0.1786,
+     "brier": 0.2616,
+     "aurc": 0.1917,
+     "auroc_ci_item": [
+      0.5573,
+      0.69
+     ],
+     "auroc_ci_table": [
+      0.5574,
+      0.6883
+     ],
+     "auroc_official_em_label": 0.5175,
+     "selective_acc_cov50": 0.8026,
+     "selective_acc_cov80": 0.7131,
+     "coverage_at_selective_risk_10pct": 0.2787,
+     "crc_design_lambda": {
+      "lambda": 0.926,
+      "realized_risk": 0.0197,
+      "coverage": 0.2098,
+      "selective_acc": 0.9062,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.5344,
+      "realized_risk": 0.1311,
+      "coverage": 0.5934,
+      "selective_acc": 0.779,
+      "risk_controlled": false
+     }
+    },
+    "raw_ptrue": {
+     "auroc": 0.7683,
+     "ece": 0.569,
+     "brier": 0.5235,
+     "aurc": 0.1234,
+     "auroc_ci_item": [
+      0.7121,
+      0.8217
+     ],
+     "auroc_ci_table": [
+      0.7005,
+      0.8313
+     ],
+     "auroc_official_em_label": 0.5143,
+     "selective_acc_cov50": 0.8684,
+     "selective_acc_cov80": 0.7951,
+     "coverage_at_selective_risk_10pct": 0.4295,
+     "crc_design_lambda": {
+      "lambda": 0.5622,
+      "realized_risk": 0.0033,
+      "coverage": 0.1213,
+      "selective_acc": 0.973,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.0293,
+      "realized_risk": 0.082,
+      "coverage": 0.5705,
+      "selective_acc": 0.8563,
+      "risk_controlled": true
+     }
+    },
+    "lex_platt": {
+     "auroc": 0.9385,
+     "ece": 0.3015,
+     "brier": 0.1847,
+     "aurc": 0.0628,
+     "auroc_ci_item": [
+      0.9098,
+      0.9605
+     ],
+     "auroc_ci_table": [
+      0.9134,
+      0.9609
+     ],
+     "auroc_official_em_label": 0.5067,
+     "selective_acc_cov50": 0.9868,
+     "selective_acc_cov80": 0.8525,
+     "coverage_at_selective_risk_10pct": 0.7311,
+     "crc_design_lambda": {
+      "lambda": null,
+      "realized_risk": 0.0,
+      "coverage": 0.0,
+      "selective_acc": 0.0,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.5483,
+      "realized_risk": 0.0656,
+      "coverage": 0.718,
+      "selective_acc": 0.9087,
+      "risk_controlled": true
+     }
+    },
+    "V8_refit": {
+     "auroc": 0.7861,
+     "ece": 0.1263,
+     "brier": 0.175,
+     "aurc": 0.1469,
+     "auroc_ci_item": [
+      0.7238,
+      0.8415
+     ],
+     "auroc_ci_table": [
+      0.7364,
+      0.8328
+     ],
+     "auroc_official_em_label": 0.7588,
+     "selective_acc_cov50": 0.9013,
+     "selective_acc_cov80": 0.7951,
+     "coverage_at_selective_risk_10pct": 0.5639,
+     "crc_design_lambda": {
+      "lambda": 0.6971,
+      "realized_risk": 0.0295,
+      "coverage": 0.3738,
+      "selective_acc": 0.9211,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.4954,
+      "realized_risk": 0.1213,
+      "coverage": 0.7115,
+      "selective_acc": 0.8295,
+      "risk_controlled": false
+     }
+    },
+    "V9_cheap": {
+     "auroc": 0.7274,
+     "ece": 0.3015,
+     "brier": 0.285,
+     "aurc": 0.1301,
+     "auroc_ci_item": [
+      0.672,
+      0.7826
+     ],
+     "auroc_ci_table": [
+      0.6803,
+      0.7717
+     ],
+     "auroc_official_em_label": 0.4964,
+     "selective_acc_cov50": 0.8882,
+     "selective_acc_cov80": 0.7418,
+     "coverage_at_selective_risk_10pct": 0.4623,
+     "crc_design_lambda": {
+      "lambda": 0.6935,
+      "realized_risk": 0.0033,
+      "coverage": 0.1803,
+      "selective_acc": 0.9818,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.2641,
+      "realized_risk": 0.1475,
+      "coverage": 0.6754,
+      "selective_acc": 0.7816,
+      "risk_controlled": false
+     }
+    },
+    "V9_full": {
+     "auroc": 0.7458,
+     "ece": 0.3038,
+     "brier": 0.2781,
+     "aurc": 0.1258,
+     "auroc_ci_item": [
+      0.6907,
+      0.7999
+     ],
+     "auroc_ci_table": [
+      0.6928,
+      0.7948
+     ],
+     "auroc_official_em_label": 0.5843,
+     "selective_acc_cov50": 0.9079,
+     "selective_acc_cov80": 0.7541,
+     "coverage_at_selective_risk_10pct": 0.5016,
+     "crc_design_lambda": {
+      "lambda": 0.6833,
+      "realized_risk": 0.0197,
+      "coverage": 0.3115,
+      "selective_acc": 0.9368,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.1784,
+      "realized_risk": 0.1246,
+      "coverage": 0.6721,
+      "selective_acc": 0.8146,
+      "risk_controlled": false
+     }
+    },
+    "abl_logprobs_only": {
+     "auroc": 0.6486,
+     "ece": 0.2289,
+     "brier": 0.2889,
+     "aurc": 0.1666,
+     "auroc_ci_item": [
+      0.5872,
+      0.7121
+     ],
+     "auroc_ci_table": [
+      0.5879,
+      0.7081
+     ],
+     "auroc_official_em_label": 0.5091,
+     "selective_acc_cov50": 0.8224,
+     "selective_acc_cov80": 0.7295,
+     "coverage_at_selective_risk_10pct": 0.2361,
+     "crc_design_lambda": {
+      "lambda": 0.7343,
+      "realized_risk": 0.0033,
+      "coverage": 0.1705,
+      "selective_acc": 0.9808,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.4691,
+      "realized_risk": 0.1443,
+      "coverage": 0.6361,
+      "selective_acc": 0.7732,
+      "risk_controlled": false
+     }
+    },
+    "abl_ptrue_only": {
+     "auroc": 0.7683,
+     "ece": 0.1463,
+     "brier": 0.2104,
+     "aurc": 0.1234,
+     "auroc_ci_item": [
+      0.7121,
+      0.8217
+     ],
+     "auroc_ci_table": [
+      0.7005,
+      0.8313
+     ],
+     "auroc_official_em_label": 0.5143,
+     "selective_acc_cov50": 0.8684,
+     "selective_acc_cov80": 0.7951,
+     "coverage_at_selective_risk_10pct": 0.4295,
+     "crc_design_lambda": {
+      "lambda": 0.6947,
+      "realized_risk": 0.0033,
+      "coverage": 0.1213,
+      "selective_acc": 0.973,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.5393,
+      "realized_risk": 0.082,
+      "coverage": 0.5705,
+      "selective_acc": 0.8563,
+      "risk_controlled": true
+     }
+    },
+    "abl_semantic_entropy_only": {
+     "auroc": 0.6029,
+     "ece": 0.1722,
+     "brier": 0.2554,
+     "aurc": 0.2285,
+     "auroc_ci_item": [
+      0.5372,
+      0.6682
+     ],
+     "auroc_ci_table": [
+      0.5352,
+      0.6705
+     ],
+     "auroc_official_em_label": 0.5674,
+     "selective_acc_cov50": 0.8026,
+     "selective_acc_cov80": 0.7336,
+     "coverage_at_selective_risk_10pct": 0.0066,
+     "crc_design_lambda": {
+      "lambda": null,
+      "realized_risk": 0.0,
+      "coverage": 0.0,
+      "selective_acc": 0.0,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": null,
+      "realized_risk": 0.0,
+      "coverage": 0.0,
+      "selective_acc": 0.0,
+      "risk_controlled": true
+     }
+    }
+   },
+   "paired_auroc_diff": {
+    "raw_answer_token_prob - lex_frozen": {
+     "item": [
+      -0.3854,
+      -0.2417
+     ],
+     "table": [
+      -0.3824,
+      -0.247
+     ]
+    },
+    "raw_ptrue - lex_frozen": {
+     "item": [
+      -0.2288,
+      -0.11
+     ],
+     "table": [
+      -0.2349,
+      -0.1051
+     ]
+    },
+    "lex_platt - lex_frozen": {
+     "item": [
+      0.0,
+      0.0
+     ],
+     "table": [
+      0.0,
+      0.0
+     ]
+    },
+    "V8_refit - lex_frozen": {
+     "item": [
+      -0.2168,
+      -0.0918
+     ],
+     "table": [
+      -0.1993,
+      -0.1074
+     ]
+    },
+    "V9_cheap - lex_frozen": {
+     "item": [
+      -0.2694,
+      -0.1498
+     ],
+     "table": [
+      -0.2605,
+      -0.1608
+     ]
+    },
+    "V9_full - lex_frozen": {
+     "item": [
+      -0.2512,
+      -0.1323
+     ],
+     "table": [
+      -0.2485,
+      -0.1399
+     ]
+    },
+    "abl_logprobs_only - lex_frozen": {
+     "item": [
+      -0.3571,
+      -0.2178
+     ],
+     "table": [
+      -0.3532,
+      -0.2258
+     ]
+    },
+    "abl_ptrue_only - lex_frozen": {
+     "item": [
+      -0.2288,
+      -0.11
+     ],
+     "table": [
+      -0.2349,
+      -0.1051
+     ]
+    },
+    "abl_semantic_entropy_only - lex_frozen": {
+     "item": [
+      -0.4033,
+      -0.2631
+     ],
+     "table": [
+      -0.4074,
+      -0.2603
+     ]
+    },
+    "lex_frozen - V9_cheap": {
+     "item": [
+      0.1498,
+      0.2694
+     ],
+     "table": [
+      0.1608,
+      0.2605
+     ]
+    },
+    "raw_answer_token_prob - V9_cheap": {
+     "item": [
+      -0.1382,
+      -0.0743
+     ],
+     "table": [
+      -0.137,
+      -0.0756
+     ]
+    },
+    "raw_ptrue - V9_cheap": {
+     "item": [
+      -0.0352,
+      0.1121
+     ],
+     "table": [
+      -0.0368,
+      0.1162
+     ]
+    },
+    "lex_platt - V9_cheap": {
+     "item": [
+      0.1498,
+      0.2694
+     ],
+     "table": [
+      0.1608,
+      0.2605
+     ]
+    },
+    "V8_refit - V9_cheap": {
+     "item": [
+      -0.0171,
+      0.131
+     ],
+     "table": [
+      -0.0043,
+      0.1143
+     ]
+    },
+    "V9_full - V9_cheap": {
+     "item": [
+      -0.0085,
+      0.0452
+     ],
+     "table": [
+      -0.01,
+      0.0449
+     ]
+    },
+    "abl_logprobs_only - V9_cheap": {
+     "item": [
+      -0.1078,
+      -0.0532
+     ],
+     "table": [
+      -0.1074,
+      -0.0529
+     ]
+    },
+    "abl_ptrue_only - V9_cheap": {
+     "item": [
+      -0.0352,
+      0.1121
+     ],
+     "table": [
+      -0.0368,
+      0.1162
+     ]
+    },
+    "abl_semantic_entropy_only - V9_cheap": {
+     "item": [
+      -0.1733,
+      -0.0778
+     ],
+     "table": [
+      -0.1735,
+      -0.0767
+     ]
+    }
+   },
+   "cost": {
+    "V7": {
+     "calls_per_item": 1.46,
+     "sec_per_item": 2.48,
+     "tokens_per_item": 1330.1,
+     "cost_usd": 0.0337
+    },
+    "V9_cheap": {
+     "calls_per_item": 2.46,
+     "sec_per_item": 3.35,
+     "tokens_per_item": 1780.8,
+     "cost_usd": 0.0428
+    },
+    "V8_refit": {
+     "calls_per_item": 7.55,
+     "sec_per_item": 9.54,
+     "tokens_per_item": 5256.2,
+     "cost_usd": 0.1259
+    },
+    "V9_full": {
+     "calls_per_item": 11.55,
+     "sec_per_item": 14.94,
+     "tokens_per_item": 8654.2,
+     "cost_usd": 0.2077
+    }
+   },
+   "lp_ok_rate": 1.0
+  },
+  "gen_finqa": {
+   "n_test": 296,
+   "n_cal": 104,
+   "missing_test": 0,
+   "answers": {
+    "V7_agent": {
+     "n": 296,
+     "em": 39.19,
+     "f1": 39.19,
+     "semantic": 69.93,
+     "errors_semantic": 89
+    },
+    "plain_RAG": {
+     "n": 296,
+     "em": 10.81,
+     "f1": 10.81,
+     "semantic": 41.55,
+     "errors_semantic": 173
+    }
+   },
+   "n_errors_primary": 89,
+   "signals": {
+    "lex_frozen": {
+     "auroc": 0.6841,
+     "ece": 0.1394,
+     "brier": 0.2317,
+     "aurc": 0.1761,
+     "auroc_ci_item": [
+      0.6241,
+      0.745
+     ],
+     "auroc_ci_table": [
+      0.6207,
+      0.7441
+     ],
+     "auroc_official_em_label": 0.6117,
+     "selective_acc_cov50": 0.8041,
+     "selective_acc_cov80": 0.7468,
+     "coverage_at_selective_risk_10pct": 0.3176,
+     "crc_design_lambda": {
+      "lambda": 0.809,
+      "realized_risk": 0.1689,
+      "coverage": 0.6655,
+      "selective_acc": 0.7462,
+      "risk_controlled": false
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.8099,
+      "realized_risk": 0.0169,
+      "coverage": 0.2568,
+      "selective_acc": 0.9342,
+      "risk_controlled": true
+     }
+    },
+    "raw_answer_token_prob": {
+     "auroc": 0.6377,
+     "ece": 0.164,
+     "brier": 0.2161,
+     "aurc": 0.2244,
+     "auroc_ci_item": [
+      0.5646,
+      0.7091
+     ],
+     "auroc_ci_table": [
+      0.5663,
+      0.706
+     ],
+     "auroc_official_em_label": 0.6021,
+     "selective_acc_cov50": 0.777,
+     "selective_acc_cov80": 0.7511,
+     "coverage_at_selective_risk_10pct": 0.0743,
+     "crc_design_lambda": {
+      "lambda": 0.926,
+      "realized_risk": 0.1081,
+      "coverage": 0.4831,
+      "selective_acc": 0.7762,
+      "risk_controlled": false
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.988,
+      "realized_risk": 0.0439,
+      "coverage": 0.2196,
+      "selective_acc": 0.8,
+      "risk_controlled": true
+     }
+    },
+    "raw_ptrue": {
+     "auroc": 0.5822,
+     "ece": 0.6111,
+     "brier": 0.5907,
+     "aurc": 0.284,
+     "auroc_ci_item": [
+      0.5052,
+      0.6535
+     ],
+     "auroc_ci_table": [
+      0.5013,
+      0.6643
+     ],
+     "auroc_official_em_label": 0.6198,
+     "selective_acc_cov50": 0.7635,
+     "selective_acc_cov80": 0.7215,
+     "coverage_at_selective_risk_10pct": 0.0,
+     "crc_design_lambda": {
+      "lambda": 0.5622,
+      "realized_risk": 0.0169,
+      "coverage": 0.0304,
+      "selective_acc": 0.4444,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.0675,
+      "realized_risk": 0.0912,
+      "coverage": 0.375,
+      "selective_acc": 0.7568,
+      "risk_controlled": true
+     }
+    },
+    "lex_platt": {
+     "auroc": 0.6841,
+     "ece": 0.0869,
+     "brier": 0.211,
+     "aurc": 0.1761,
+     "auroc_ci_item": [
+      0.6241,
+      0.745
+     ],
+     "auroc_ci_table": [
+      0.6207,
+      0.7441
+     ],
+     "auroc_official_em_label": 0.6117,
+     "selective_acc_cov50": 0.8041,
+     "selective_acc_cov80": 0.7468,
+     "coverage_at_selective_risk_10pct": 0.3176,
+     "crc_design_lambda": {
+      "lambda": null,
+      "realized_risk": 0.0,
+      "coverage": 0.0,
+      "selective_acc": 0.0,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.6473,
+      "realized_risk": 0.0169,
+      "coverage": 0.2568,
+      "selective_acc": 0.9342,
+      "risk_controlled": true
+     }
+    },
+    "V8_refit": {
+     "auroc": 0.6319,
+     "ece": 0.1566,
+     "brier": 0.2181,
+     "aurc": 0.2105,
+     "auroc_ci_item": [
+      0.5686,
+      0.6955
+     ],
+     "auroc_ci_table": [
+      0.5586,
+      0.7081
+     ],
+     "auroc_official_em_label": 0.5885,
+     "selective_acc_cov50": 0.7568,
+     "selective_acc_cov80": 0.7342,
+     "coverage_at_selective_risk_10pct": 0.2162,
+     "crc_design_lambda": {
+      "lambda": 0.6971,
+      "realized_risk": 0.0203,
+      "coverage": 0.1926,
+      "selective_acc": 0.8947,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.5713,
+      "realized_risk": 0.0372,
+      "coverage": 0.3074,
+      "selective_acc": 0.8791,
+      "risk_controlled": true
+     }
+    },
+    "V9_cheap": {
+     "auroc": 0.6965,
+     "ece": 0.1311,
+     "brier": 0.1981,
+     "aurc": 0.2014,
+     "auroc_ci_item": [
+      0.6312,
+      0.7624
+     ],
+     "auroc_ci_table": [
+      0.622,
+      0.7682
+     ],
+     "auroc_official_em_label": 0.6712,
+     "selective_acc_cov50": 0.8311,
+     "selective_acc_cov80": 0.7679,
+     "coverage_at_selective_risk_10pct": 0.1014,
+     "crc_design_lambda": {
+      "lambda": 0.6935,
+      "realized_risk": 0.0642,
+      "coverage": 0.3682,
+      "selective_acc": 0.8257,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.6949,
+      "realized_risk": 0.0574,
+      "coverage": 0.3615,
+      "selective_acc": 0.8411,
+      "risk_controlled": true
+     }
+    },
+    "V9_full": {
+     "auroc": 0.735,
+     "ece": 0.1383,
+     "brier": 0.198,
+     "aurc": 0.1754,
+     "auroc_ci_item": [
+      0.6707,
+      0.7927
+     ],
+     "auroc_ci_table": [
+      0.6727,
+      0.7992
+     ],
+     "auroc_official_em_label": 0.6751,
+     "selective_acc_cov50": 0.8514,
+     "selective_acc_cov80": 0.7679,
+     "coverage_at_selective_risk_10pct": 0.1757,
+     "crc_design_lambda": {
+      "lambda": 0.6833,
+      "realized_risk": 0.0574,
+      "coverage": 0.4122,
+      "selective_acc": 0.8607,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.6837,
+      "realized_risk": 0.0574,
+      "coverage": 0.402,
+      "selective_acc": 0.8571,
+      "risk_controlled": true
+     }
+    },
+    "abl_logprobs_only": {
+     "auroc": 0.6763,
+     "ece": 0.0723,
+     "brier": 0.1924,
+     "aurc": 0.2064,
+     "auroc_ci_item": [
+      0.6076,
+      0.744
+     ],
+     "auroc_ci_table": [
+      0.6073,
+      0.7435
+     ],
+     "auroc_official_em_label": 0.6321,
+     "selective_acc_cov50": 0.8041,
+     "selective_acc_cov80": 0.7553,
+     "coverage_at_selective_risk_10pct": 0.1047,
+     "crc_design_lambda": {
+      "lambda": 0.7343,
+      "realized_risk": 0.0574,
+      "coverage": 0.2804,
+      "selective_acc": 0.7952,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.7348,
+      "realized_risk": 0.0541,
+      "coverage": 0.2736,
+      "selective_acc": 0.8025,
+      "risk_controlled": true
+     }
+    },
+    "abl_ptrue_only": {
+     "auroc": 0.5822,
+     "ece": 0.1535,
+     "brier": 0.2314,
+     "aurc": 0.2835,
+     "auroc_ci_item": [
+      0.505,
+      0.6533
+     ],
+     "auroc_ci_table": [
+      0.5013,
+      0.6643
+     ],
+     "auroc_official_em_label": 0.6199,
+     "selective_acc_cov50": 0.7635,
+     "selective_acc_cov80": 0.7215,
+     "coverage_at_selective_risk_10pct": 0.0,
+     "crc_design_lambda": {
+      "lambda": 0.6947,
+      "realized_risk": 0.0135,
+      "coverage": 0.027,
+      "selective_acc": 0.5,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": 0.5505,
+      "realized_risk": 0.0912,
+      "coverage": 0.375,
+      "selective_acc": 0.7568,
+      "risk_controlled": true
+     }
+    },
+    "abl_semantic_entropy_only": {
+     "auroc": 0.6262,
+     "ece": 0.0388,
+     "brier": 0.1921,
+     "aurc": 0.2456,
+     "auroc_ci_item": [
+      0.5735,
+      0.6761
+     ],
+     "auroc_ci_table": [
+      0.5738,
+      0.68
+     ],
+     "auroc_official_em_label": 0.6162,
+     "selective_acc_cov50": 0.777,
+     "selective_acc_cov80": 0.7679,
+     "coverage_at_selective_risk_10pct": 0.0034,
+     "crc_design_lambda": {
+      "lambda": null,
+      "realized_risk": 0.0,
+      "coverage": 0.0,
+      "selective_acc": 0.0,
+      "risk_controlled": true
+     },
+     "crc_cal_refit_lambda": {
+      "lambda": null,
+      "realized_risk": 0.0,
+      "coverage": 0.0,
+      "selective_acc": 0.0,
+      "risk_controlled": true
+     }
+    }
+   },
+   "paired_auroc_diff": {
+    "raw_answer_token_prob - lex_frozen": {
+     "item": [
+      -0.1419,
+      0.0486
+     ],
+     "table": [
+      -0.1404,
+      0.0449
+     ]
+    },
+    "raw_ptrue - lex_frozen": {
+     "item": [
+      -0.19,
+      -0.0141
+     ],
+     "table": [
+      -0.187,
+      -0.012
+     ]
+    },
+    "lex_platt - lex_frozen": {
+     "item": [
+      0.0,
+      0.0
+     ],
+     "table": [
+      0.0,
+      0.0
+     ]
+    },
+    "V8_refit - lex_frozen": {
+     "item": [
+      -0.129,
+      0.0191
+     ],
+     "table": [
+      -0.1297,
+      0.0262
+     ]
+    },
+    "V9_cheap - lex_frozen": {
+     "item": [
+      -0.0508,
+      0.0767
+     ],
+     "table": [
+      -0.0496,
+      0.0754
+     ]
+    },
+    "V9_full - lex_frozen": {
+     "item": [
+      -0.0157,
+      0.116
+     ],
+     "table": [
+      -0.0094,
+      0.1172
+     ]
+    },
+    "abl_logprobs_only - lex_frozen": {
+     "item": [
+      -0.0957,
+      0.0763
+     ],
+     "table": [
+      -0.0886,
+      0.0746
+     ]
+    },
+    "abl_ptrue_only - lex_frozen": {
+     "item": [
+      -0.1901,
+      -0.0141
+     ],
+     "table": [
+      -0.1869,
+      -0.0121
+     ]
+    },
+    "abl_semantic_entropy_only - lex_frozen": {
+     "item": [
+      -0.1333,
+      0.0171
+     ],
+     "table": [
+      -0.1429,
+      0.0238
+     ]
+    },
+    "lex_frozen - V9_cheap": {
+     "item": [
+      -0.0767,
+      0.0508
+     ],
+     "table": [
+      -0.0754,
+      0.0496
+     ]
+    },
+    "raw_answer_token_prob - V9_cheap": {
+     "item": [
+      -0.1232,
+      0.0022
+     ],
+     "table": [
+      -0.1239,
+      0.0037
+     ]
+    },
+    "raw_ptrue - V9_cheap": {
+     "item": [
+      -0.2005,
+      -0.0306
+     ],
+     "table": [
+      -0.2011,
+      -0.0239
+     ]
+    },
+    "lex_platt - V9_cheap": {
+     "item": [
+      -0.0767,
+      0.0508
+     ],
+     "table": [
+      -0.0754,
+      0.0496
+     ]
+    },
+    "V8_refit - V9_cheap": {
+     "item": [
+      -0.1464,
+      0.0127
+     ],
+     "table": [
+      -0.1551,
+      0.0264
+     ]
+    },
+    "V9_full - V9_cheap": {
+     "item": [
+      -0.0108,
+      0.0888
+     ],
+     "table": [
+      -0.0106,
+      0.0904
+     ]
+    },
+    "abl_logprobs_only - V9_cheap": {
+     "item": [
+      -0.0707,
+      0.0292
+     ],
+     "table": [
+      -0.0727,
+      0.0293
+     ]
+    },
+    "abl_ptrue_only - V9_cheap": {
+     "item": [
+      -0.2005,
+      -0.0306
+     ],
+     "table": [
+      -0.2012,
+      -0.024
+     ]
+    },
+    "abl_semantic_entropy_only - V9_cheap": {
+     "item": [
+      -0.1411,
+      0.0013
+     ],
+     "table": [
+      -0.148,
+      0.004
+     ]
+    }
+   },
+   "cost": {
+    "V7": {
+     "calls_per_item": 3.12,
+     "sec_per_item": 5.57,
+     "tokens_per_item": 4852.4,
+     "cost_usd": 0.1098
+    },
+    "V9_cheap": {
+     "calls_per_item": 4.12,
+     "sec_per_item": 6.31,
+     "tokens_per_item": 6127.3,
+     "cost_usd": 0.1333
+    },
+    "V8_refit": {
+     "calls_per_item": 9.6,
+     "sec_per_item": 12.13,
+     "tokens_per_item": 14468.2,
+     "cost_usd": 0.2993
+    },
+    "V9_full": {
+     "calls_per_item": 13.62,
+     "sec_per_item": 17.25,
+     "tokens_per_item": 21225.3,
+     "cost_usd": 0.4411
+    }
+   },
+   "lp_ok_rate": 1.0
+  }
+ },
+ "oodsec_reference_auroc": {
+  "lex_frozen": 0.6264,
+  "raw_answer_token_prob": 0.7391,
+  "raw_ptrue": 0.8538,
+  "lex_platt": 0.6264,
+  "V8_refit": 0.8975,
+  "V9_cheap": 0.8689,
+  "V9_full": 0.8798,
+  "abl_logprobs_only": 0.791,
+  "abl_ptrue_only": 0.8538,
+  "abl_semantic_entropy_only": 0.4604
+ },
+ "stability": {
+  "lex_frozen": {
+   "design_oof": 0.6367,
+   "oodsec": 0.6264,
+   "gen_secq": 0.6734,
+   "gen_jfinqa": 0.9385,
+   "gen_finqa": 0.6841
+  },
+  "raw_answer_token_prob": {
+   "design_oof": 0.6981,
+   "oodsec": 0.7391,
+   "gen_secq": 0.6122,
+   "gen_jfinqa": 0.6222,
+   "gen_finqa": 0.6377
+  },
+  "raw_ptrue": {
+   "design_oof": 0.6392,
+   "oodsec": 0.8538,
+   "gen_secq": 0.6634,
+   "gen_jfinqa": 0.7683,
+   "gen_finqa": 0.5822
+  },
+  "lex_platt": {
+   "design_oof": 0.4709,
+   "oodsec": 0.6264,
+   "gen_secq": 0.6734,
+   "gen_jfinqa": 0.9385,
+   "gen_finqa": 0.6841
+  },
+  "V8_refit": {
+   "design_oof": 0.6527,
+   "oodsec": 0.8975,
+   "gen_secq": 0.7718,
+   "gen_jfinqa": 0.7861,
+   "gen_finqa": 0.6319
+  },
+  "V9_cheap": {
+   "design_oof": 0.7312,
+   "oodsec": 0.8689,
+   "gen_secq": 0.5894,
+   "gen_jfinqa": 0.7274,
+   "gen_finqa": 0.6965
+  },
+  "V9_full": {
+   "design_oof": 0.7855,
+   "oodsec": 0.8798,
+   "gen_secq": 0.7499,
+   "gen_jfinqa": 0.7458,
+   "gen_finqa": 0.735
+  },
+  "abl_logprobs_only": {
+   "design_oof": 0.6898,
+   "oodsec": 0.791,
+   "gen_secq": 0.6748,
+   "gen_jfinqa": 0.6486,
+   "gen_finqa": 0.6763
+  },
+  "abl_ptrue_only": {
+   "design_oof": 0.6006,
+   "oodsec": 0.8538,
+   "gen_secq": 0.6633,
+   "gen_jfinqa": 0.7683,
+   "gen_finqa": 0.5822
+  },
+  "abl_semantic_entropy_only": {
+   "design_oof": 0.6532,
+   "oodsec": 0.4604,
+   "gen_secq": 0.6654,
+   "gen_jfinqa": 0.6029,
+   "gen_finqa": 0.6262
+  }
+ },
+ "kendall_tau_vs_design": {
+  "gen_secq": -0.0455,
+  "gen_jfinqa": -0.4419,
+  "gen_finqa": 0.3953,
+  "oodsec": 0.3023
+ },
+ "verdict": {
+  "lex_frozen": {
+   "design_auroc": 0.6367,
+   "mean_new_auroc": 0.7653,
+   "drop": -0.1286,
+   "n_sets_auroc_ci_includes_0.5": 0,
+   "design_crc_within_alpha+0.02_all_sets": false,
+   "label": "PARTIAL"
+  },
+  "raw_answer_token_prob": {
+   "design_auroc": 0.6981,
+   "mean_new_auroc": 0.624,
+   "drop": 0.0741,
+   "n_sets_auroc_ci_includes_0.5": 0,
+   "design_crc_within_alpha+0.02_all_sets": true,
+   "label": "PARTIAL"
+  },
+  "raw_ptrue": {
+   "design_auroc": 0.6392,
+   "mean_new_auroc": 0.6713,
+   "drop": -0.0321,
+   "n_sets_auroc_ci_includes_0.5": 0,
+   "design_crc_within_alpha+0.02_all_sets": true,
+   "label": "GENERALIZES"
+  },
+  "lex_platt": {
+   "design_auroc": 0.4709,
+   "mean_new_auroc": 0.7653,
+   "drop": -0.2944,
+   "n_sets_auroc_ci_includes_0.5": 0,
+   "design_crc_within_alpha+0.02_all_sets": true,
+   "label": "GENERALIZES"
+  },
+  "V8_refit": {
+   "design_auroc": 0.6527,
+   "mean_new_auroc": 0.7299,
+   "drop": -0.0772,
+   "n_sets_auroc_ci_includes_0.5": 0,
+   "design_crc_within_alpha+0.02_all_sets": true,
+   "label": "GENERALIZES"
+  },
+  "V9_cheap": {
+   "design_auroc": 0.7312,
+   "mean_new_auroc": 0.6711,
+   "drop": 0.0601,
+   "n_sets_auroc_ci_includes_0.5": 0,
+   "design_crc_within_alpha+0.02_all_sets": true,
+   "label": "PARTIAL"
+  },
+  "V9_full": {
+   "design_auroc": 0.7855,
+   "mean_new_auroc": 0.7436,
+   "drop": 0.0419,
+   "n_sets_auroc_ci_includes_0.5": 0,
+   "design_crc_within_alpha+0.02_all_sets": true,
+   "label": "GENERALIZES"
+  },
+  "abl_logprobs_only": {
+   "design_auroc": 0.6898,
+   "mean_new_auroc": 0.6666,
+   "drop": 0.0232,
+   "n_sets_auroc_ci_includes_0.5": 0,
+   "design_crc_within_alpha+0.02_all_sets": true,
+   "label": "GENERALIZES"
+  },
+  "abl_ptrue_only": {
+   "design_auroc": 0.6006,
+   "mean_new_auroc": 0.6713,
+   "drop": -0.0707,
+   "n_sets_auroc_ci_includes_0.5": 0,
+   "design_crc_within_alpha+0.02_all_sets": true,
+   "label": "GENERALIZES"
+  },
+  "abl_semantic_entropy_only": {
+   "design_auroc": 0.6532,
+   "mean_new_auroc": 0.6315,
+   "drop": 0.0217,
+   "n_sets_auroc_ci_includes_0.5": 0,
+   "design_crc_within_alpha+0.02_all_sets": true,
+   "label": "GENERALIZES"
+  }
+ },
+ "best_generalizing_signal": "lex_platt"
+}
