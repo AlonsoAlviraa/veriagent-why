@@ -26,7 +26,7 @@ Voiceover word count is about 330 words for 3:00 (≈110 words/min). Do not read
 - [ ] Audio voiceover audible over the whole video; 1–4 min (aim 3:00).
 - [ ] Track 02 named with the same wording as README and deck.
 - [ ] ≥2 agents collaborating visible (trace hand-offs, send-back loop).
-- [ ] Real execution (live run on Zetaris through Nightshift, recorded by Alonso: shot 5); cuts only of waiting.
+- [ ] Real execution (recorded by Alonso: shot 5); cuts only of waiting. Evidence today: Nightshift live receipts on the sample backend only (`eval/nightshift_live/v2_agent_ids/`); live Zetaris+Nightshift failed on 25 Oct (502), so do not narrate live Zetaris unless the take succeeds.
 - [ ] Zetaris doing real work (views queried, source mutation re-checked through JDBC).
 - [ ] Meterless doing real work (Nightshift receipts; H-MEM ledger / Markovian rounds in the trace).
 - [ ] Planted-trap demo (example_2) and mutation demo (green → red → green).
