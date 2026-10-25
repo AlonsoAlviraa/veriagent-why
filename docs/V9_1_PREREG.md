@@ -54,3 +54,15 @@ each new set, and Kendall tau of the arm ranking vs design.
   GENERALIZES, the recommendation is to claim no transferable abstention gain and report the best PARTIAL arm descriptively.
 * Answer systems: V7 vs plain RAG reported with paired item bootstrap; no decision depends on it.
 * Every result, including negative ones, is reported. Set-level failures (e.g. V7 accuracy outside 30-70%) are reported, not fixed.
+
+## 6. Pilot results (declared before the full runs; pilot items are excluded from all results)
+| Set | Pilot items | V7 official EM | V7 semantic | Pilot cost |
+|---|---|---|---|---|
+| gen_finqa | 15 | 5/15 | 10/15 | $0.022 |
+| gen_jfinqa | 15 | 5/15 | 13/15 | $0.010 |
+| gen_secq | 16 | 9/16 | 14/16 | ≈ $0.02 |
+On the primary (semantic) label, jfinqa and secq look easier than the 30-70% target (pilots suggest ~85-90%, i.e. roughly 30-45
+errors per 300-item test split); FinQA is near target. The sets are **not** changed after seeing the pilots: they stay frozen as
+committed, and the lower-than-targeted error count is a declared limitation (wider AUROC CIs). Official-EM gaps on the pilots are
+mostly scale labels (e.g. gold scale empty, model answers "thousand"), which is why the semantic label is primary.
+Ledger after pilots: $8.067.
