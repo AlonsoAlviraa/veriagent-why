@@ -12,7 +12,7 @@ Nebius bills the user's card automatically past the promo balance and has no pla
 Prices: USD per 1M tokens (input, output), Nebius Token Factory published prices as given 2026-10-22.
 """
 from __future__ import annotations
-import json, os, time, urllib.request, urllib.error
+import json, os, threading, time, urllib.request, urllib.error
 try:
     import fcntl  # POSIX
 except ImportError:  # Windows: msvcrt byte-range lock on the lock file
@@ -29,6 +29,7 @@ PRICES = {
     "nvidia/Nemotron-3-Ultra-550b-a55b": (1.00, 3.00),
 }
 DEFAULT_MODEL = "nvidia/Nemotron-3_5-Lightning"
+_THREAD_LOCK = threading.Lock()
 
 
 class NebiusBudgetExceeded(RuntimeError):
@@ -52,7 +53,7 @@ def cost(model: str, prompt_tokens: int, completion_tokens: int) -> float:
 def _locked():
     p = ledger_path()
     p.parent.mkdir(parents=True, exist_ok=True)
-    with open(str(p) + ".lock", "w") as lk:
+    with _THREAD_LOCK, open(str(p) + ".lock", "a+") as lk:
         if fcntl:
             fcntl.flock(lk, fcntl.LOCK_EX)
         else:
@@ -81,7 +82,7 @@ def reserve(model: str, est_prompt_tokens: int, max_tokens: int) -> str:
     if model not in PRICES:
         raise NebiusBudgetExceeded(f"no published price for {model!r}; refusing")
     worst = cost(model, est_prompt_tokens, max_tokens)
-    rid = f"{os.getpid()}-{time.time_ns()}"
+    rid = f"{os.getpid()}-{threading.get_ident()}-{time.time_ns()}"
     with _locked() as d:
         committed = d["spent_usd"] + sum(d["reserved"].values())
         if committed + worst > budget():

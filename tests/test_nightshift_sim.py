@@ -51,7 +51,7 @@ def _req(url, token=None, body=None):
 
 def test_token_file_created_private(stack):
     _, tf = stack
-    assert tf.exists() and (tf.stat().st_mode & 0o077) == 0 and len(tf.read_text(encoding="utf-8")) >= 32
+    assert tf.exists() and (__import__("os").name == "nt" or (tf.stat().st_mode & 0o077) == 0) and len(tf.read_text(encoding="utf-8")) >= 32
 
 
 def test_rejects_missing_or_wrong_token(stack):
