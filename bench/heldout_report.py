@@ -8,7 +8,9 @@ import json, math, random, re, statistics as st, sys
 from collections import defaultdict
 from pathlib import Path
 
-HOLD = Path(__file__).resolve().parent / "splits" / "holdout_v1.json"
+import os
+# split under analysis: HELDOUT_SPLIT=bench/splits/tatqa_test500_v1.json (default: the holdout_v1 pilot)
+HOLD = Path(os.environ.get("HELDOUT_SPLIT") or Path(__file__).resolve().parent / "splits" / "holdout_v1.json")
 
 
 def load(d: Path):
@@ -104,6 +106,8 @@ def report(d: Path):
         y = [em(r) == 1.0 for r in rows]
         s = [float(r["output"].get("confidence") or 0) for r in rows]
         out["confidence"][arm + " (shipped)"] = conf_metrics(y, s)
+        from .abstention import selective
+        out.setdefault("abstention", {})[arm] = selective(rows, em)
         if arm.endswith("agent_cr"):
             out["confidence"][arm + " (train-fitted map, CR_USE_CALIB=1)"] = conf_metrics(y, [calibrated(r) for r in rows])
     names = sorted(item)
@@ -128,6 +132,10 @@ def md(o):
     L += ["", "| confidence | n rows | acc | mean conf | distinct values | Brier ↓ | ECE ↓ | AUROC ↑ | AURC ↓ |", "|---|---|---|---|---|---|---|---|---|"]
     for a, c in o["confidence"].items():
         L.append(f"| {a} | {c['n']} | {c['acc']} | {c['mean_conf']} | {c['distinct']} | {c['brier']} | {c['ece']} | {c['auroc']} | {c['aurc']} |")
+    if o.get("abstention"):
+        L += ["", "| abstention (pre-registered: lex >= 0.809) | n | answered | coverage | selective EM | AURC ↓ |", "|---|---|---|---|---|---|"]
+        for a, v in o["abstention"].items():
+            L.append(f"| {a} | {v['n']} | {v['answered']} | {v['coverage']} | {v['selective_em']} | {v['aurc']} |")
     return "\n".join(L)
 
 

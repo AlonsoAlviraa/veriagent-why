@@ -51,7 +51,7 @@ def literal(v) -> str:
     return "'" + str(v).replace("\\", "\\\\").replace("'", "\\'") + "'"  # Spark SQL string literal
 
 
-def render(sql: str, params: list | None, prefix: str = "") -> str:
+def render(sql: str, params: list | None, prefix: str = "", views: tuple = VIEWS) -> str:
     """Inline escaped literals (one plain statement per call), translate DuckDB-isms to Lightning
     (Spark) SQL and qualify the 5 view names."""
     parts = sql.split("?")
@@ -60,7 +60,7 @@ def render(sql: str, params: list | None, prefix: str = "") -> str:
     out = parts[0] + "".join(literal(p) + rest for p, rest in zip(params or [], parts[1:]))
     out = re.sub(r"\bAS\s+VARCHAR\b", "AS STRING", out, flags=re.I)
     if prefix:
-        out = re.sub(r"(?<![\w.])(" + "|".join(VIEWS) + r")\b", lambda m: prefix + m.group(1), out)
+        out = re.sub(r"(?<![\w.])(" + "|".join(views) + r")\b", lambda m: prefix + m.group(1), out)
     return out.strip().rstrip(";")
 
 
@@ -95,6 +95,7 @@ def jdbc_connect():
 
 class ZetarisJdbcBackend:
     name = "zetaris-jdbc"
+    views = VIEWS
 
     def __init__(self, dataset: str | None = None, conn=None):
         if dataset:
@@ -116,7 +117,32 @@ class ZetarisJdbcBackend:
             cur.close()
 
     def query(self, sql: str, params: list | None = None) -> list[dict]:
-        return self.execute(render(sql, params, self.prefix)) or []
+        return self.execute(render(sql, params, self.prefix, self.views)) or []
+
+
+class SnapshotBackend(SampleBackend):
+    """DuckDB snapshot at an explicit path (same 5 views as the demo/Zetaris schema). Used by the
+    public SAMPLE_MODE Space and by the CI mutation test (writable copy)."""
+    name = "snapshot-duckdb"
+
+    def __init__(self, path, read_only: bool = True):
+        import duckdb
+        self.path = str(path)
+        self.con = duckdb.connect(self.path, read_only=read_only)
+
+
+def badge(db) -> str:
+    """Backend badge shown on every receipt: 'zetaris' only when the query really went over JDBC."""
+    return "zetaris" if isinstance(db, ZetarisJdbcBackend) else "snapshot"
+
+
+def schema(db) -> dict[str, list[str]]:
+    """View -> column names, by querying each view (works for DuckDB and Zetaris)."""
+    out = {}
+    for v in VIEWS:
+        r = db.query(f"SELECT * FROM {v} LIMIT 1")
+        out[v] = sorted(r[0].keys()) if r else []
+    return out
 
 
 def get_backend(dataset: str | None = None):

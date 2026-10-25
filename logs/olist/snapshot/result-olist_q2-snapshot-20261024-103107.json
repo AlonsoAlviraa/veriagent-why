@@ -1,0 +1,272 @@
+{
+ "run_id": "olist_q2-snapshot-20261024-103107",
+ "question_id": "olist_q2",
+ "question": {
+  "title": "Why did the late-delivery rate spike in November 2017 (Black Friday month) compared with October 2017?",
+  "dataset": "olist"
+ },
+ "kpi": {
+  "metric": "olist.late_rate",
+  "period": 12.404,
+  "baseline": 4.176
+ },
+ "status": {
+  "H_volume": "supported",
+  "H_handling": "inconclusive",
+  "H_transit": "supported"
+ },
+ "top_cause": "H_volume",
+ "findings": [
+  {
+   "hyp": "H_volume",
+   "evidence_id": "q2_volume",
+   "label": "delivered orders per day",
+   "treatment": 242.933,
+   "control": 144.452,
+   "ratio": 1.6818,
+   "outcome": "supports"
+  },
+  {
+   "hyp": "H_handling",
+   "evidence_id": "q2_handling",
+   "label": "avg seller handling days",
+   "treatment": 4.066,
+   "control": 3.45,
+   "ratio": 1.1788,
+   "outcome": "inconclusive"
+  },
+  {
+   "hyp": "H_transit",
+   "evidence_id": "q2_transit",
+   "label": "avg transit days",
+   "treatment": 11.095,
+   "control": 8.407,
+   "ratio": 1.3197,
+   "outcome": "supports"
+  }
+ ],
+ "claims": [
+  {
+   "id": "kpi_period",
+   "metric": "olist.late_rate",
+   "params": {
+    "window": [
+     "2017-11-01",
+     "2017-11-30"
+    ]
+   },
+   "value": 12.404,
+   "row_ids": [
+    "000e906b789b55f64edcb1f84030f90d",
+    "001c85b5f68d2be0cb0797afc9e8ce9a",
+    "0030d783f979fbc5981e75613b057344"
+   ],
+   "label": "KPI in the period"
+  },
+  {
+   "id": "kpi_baseline",
+   "metric": "olist.late_rate",
+   "params": {
+    "window": [
+     "2017-10-01",
+     "2017-10-31"
+    ]
+   },
+   "value": 4.176,
+   "row_ids": [
+    "009742b43f4530bc3db7f62332c50f4b",
+    "016d1bdf6efab4f6b805df1c03043113",
+    "026f3440c258a87c9f6fb9c8e1bbb6e7"
+   ],
+   "label": "KPI in the baseline"
+  },
+  {
+   "id": "q2_volume_t",
+   "metric": "olist.orders_per_day",
+   "params": {
+    "window": [
+     "2017-11-01",
+     "2017-11-30"
+    ]
+   },
+   "value": 242.933,
+   "row_ids": [
+    "000e906b789b55f64edcb1f84030f90d",
+    "00137e170939bba5a3134e2386413108",
+    "001c85b5f68d2be0cb0797afc9e8ce9a"
+   ],
+   "label": "delivered orders per day (treatment)"
+  },
+  {
+   "id": "q2_volume_c",
+   "metric": "olist.orders_per_day",
+   "params": {
+    "window": [
+     "2017-10-01",
+     "2017-10-31"
+    ]
+   },
+   "value": 144.452,
+   "row_ids": [
+    "00143d0f86d6fbd9f9b38ab440ac16f5",
+    "0026a368634b6e6f34f33b1499773a30",
+    "0036887767dea4bd43b1a88cd0d9477a"
+   ],
+   "label": "delivered orders per day (control)"
+  },
+  {
+   "id": "q2_handling_t",
+   "metric": "olist.avg_handling_days",
+   "params": {
+    "window": [
+     "2017-11-01",
+     "2017-11-30"
+    ]
+   },
+   "value": 4.066,
+   "row_ids": [
+    "000e906b789b55f64edcb1f84030f90d",
+    "00137e170939bba5a3134e2386413108",
+    "001c85b5f68d2be0cb0797afc9e8ce9a"
+   ],
+   "label": "avg seller handling days (treatment)"
+  },
+  {
+   "id": "q2_handling_c",
+   "metric": "olist.avg_handling_days",
+   "params": {
+    "window": [
+     "2017-10-01",
+     "2017-10-31"
+    ]
+   },
+   "value": 3.45,
+   "row_ids": [
+    "00143d0f86d6fbd9f9b38ab440ac16f5",
+    "0026a368634b6e6f34f33b1499773a30",
+    "0036887767dea4bd43b1a88cd0d9477a"
+   ],
+   "label": "avg seller handling days (control)"
+  },
+  {
+   "id": "q2_transit_t",
+   "metric": "olist.avg_transit_days",
+   "params": {
+    "window": [
+     "2017-11-01",
+     "2017-11-30"
+    ]
+   },
+   "value": 11.095,
+   "row_ids": [
+    "000e906b789b55f64edcb1f84030f90d",
+    "00137e170939bba5a3134e2386413108",
+    "001c85b5f68d2be0cb0797afc9e8ce9a"
+   ],
+   "label": "avg transit days (treatment)"
+  },
+  {
+   "id": "q2_transit_c",
+   "metric": "olist.avg_transit_days",
+   "params": {
+    "window": [
+     "2017-10-01",
+     "2017-10-31"
+    ]
+   },
+   "value": 8.407,
+   "row_ids": [
+    "00143d0f86d6fbd9f9b38ab440ac16f5",
+    "0026a368634b6e6f34f33b1499773a30",
+    "0036887767dea4bd43b1a88cd0d9477a"
+   ],
+   "label": "avg transit days (control)"
+  }
+ ],
+ "why_diff": {
+  "prior_first": "H_volume",
+  "final_top": "H_volume",
+  "hypotheses": [
+   {
+    "hyp": "H_volume",
+    "prior_rank": 1,
+    "before": "open",
+    "after": "supported",
+    "moved_by": [
+     "q2_volume"
+    ]
+   },
+   {
+    "hyp": "H_handling",
+    "prior_rank": 2,
+    "before": "open",
+    "after": "inconclusive",
+    "moved_by": [
+     "q2_handling"
+    ]
+   },
+   {
+    "hyp": "H_transit",
+    "prior_rank": 3,
+    "before": "open",
+    "after": "supported",
+    "moved_by": [
+     "q2_transit"
+    ]
+   }
+  ],
+  "n_updates": 6,
+  "source": "trace-olist_q2-snapshot-20261024-103107.jsonl: hypothesis_update events only"
+ },
+ "sensitivity": {
+  "top_cause": "H_volume",
+  "by_source": [
+   {
+    "drop_source": "ol_orders",
+    "top_cause": null,
+    "conclusion_changes": true,
+    "status_changes": {
+     "H_volume": [
+      "supported",
+      "open"
+     ],
+     "H_handling": [
+      "inconclusive",
+      "open"
+     ],
+     "H_transit": [
+      "supported",
+      "open"
+     ]
+    }
+   },
+   {
+    "drop_source": "ol_items",
+    "top_cause": "H_volume",
+    "conclusion_changes": false,
+    "status_changes": {}
+   },
+   {
+    "drop_source": "ol_reviews",
+    "top_cause": "H_volume",
+    "conclusion_changes": false,
+    "status_changes": {}
+   },
+   {
+    "drop_source": "ol_sellers",
+    "top_cause": "H_volume",
+    "conclusion_changes": false,
+    "status_changes": {}
+   }
+  ],
+  "method": "deterministic replay of recorded outcomes without one source table"
+ },
+ "backend": "snapshot",
+ "attribution": "Data: Brazilian E-Commerce Public Dataset by Olist (https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), CC BY-NC-SA 4.0. Non-commercial demo; derived memos and traces are shared under the same license.",
+ "hyp_text": {
+  "H_volume": "Black Friday order volume surge",
+  "H_handling": "Sellers took longer to hand orders to the carrier",
+  "H_transit": "Carrier transit time got longer"
+ },
+ "system_seconds": 0.028
+}

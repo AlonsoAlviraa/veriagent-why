@@ -12,7 +12,9 @@ SEG_COLS = {"carrier": "l.carrier", "region": "l.region", "category": "o.categor
 FROM = "v_logistics l JOIN v_orders o USING(order_id)"
 
 
-def metric_value(db, metric: str, segment: dict, window: list[str]) -> float | None:
+def metric_sql(metric: str, segment: dict, window: list[str]) -> tuple[str, list]:
+    """The exact SQL (and bound params) that defines a claim's value. Used by the Claim Gate and by
+    POST /verify, so the receipt re-executes the same statement the claim was built from."""
     where, params = ["l.ship_date BETWEEN ? AND ?"], [window[0], window[1]]
     for c, v in segment.items():
         if c not in SEG_COLS:
@@ -20,11 +22,15 @@ def metric_value(db, metric: str, segment: dict, window: list[str]) -> float | N
         where.append(f"{SEG_COLS[c]} = ?"); params.append(v)
     w = " AND ".join(where)
     if metric == "on_time_rate":
-        r = db.query(f"SELECT AVG(CASE WHEN l.on_time THEN 100.0 ELSE 0 END) AS v FROM {FROM} WHERE {w}", params)
-    elif metric == "late_count":
-        r = db.query(f"SELECT SUM(CASE WHEN l.on_time THEN 0 ELSE 1 END) AS v FROM {FROM} WHERE {w}", params)
-    else:
-        raise ValueError(f"unsupported metric {metric}")
+        return f"SELECT AVG(CASE WHEN l.on_time THEN 100.0 ELSE 0 END) AS v FROM {FROM} WHERE {w}", params
+    if metric == "late_count":
+        return f"SELECT SUM(CASE WHEN l.on_time THEN 0 ELSE 1 END) AS v FROM {FROM} WHERE {w}", params
+    raise ValueError(f"unsupported metric {metric}")
+
+
+def metric_value(db, metric: str, segment: dict, window: list[str]) -> float | None:
+    sql, params = metric_sql(metric, segment, window)
+    r = db.query(sql, params)
     v = r[0]["v"] if r else None
     return None if v is None else float(v)
 
