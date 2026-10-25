@@ -91,6 +91,9 @@ def settle(rid: str, model: str, usage: dict | None, book_worst: bool) -> float:
         return c
 
 
+TEMPERATURE = 0.0  # verify-v2 self-consistency samples set this temporarily (bench/verify2.py: sampling())
+
+
 def complete(messages: list[dict], model: str | None = None, max_tokens: int = 1024, timeout: float = 180) -> dict:
     model = model or os.environ.get("NEBIUS_MODEL") or DEFAULT_MODEL
     key = os.environ.get("NEBIUS_API_KEY")
@@ -98,7 +101,7 @@ def complete(messages: list[dict], model: str | None = None, max_tokens: int = 1
         raise RuntimeError("NEBIUS_API_KEY not set")
     est = sum(len(m["content"]) for m in messages) // 3 + 50  # conservative (~3 chars/token)
     rid = reserve(model, est, max_tokens)
-    body = {"model": model, "messages": messages, "max_tokens": max_tokens, "temperature": 0}
+    body = {"model": model, "messages": messages, "max_tokens": max_tokens, "temperature": TEMPERATURE}  # 0 unless a sampling config sets it
     if os.environ.get("NEBIUS_THINKING", "0") != "1":
         body["chat_template_kwargs"] = {"enable_thinking": False}  # same as app.llm for NVIDIA
     if os.environ.get("NEBIUS_JSON_MODE", "1") == "1" and any("JSON" in m["content"] for m in messages):
