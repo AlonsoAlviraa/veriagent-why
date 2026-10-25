@@ -179,3 +179,6 @@ MIT. See [LICENSE](LICENSE).
 
 ## Team
 Alonso Alvira Ballano (solo). GitHub: [@AlonsoAlviraa](https://github.com/AlonsoAlviraa)
+
+
+Live Nightshift receipts with per-agent and request ids (sample backend; live-Zetaris attempt failed): [eval/nightshift_live/v2_agent_ids/](eval/nightshift_live/v2_agent_ids/README.md)
