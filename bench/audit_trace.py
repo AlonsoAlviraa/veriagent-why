@@ -541,7 +541,10 @@ def write_item_trace(row: dict, results_path: Path, data: Path, root: Path, min_
     if isinstance(row.get("output"), dict) and row["output"].get("v71"):  # V7.1: every gate decision with its reason
         t["v71"] = row["output"]["v71"]
     p = d / f"{safe}.audit.json"
-    p.write_text(json.dumps(t, indent=1, ensure_ascii=False, default=str))
+    body = json.dumps(t, indent=1, ensure_ascii=False, default=str)
+    p.write_text(body)
+    import hashlib
+    sha = hashlib.sha256(body.encode()).hexdigest()  # TRACE_AUDIT P1-4: hash logged so a later edit/deletion is detectable
     gz = None
     if any(f["prompt"] for f in full) and _disk_free_gb(root) > min_free_gb:
         clean, _ = secret_scan(full)
@@ -552,7 +555,7 @@ def write_item_trace(row: dict, results_path: Path, data: Path, root: Path, min_
     idx = {"id": row["id"], "config": row["system"], "bench": row["bench"],
            "score": sc.get("em") if row["bench"] == "tatqa" else sc.get("summary_judge"),
            "failure_cause": failure_cause(row), "path": str(p), "prompts_gz": str(gz) if gz else None,
-           "redactions": t["secret_scan"]["redactions"]}
+           "redactions": t["secret_scan"]["redactions"], "sha256": sha}
     with (root / run / "audit_index.jsonl").open("a") as f:
         f.write(json.dumps(idx) + "\n")
     return idx

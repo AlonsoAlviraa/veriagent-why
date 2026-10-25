@@ -81,8 +81,18 @@ def _norm(s: str) -> str:
     return re.sub(r"[\s$,()]+", " ", s).strip()
 
 
+def _is_empty_answer(ans) -> bool:
+    """None, '', whitespace, or a list holding only those (TRACE_AUDIT P1-2: 70/70 empty gen answers passed)."""
+    items = ans if isinstance(ans, (list, tuple)) else [ans]
+    return not any(x is not None and str(x).strip() for x in items)
+
+
 def gate(out: dict, ctx: str) -> list[str]:
+    """Traceability check (NOT a correctness check): cited evidence and numbers must be re-findable in the same context
+    the model saw, and the expression must reproduce the answer. A pass means 'traceable', never 'verified true'."""
     reasons, nctx, cnums = [], _norm(ctx), nums(ctx)
+    if _is_empty_answer(out.get("answer")):
+        reasons.append("empty answer: blocked")
     for e in out.get("evidence") or []:
         if _norm(e) and _norm(e) not in nctx:
             reasons.append(f"evidence not found in context: {str(e)[:80]}")
