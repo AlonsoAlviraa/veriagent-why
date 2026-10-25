@@ -29,10 +29,10 @@ def test_runner_offline_resumable(tmp_path, bench):
     out = tmp_path / "r.jsonl"
     args = ["--bench", bench, "--offline", "--fixtures", "--out", str(out), "--max-calls", "50"]
     assert run.main(args) == 0
-    rows = [json.loads(l) for l in out.read_text().splitlines()]
+    rows = [json.loads(l) for l in out.read_text(encoding="utf-8").splitlines()]
     assert {r["system"] for r in rows} == {"agent", "rag", "react"} and not any(r.get("error") for r in rows)
     assert run.main(args) == 0  # resume: nothing re-run
-    assert len(out.read_text().splitlines()) == len(rows)
+    assert len(out.read_text(encoding="utf-8").splitlines()) == len(rows)
     s = report.summarise(report.load(out))
     assert all(d["n"] == 1 for d in s)
 
@@ -40,7 +40,7 @@ def test_runner_offline_resumable(tmp_path, bench):
 def test_budget_cap(tmp_path):
     out = tmp_path / "r.jsonl"
     run.main(["--bench", "insightbench", "--offline", "--fixtures", "--out", str(out), "--max-calls", "1", "--systems", "agent"])
-    r = json.loads(out.read_text().splitlines()[0])
+    r = json.loads(out.read_text(encoding="utf-8").splitlines()[0])
     assert r["error"].startswith("BudgetExceeded")
 
 

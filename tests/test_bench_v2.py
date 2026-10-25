@@ -105,7 +105,7 @@ def test_calibration_and_bootstrap():
 def test_report_v2_fields_and_empty_gold(tmp_path):
     out = tmp_path / "r.jsonl"
     assert run.main(["--bench", "insightbench", "--offline", "--fixtures", "--out", str(out), "--max-calls", "80"]) == 0
-    rows = [json.loads(l) for l in out.read_text().splitlines()]
+    rows = [json.loads(l) for l in out.read_text(encoding="utf-8").splitlines()]
     assert all("explain" in r and "evidence_store" in r["output"] for r in rows)
     assert all(r["explain"].get("faithfulness") is not None for r in rows)
     r0 = dict(rows[0]); r0["id"] = "flag-36"; r0["scores"] = {**r0["scores"], "excluded": "empty ground-truth insights in the dataset"}

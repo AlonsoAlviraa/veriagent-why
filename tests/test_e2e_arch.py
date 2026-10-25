@@ -7,7 +7,7 @@ from app import pipeline
 from app.config import ROOT, TIMEOUTS
 from tests.test_llm_mock import serve, good, live  # noqa: F401  (fixture reuse)
 
-INP = json.loads((ROOT / "input_examples" / "example_1.json").read_text())["input"]
+INP = json.loads((ROOT / "input_examples" / "example_1.json").read_text(encoding="utf-8"))["input"]
 BOXES = [("orchestrator", "start"), ("orchestrator", "backend"), ("planner", "hypotheses"), ("retriever", "retrieved"),
          ("s1_filter", "filtered"), ("evidence_evaluator", "verdicts"), ("evidence_evaluator", "send_back_to_planner"),
          ("markovian", "run"), ("cause_analyst", "ranked"), ("writer", "claims"), ("claim_gate", "checked"),
@@ -15,7 +15,7 @@ BOXES = [("orchestrator", "start"), ("orchestrator", "backend"), ("planner", "hy
 
 
 def events(res):
-    return [json.loads(l) for l in (ROOT / res["log_file"]).read_text().splitlines()]
+    return [json.loads(l) for l in (ROOT / res["log_file"]).read_text(encoding="utf-8").splitlines()]
 
 
 def test_sample_run_touches_every_box_and_writes_artifacts():
@@ -74,7 +74,7 @@ def test_app_run_writes_audit_json_next_to_memo():
     res = pipeline.run(INP, "e2e-audit")
     from app.config import log_dir
     d = log_dir() / "e2e-audit"
-    a = json.loads((d / "audit.json").read_text())
+    a = json.loads((d / "audit.json").read_text(encoding="utf-8"))
     assert (d / "memo.md").exists()
     for k in ("planner", "sql", "evidence", "requery", "cause_analyst", "writer", "claim_gate"):
         assert a["flow"][k], k

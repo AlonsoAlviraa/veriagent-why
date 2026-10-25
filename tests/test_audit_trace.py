@@ -6,7 +6,7 @@ import pytest
 
 from bench import audit_trace as AT
 
-SCHEMA = json.loads((Path(__file__).resolve().parents[1] / "docs" / "audit_trace.schema.json").read_text())
+SCHEMA = json.loads((Path(__file__).resolve().parents[1] / "docs" / "audit_trace.schema.json").read_text(encoding="utf-8"))
 
 
 def tat_row(**kw):

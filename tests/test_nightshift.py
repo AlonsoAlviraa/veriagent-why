@@ -4,7 +4,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 import pytest
 
-INP = json.loads((Path(__file__).parents[1] / "input_examples" / "example_1.json").read_text())["input"]
+INP = json.loads((Path(__file__).parents[1] / "input_examples" / "example_1.json").read_text(encoding="utf-8"))["input"]
 LIGHT, ULTRA = "nvidia/nemotron-3.5-lightning-30b-a3b", "nvidia/nemotron-3-ultra-550b-a55b"
 
 
@@ -50,7 +50,7 @@ def ns(monkeypatch, tmp_path):
 
 
 def receipts(d, rid="t-ns"):
-    return [json.loads(l) for l in (d / f"receipts-{rid}.jsonl").read_text().splitlines()]
+    return [json.loads(l) for l in (d / f"receipts-{rid}.jsonl").read_text(encoding="utf-8").splitlines()]
 
 
 def test_receipt_and_pins(ns):
@@ -63,7 +63,7 @@ def test_receipt_and_pins(ns):
     assert seen[0]["headers"]["meterless-app"] == "veriagent-why" and seen[0]["headers"]["meterless-scope"] == "user"
     rec = receipts(d)[0]
     assert rec["pin_ok"] and rec["routed_model"] == LIGHT and rec["requested_model"] == LIGHT and not rec["fallback"]
-    assert "test-token-not-real" not in (d / "receipts-t-ns.jsonl").read_text()
+    assert "test-token-not-real" not in (d / "receipts-t-ns.jsonl").read_text(encoding="utf-8")
 
 
 def test_mismatch_fails_loudly(ns):

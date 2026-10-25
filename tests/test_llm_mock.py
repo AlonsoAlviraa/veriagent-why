@@ -4,7 +4,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 import pytest
 
-INP = json.loads((Path(__file__).parents[1] / "input_examples" / "example_1.json").read_text())["input"]
+INP = json.loads((Path(__file__).parents[1] / "input_examples" / "example_1.json").read_text(encoding="utf-8"))["input"]
 
 
 def serve(reply):

@@ -8,7 +8,7 @@ from app.adapters.zetaris import SnapshotBackend, VIEWS, badge, schema, SampleBa
 
 ROOT = Path(__file__).parents[1]
 C = TestClient(app)
-INP = json.loads((ROOT / "input_examples" / "example_1.json").read_text())["input"]
+INP = json.loads((ROOT / "input_examples" / "example_1.json").read_text(encoding="utf-8"))["input"]
 
 
 def _run(rid="verify-test"):
@@ -30,11 +30,11 @@ def test_verify_endpoint_reexecutes_and_logs(tmp_path):
     assert len(v["receipts"]) == len(r["claims"])
     for rc in v["receipts"]:
         assert rc["sql"].startswith("SELECT") and rc["db_value"] is not None and rc["executed_at"]
-    ev = [json.loads(l) for l in (log_dir() / f"trace-{rid}.jsonl").read_text().splitlines()]
+    ev = [json.loads(l) for l in (log_dir() / f"trace-{rid}.jsonl").read_text(encoding="utf-8").splitlines()]
     ver = [e for e in ev if e["event"] == "verify"]
     assert len(ver) == len(r["claims"]) and all(e["agent"] == "verifier" for e in ver)
     v2 = C.post("/verify", json={"run_id": rid}).json()  # each call re-executes and logs again
-    assert sum(1 for l in (log_dir() / f"trace-{rid}.jsonl").read_text().splitlines() if '"verify"' in l) == 2 * len(r["claims"])
+    assert sum(1 for l in (log_dir() / f"trace-{rid}.jsonl").read_text(encoding="utf-8").splitlines() if '"verify"' in l) == 2 * len(r["claims"])
     assert v2["receipts"][0]["executed_at"] >= v["receipts"][0]["executed_at"]
 
 

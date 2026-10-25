@@ -65,7 +65,7 @@ def test_offline_systems_log_decisions(tmp_path):
     for bench in ("tatqa", "insightbench"):
         out = tmp_path / f"{bench}.jsonl"
         R.main(["--bench", bench, "--offline", "--fixtures", "--systems", "agent_mk,agent_mknv", "--out", str(out), "--no-judge"])
-        recs = [json.loads(l) for l in out.read_text().splitlines()]
+        recs = [json.loads(l) for l in out.read_text(encoding="utf-8").splitlines()]
         assert recs and all(not r.get("error") for r in recs)
         assert all(r["output"]["decisions"] for r in recs)
 

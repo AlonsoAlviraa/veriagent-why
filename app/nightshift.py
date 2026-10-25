@@ -56,11 +56,11 @@ def token() -> str:
         return k
     kf = env("NIGHTSHIFT_API_KEY_FILE")  # e.g. the local simulator's token file (app/nightshift_sim.py)
     if kf:
-        return Path(kf).expanduser().read_text().strip()
+        return Path(kf).expanduser().read_text(encoding="utf-8").strip()
     sd = env("NIGHTSHIFT_STATE_DIR") or (os.path.join(os.environ.get("LOCALAPPDATA", ""), "ai.meterless.runtime")
                                          if os.name == "nt" else os.path.expanduser("~/.meterless"))
     p = Path(sd) / "proxy-token"
-    return p.read_text().strip() if p.exists() else ""
+    return p.read_text(encoding="utf-8").strip() if p.exists() else ""
 
 
 def bound_messages(messages: list[dict], limit: int | None = None) -> tuple[list[dict], bool]:

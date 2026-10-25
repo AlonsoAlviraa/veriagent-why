@@ -10,7 +10,7 @@ from bench import tatqa as TQ
 ROOT = Path(__file__).resolve().parents[1]
 D = ROOT / "data" / "bench" / "tatqa"
 rows = {}
-for l in (ROOT / "bench/results/battery/tatqa-train-v2-agent_cr.jsonl").read_text().splitlines():
+for l in (ROOT / "bench/results/battery/tatqa-train-v2-agent_cr.jsonl").read_text(encoding="utf-8").splitlines():
     r = json.loads(l)
     if not r.get("error"):
         rows[r["id"]] = r

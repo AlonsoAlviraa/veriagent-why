@@ -51,7 +51,7 @@ def _req(url, token=None, body=None):
 
 def test_token_file_created_private(stack):
     _, tf = stack
-    assert tf.exists() and (tf.stat().st_mode & 0o077) == 0 and len(tf.read_text()) >= 32
+    assert tf.exists() and (tf.stat().st_mode & 0o077) == 0 and len(tf.read_text(encoding="utf-8")) >= 32
 
 
 def test_rejects_missing_or_wrong_token(stack):
@@ -65,7 +65,7 @@ def test_rejects_missing_or_wrong_token(stack):
 def test_chat_forwards_and_is_labelled_as_simulator(stack):
     base, tf = stack
     SEEN.clear()
-    code, headers, out = _req(base + "/v1/chat/completions", tf.read_text(),
+    code, headers, out = _req(base + "/v1/chat/completions", tf.read_text(encoding="utf-8"),
                               {"model": "meterless/fast", "messages": [{"role": "user", "content": "ping"}], "max_tokens": 5})
     assert code == 200 and out["choices"][0]["message"]["content"] == "pong"
     assert "not Meterless Nightshift" in headers["x-simulator"]
@@ -95,7 +95,7 @@ def test_nebius_upstream_refused_by_budget_guard(stack, monkeypatch, tmp_path):
     monkeypatch.setenv("NEBIUS_LEDGER", str(tmp_path / "ledger.json"))
     monkeypatch.setenv("NEBIUS_BUDGET_USD", "0")
     with pytest.raises(urllib.error.HTTPError) as e:
-        _req(base + "/v1/chat/completions", tf.read_text(), {"messages": [{"role": "user", "content": "hi"}]})
+        _req(base + "/v1/chat/completions", tf.read_text(encoding="utf-8"), {"messages": [{"role": "user", "content": "hi"}]})
     assert e.value.code == 402
 
 

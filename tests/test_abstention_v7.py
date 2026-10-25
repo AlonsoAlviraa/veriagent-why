@@ -6,7 +6,7 @@ ROOT = Path(__file__).parents[1]
 
 
 def test_frozen_constants_match_fit_file():
-    fit = json.loads((ROOT / "bench/calib/abstention_v7.json").read_text())
+    fit = json.loads((ROOT / "bench/calib/abstention_v7.json").read_text(encoding="utf-8"))
     assert fit["signal"] == A.SIGNAL and abs(fit["operating_point"]["threshold"] - A.THRESHOLD) < 1e-9
     assert set(fit["inputs"]) == {"train", "dev"}  # never test500 / holdout_v1
 

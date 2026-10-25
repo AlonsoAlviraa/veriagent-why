@@ -10,7 +10,7 @@ from app.adapters.zetaris import SampleBackend
 from app.agents.core import Retriever, LLMCtx
 from app.memory import HMem
 
-INP = json.loads((Path(__file__).parents[1] / "input_examples" / "example_1.json").read_text())["input"]
+INP = json.loads((Path(__file__).parents[1] / "input_examples" / "example_1.json").read_text(encoding="utf-8"))["input"]
 
 
 def q():
@@ -152,5 +152,5 @@ def test_sample_pipeline_uses_agentic_retriever_and_reports_embedder():
     res = run(INP, "test-agentic")
     r = res["output"]["result"]["retrieval"]
     assert r["mode"] == "agentic" and r["embed_backend"] == "hash" and r["stats"]["tool_calls"] > 0
-    log = (Path(__file__).parents[1] / res["log_file"]).read_text()
+    log = (Path(__file__).parents[1] / res["log_file"]).read_text(encoding="utf-8")
     assert '"tool_call"' in log

@@ -11,7 +11,7 @@ from bench.stats import paired_bootstrap, mcnemar  # noqa: E402
 def load(spec):
     p, sys_ = spec.rsplit(":", 1)
     rows = {}
-    for l in Path(p).read_text().splitlines():
+    for l in Path(p).read_text(encoding="utf-8").splitlines():
         r = json.loads(l)
         if r.get("system") == sys_ and not r.get("error"):
             rows[r["id"]] = r

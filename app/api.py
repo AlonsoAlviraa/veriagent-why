@@ -55,7 +55,7 @@ def start(req: dict):
 @app.get("/runs/{run_id}/trace")
 def trace(run_id: str, since: int = 0):
     p = log_dir() / f"trace-{_rid(run_id)}.jsonl"
-    lines = p.read_text().splitlines() if p.exists() else []
+    lines = p.read_text(encoding="utf-8").splitlines() if p.exists() else []
     return {"status": STATE.get(run_id, {}).get("status", "unknown"), "events": [json.loads(l) for l in lines[since:]], "next": len(lines)}
 
 
@@ -64,7 +64,7 @@ def result(run_id: str):
     p = log_dir() / f"result-{_rid(run_id)}.json"
     if not p.exists():
         raise HTTPException(404, "not found")
-    return json.loads(p.read_text())
+    return json.loads(p.read_text(encoding="utf-8"))
 
 
 @app.post("/runs/{run_id}/whatif")
@@ -81,7 +81,7 @@ def memo(run_id: str):
     p = log_dir() / f"memo-{_rid(run_id)}.md"
     if not p.exists():
         raise HTTPException(404, "not found")
-    return p.read_text()
+    return p.read_text(encoding="utf-8")
 
 
 @app.get("/memo/{run_id}.pdf")

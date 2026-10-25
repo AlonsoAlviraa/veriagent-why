@@ -21,7 +21,7 @@ def any_ev(doc):
     c = [p["text"] for p in doc["paragraphs"]] + [" | ".join(r) for r in doc["table"]["table"][1:]]
     return rng.choice(c)
 out_p = ROOT / "bench/features/relevance-calib-train.json"
-res = json.loads(out_p.read_text())["items"] if out_p.exists() else []
+res = json.loads(out_p.read_text(encoding="utf-8"))["items"] if out_p.exists() else []
 done = {r["uid"] for r in res}
 while len(res) < N:
     i = rng.randrange(len(d)); doc = d[i]; q = rng.choice(doc["questions"])
