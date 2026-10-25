@@ -261,5 +261,6 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
     return {"run_id": run_id, "status": status, "output": {"summary": out["memo_md"].splitlines()[1],
             "result": out, "artifacts": [_rel(memo_path), _rel(lpath), _rel(rpath)]
             + ([_rel(tr.path.parent / f"memo-{run_id}.pdf")] if (tr.path.parent / f"memo-{run_id}.pdf").exists() else [])},
-            "agents": [{"name": a.name} for a in (planner, retr, s1, ev, analyst, writer, gate)],
+            "agents": [{"name": a.name, "kind": "agent"} for a in (planner, retr, s1, ev, analyst, writer)],
+            "checks": [{"name": "traceability_check", "display_name": "Traceability Check", "kind": "deterministic_check", "trace_id": gate.name}],
             "trace_id": tr.trace_id, "log_file": _rel(tr.path), "execution_time_seconds": round(time.time() - t0, 3)}

@@ -353,7 +353,8 @@ class Writer:
 
 class ClaimGate:
     """Deterministic (no LLM). Decides what leaves the system; can reject the Writer's output."""
-    name = "claim_gate"
+    name = "claim_gate"  # trace/step id kept for compatibility with existing traces and docs/audit_trace.schema.json
+    display_name = "Traceability Check"
 
     def __init__(self, db):
         self.db = db

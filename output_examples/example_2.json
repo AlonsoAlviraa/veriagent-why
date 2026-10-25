@@ -491,28 +491,39 @@
   },
   "agents": [
     {
-      "name": "planner"
+      "name": "planner",
+      "kind": "agent"
     },
     {
-      "name": "retriever"
+      "name": "retriever",
+      "kind": "agent"
     },
     {
-      "name": "s1_filter"
+      "name": "s1_filter",
+      "kind": "agent"
     },
     {
-      "name": "evidence_evaluator"
+      "name": "evidence_evaluator",
+      "kind": "agent"
     },
     {
-      "name": "cause_analyst"
+      "name": "cause_analyst",
+      "kind": "agent"
     },
     {
-      "name": "writer"
-    },
-    {
-      "name": "claim_gate"
+      "name": "writer",
+      "kind": "agent"
     }
   ],
   "trace_id": "a5cbffe7059d4753",
   "log_file": "logs/trace-example-002.jsonl",
-  "execution_time_seconds": 0.387
+  "execution_time_seconds": 0.387,
+  "checks": [
+    {
+      "name": "traceability_check",
+      "display_name": "Traceability Check",
+      "kind": "deterministic_check",
+      "trace_id": "claim_gate"
+    }
+  ]
 }
