@@ -48,4 +48,15 @@ This file was written and committed **before any model call** on `hard_mhiertt` 
 - NVIDIA calls are free but rate-limited (40 requests/min).
 
 ## 7. Pilot results
-Not yet run.
+Pilots ran on 25 Oct 2026 (15 disjoint items per set, `agent_v9` only, pilot items excluded from all results). Pipeline worked on both sets, 0 errors.
+
+| Set | Pilot items | V7 official EM | V7 semantic | Pilot cost |
+|---|---|---|---|---|
+| hard_mhiertt | 15 | 0/15 | 10/15 | ≈ $0.074 (both pilots $0.147) |
+| hard_docfinqa | 15 | 1/15 | 4/15 | ≈ $0.074 |
+
+- Cost extrapolation: about $0.0049 per `agent_v9` item, so about $2.0 per set plus `rag`, under the $2.6 limit. Both sets run on all cal + test ids.
+- hard_mhiertt official EM is 0/15 mostly because the gold answers are ratios (0.2365) while V7 answers percents (23.65); the semantic label accepts ×100, as pre-registered. On the semantic label the pilot is above the 60% "hard" line; per section 5 the set is not replaced.
+- Ledger after pilots: $9.779.
+- Analysis code: `bench/v10_analysis.py`, a thin wrapper over the unchanged `bench/v9_gen_analysis.py` that adds only the section 4 extras (30% coverage, risk ≤ 20%, CRC alpha 0.20, V9_full − raw token prob, DocFinQA operand strata) and the section 5 rule.
+- Timing disclosure: the full runs were launched at about 12:24 Madrid, a few minutes before this section and `bench/v10_analysis.py` were committed. No full-run output was read before the commit.
