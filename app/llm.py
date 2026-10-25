@@ -125,7 +125,8 @@ def _post(req, timeout, p):
     1.6 s on nvidia) and up to 3 retries on 429/5xx with backoff (Retry-After honoured)."""
     import time
     gap = float(env("MODEL_MIN_INTERVAL_S", "1.6" if p == "nvidia" else "0"))
-    for attempt in range(4):
+    max_attempts = int(env("LLM_MAX_ATTEMPTS", "4"))
+    for attempt in range(max_attempts):
         wait = _LAST[0] + gap - time.time()
         if wait > 0:
             time.sleep(wait)
@@ -135,7 +136,7 @@ def _post(req, timeout, p):
                 return json.load(r)
         except urllib.error.HTTPError as e:
             left = remaining()
-            if (e.code != 429 and e.code < 500) or attempt == 3 or (left is not None and left < 5):
+            if (e.code != 429 and e.code < 500) or attempt == max_attempts - 1 or (left is not None and left < 5):
                 raise
             ra = e.headers.get("Retry-After") if e.headers else None
             time.sleep(float(ra) if ra and ra.replace(".", "").isdigit() else 2 * 2 ** attempt)

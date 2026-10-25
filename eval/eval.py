@@ -62,8 +62,8 @@ def main() -> None:
                      "agent_secondary": (r["analysis"].get("secondary_cause") or {}).get("segment"),
                      "expected_secondary": (q.get("expected_secondary") or {}).get("segment"), "resolution": r["resolution"],
                      "baseline": b["label"], "baseline_context_tokens": b["context_tokens"],
-                     "agent_s2_context_tokens": r["token_report"]["s1_filter"]["actual_total"], "log": res["log_file"], "secs": round(time.time() - t0, 2)})
-        calls = [json.loads(l)["data"]["call"] for l in (R / res["log_file"]).read_text().splitlines() if '"model_call"' in l]
+                     "agent_s2_context_tokens": r["token_report"]["s1_filter"]["actual_total"], "log": res["log_file"].replace("\\", "/"), "secs": round(time.time() - t0, 2)})
+        calls = [json.loads(l)["data"]["call"] for l in (R / res["log_file"]).read_text(encoding="utf-8").splitlines() if '"model_call"' in l]
         rows[-1]["llm_calls_ok"] = sum(1 for c in calls if c.get("ok")); rows[-1]["llm_calls_failed"] = sum(1 for c in calls if not c.get("ok"))
         print(json.dumps(rows[-1]))
     n = len(rows)
@@ -77,7 +77,7 @@ def main() -> None:
     out = {"llm_calls": {"ok": llm_ok, "failed_fell_back_to_rules": llm_fail}, "baseline_errors": sum(x["baseline"] == "error" for x in rows), "secondary_metrics": {"segment_match": f"{ks}/{len(seg_rows)}", "secondary_detected": f"{k2}/{len(sec_rows)}",
                                  "secondary_false_positives": f"{fp2}/{len(rows) - len(sec_rows)}"}, "split": a.split, "provider": provider(), "n": n, "agent_k": ka, "agent_wilson95": wilson(ka, n),
            "baseline_k": kb, "baseline_wilson95": wilson(kb, n), "rows": rows}
-    (R / "eval" / f"results_{a.split}_{provider()}.json").write_text(json.dumps(out, indent=2) + "\n")
+    (R / "eval" / f"results_{a.split}_{provider()}.json").write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
     f = lambda k, ci: f"{k}/{n} (Wilson 95% CI {ci[0]:.2f}–{ci[1]:.2f})"
     md = [f"# Eval results: {a.split} split, provider `{provider()}`", "",
           "Measured by `eval/eval.py` on seeded synthetic data. Metric: exact match of `top_cause_label`.", "",
@@ -86,7 +86,7 @@ def main() -> None:
           f"Agent model calls: {llm_ok} ok, {llm_fail} failed (those steps fell back to the deterministic rules). Baseline model errors (scored wrong): {out['baseline_errors']}.", "",
           "| qid | kind | expected | agent | baseline |", "|---|---|---|---|---|"]
     md += [f"| {x['qid']} | {x['kind']} | {x['expected']} | {x['agent']} | {x['baseline']} |" for x in rows]
-    (R / "eval" / f"RESULTS_{a.split}_{provider()}.md").write_text("\n".join(md) + "\n")
+    (R / "eval" / f"RESULTS_{a.split}_{provider()}.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print("secondary:", out["secondary_metrics"])
     print(f"agent {ka}/{n} {out['agent_wilson95']}  baseline {kb}/{n} {out['baseline_wilson95']}")
 
