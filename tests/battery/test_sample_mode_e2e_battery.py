@@ -19,11 +19,12 @@ def strip(d):
 
 def run(i, tmp):
     env = {k: v for k, v in os.environ.items() if not any(s in k for s in ("API_KEY", "TOKEN", "SAMPLE_MODE", "ZETARIS", "NIGHTSHIFT"))}
-    env["VA_LOG_DIR"] = str(tmp)
+    env.update({k: "" for k in ("ZETARIS_BACKEND", "ZETARIS_JDBC_URL", "SAMPLE_MODE", "NVIDIA_API_KEY", "NIGHTSHIFT_API_KEY")}); env["VA_LOG_DIR"] = str(tmp)
     p = subprocess.run([sys.executable, "run.py", "--input", f"input_examples/example_{i}.json"], cwd=ROOT, env=env,
                        capture_output=True, text=True, timeout=120)
     assert p.returncode == 0, p.stderr[-500:]
-    return json.loads(p.stdout[p.stdout.index("{"):].replace(str(tmp), "logs")), p.stderr
+    raw = p.stdout[p.stdout.index("{"):].replace(str(tmp).replace("\\", "\\\\"), "logs").replace(str(tmp), "logs").replace("logs\\\\", "logs/")
+    return json.loads(raw), p.stderr
 
 
 @pytest.fixture(scope="module")
@@ -33,7 +34,7 @@ def outs(tmp_path_factory):
 
 @pytest.mark.parametrize("i", [1, 2, 3])
 def test_matches_committed_output_example(outs, i):
-    ref = json.loads((ROOT / f"output_examples/example_{i}.json").read_text())
+    ref = json.loads((ROOT / f"output_examples/example_{i}.json").read_text(encoding="utf-8"))
     assert strip(outs[(i, 0)][0]) == strip(ref)
 
 

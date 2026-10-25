@@ -37,7 +37,7 @@
   "sample_mode": "fallback when Zetaris is not configured (SAMPLE_MODE=true forces it)",
   "data": "Demo data is synthetic (scripts/make_data.py, seeded). The Zetaris session uses the public Olist Brazilian E-Commerce dataset (Kaggle olistbr/brazilian-ecommerce, CC BY-NC-SA 4.0), downloaded on demand, not committed. No private customer data.",
   "ai_usage": "Code written during the build window by AI coding agents (Grok Bot) under the author's direction; Cursor not used (made optional by the organisers' 22 Oct 2026 announcement). See README 'AI and Model Usage'.",
-  "final_system": "V7 answers + V9_full confidence (app/v9conf.py, V9_CONFIDENCE=on by default); per-row abstention decision from the frozen V9_full signal. Results: docs/TEST500_RESULTS.md, docs/V9_GENERALIZATION_RESULTS.md; V10 (PARTIAL) in docs/V10_RESULTS.md on feat/test-battery.",
+  "final_system": "V7 answers + V9_full confidence (app/v9conf.py, V9_CONFIDENCE=on by default); per-row abstention decision from the frozen V9_full signal. Results: docs/TEST500_RESULTS.md, docs/V9_GENERALIZATION_RESULTS.md, docs/V10_RESULTS.md (PARTIAL), docs/V11_RESULTS.md (TableBench n=361, WORKS: V7 48.2% vs RAG 32.7%, V9_full AUROC 0.834, selective acc 77.3%, realized risk 8.3% <= 10%).",
   "sample_io": [
     "input_examples/example_1.json -> output_examples/example_1.json",
     "input_examples/example_2.json -> output_examples/example_2.json",

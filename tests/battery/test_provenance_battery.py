@@ -9,13 +9,13 @@ MAIN = [s for s in SPLITS if not s.endswith("_pilot.json")]
 
 
 def j(p):
-    return json.loads(Path(p).read_text())
+    return json.loads(Path(p).read_text(encoding="utf-8"))
 
 
 @pytest.mark.parametrize("sp", SPLITS, ids=lambda p: Path(p).stem)
 def test_split_dataset_hash_matches_frozen_file(sp):
     d = j(sp); ds = Path(sp).parent / f"tatqa_dataset_{d['tatqa_split']}.json"
-    assert hashlib.sha256(ds.read_bytes()).hexdigest() == d["dataset_sha256"]
+    assert hashlib.sha256(ds.read_bytes().replace(b"\r\n", b"\n")).hexdigest() == d["dataset_sha256"]
 
 
 @pytest.mark.parametrize("sp", SPLITS, ids=lambda p: Path(p).stem)
