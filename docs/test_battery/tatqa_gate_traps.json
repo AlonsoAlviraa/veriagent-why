@@ -1,0 +1,150 @@
+{
+ "dataset": "tatqa_dataset_dev.json",
+ "n_questions": 702,
+ "trap_flagged": [
+  1805,
+  2253,
+  0.8012,
+  [
+   0.7842,
+   0.8171
+  ]
+ ],
+ "control_flagged": [
+  6,
+  702,
+  0.0085,
+  [
+   0.0039,
+   0.0185
+  ]
+ ],
+ "by_type": {
+  "control/gold_derivation": {
+   "passed": 696,
+   "flagged": 6,
+   "n": 702,
+   "rate_flagged": 0.0085,
+   "ci95": [
+    0.0039,
+    0.0185
+   ]
+  },
+  "trap/answer_not_expression_value": {
+   "flagged": 516,
+   "n": 516,
+   "rate_flagged": 1.0,
+   "ci95": [
+    0.9926,
+    1.0
+   ]
+  },
+  "trap/fabricated_evidence_number": {
+   "flagged": 702,
+   "n": 702,
+   "rate_flagged": 1.0,
+   "ci95": [
+    0.9946,
+    1.0
+   ]
+  },
+  "trap/operand_changed": {
+   "flagged": 507,
+   "passed": 64,
+   "n": 571,
+   "rate_flagged": 0.8879,
+   "ci95": [
+    0.8594,
+    0.9112
+   ]
+  },
+  "trap/untraceable_answer_no_expression": {
+   "passed": 384,
+   "flagged": 80,
+   "n": 464,
+   "rate_flagged": 0.1724,
+   "ci95": [
+    0.1408,
+    0.2094
+   ]
+  }
+ },
+ "examples_wrong": {
+  "trap/untraceable_answer_no_expression": [
+   {
+    "uid": "eb787966-fa02-401f-bfaf-ccabf3828b23",
+    "reasons": []
+   },
+   {
+    "uid": "b2786c1a-37de-4120-b03c-32bf5c81f157",
+    "reasons": []
+   },
+   {
+    "uid": "a0414f81-8dc2-44b2-a441-2c9d9c805c4d",
+    "reasons": []
+   },
+   {
+    "uid": "ba6783f3-8207-419a-b407-3f688682caef",
+    "reasons": []
+   },
+   {
+    "uid": "78fc6d55-c20c-4f71-99fe-bc40a16e61d0",
+    "reasons": []
+   }
+  ],
+  "trap/operand_changed": [
+   {
+    "uid": "64c902c6-f426-4432-84b3-c10b3065716f",
+    "reasons": []
+   },
+   {
+    "uid": "4f7c8e0a-6ae9-40ee-bd16-06db6f96eaf1",
+    "reasons": []
+   },
+   {
+    "uid": "191c3926-7356-4ab8-a8f9-41e7b7c8a492",
+    "reasons": []
+   },
+   {
+    "uid": "096680e3-c65a-49cc-9339-55abdafd4a38",
+    "reasons": []
+   },
+   {
+    "uid": "a1912c87-d68c-42ea-b0da-98908097d227",
+    "reasons": []
+   }
+  ],
+  "control/gold_derivation": [
+   {
+    "uid": "af49c57c-91aa-4e69-b3e7-1df2d762b250",
+    "reasons": [
+     "answer 12.47 != expression value -2.0533"
+    ]
+   },
+   {
+    "uid": "a692d44e-823d-4b9f-a9f6-5e7caa53295e",
+    "reasons": [
+     "answer 4277.0 != expression value -227.5"
+    ]
+   },
+   {
+    "uid": "c36e2211-e46a-43d1-a0a8-ae87af347ae8",
+    "reasons": [
+     "answer -43.0 != expression value -185.0"
+    ]
+   },
+   {
+    "uid": "c4a0f2ab-d7d0-448a-b5f7-85310e5e3427",
+    "reasons": [
+     "answer 92437.0 != expression value 32197.3"
+    ]
+   },
+   {
+    "uid": "68107102-0fdc-4e64-850f-8eda6bcc892a",
+    "reasons": [
+     "answer 16.0 != expression value 42.0"
+    ]
+   }
+  ]
+ }
+}
