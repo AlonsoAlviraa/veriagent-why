@@ -1,0 +1,4 @@
+pandas
+numpy
+scipy
+rouge-score==0.1.2
