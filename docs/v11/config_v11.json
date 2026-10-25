@@ -1,0 +1,24 @@
+{
+ "main_commit": "9e0af6b8682c59ea0a2423f216961501c3b9429c",
+ "main_tree": "3dbf64596d67543421573b8860406c1dc6999987",
+ "v9_full_model_sha256": "566c4c0962d8e1ed4122eeb37aaaa8c8cc0484b893174c55913ce50cbc440de6",
+ "env": {
+  "AUDIT_TRACE": "1",
+  "BENCH_SINGLE_MODEL": "1",
+  "CR_USE_CALIB": "0",
+  "DEEP_MODEL": "nvidia/Nemotron-3_5-Lightning",
+  "FAST_MODEL": "nvidia/Nemotron-3_5-Lightning",
+  "LLM_CACHE": "0",
+  "LLM_PROVIDER": "nebius",
+  "MODEL_TIMEOUT_S": "120",
+  "NEBIUS_BUDGET_USD": "20",
+  "NEBIUS_MODEL": "nvidia/Nemotron-3_5-Lightning",
+  "NEBIUS_STRICT": "1",
+  "REASONING_MODEL": "nvidia/Nemotron-3_5-Lightning",
+  "TATQA_SPLIT": "train",
+  "V9": "1"
+ },
+ "systems": "agent_v9,rag",
+ "flags": "--max-calls-item 40 --no-judge",
+ "config_sha256": "52d302ebf6cc990c135a133e154e0cd89c50fb400ed594c4f44b53fa91529173"
+}
