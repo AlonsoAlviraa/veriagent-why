@@ -30,12 +30,16 @@ class Meter:
         # audit trace hook (docs/AUDIT_TRACE.md): one record per model call; AUDIT_TRACE=0 disables
         self.trace = os.environ.get("AUDIT_TRACE", "1") == "1"
         self.calls_log: list[dict] = []
+        # trace-fix 6: per-item cache of identical deterministic calls (T=0). A Meter is created per item (bench/run.py),
+        # so the cache never crosses items. Hits are NOT counted as calls and cost nothing; LLM_CACHE=0 disables.
+        self.cache: dict[str, str] = {}
+        self.cache_hits = 0
 
     def snapshot(self) -> dict:
         return {"calls": self.calls, "prompt_tokens": self.prompt_tokens,
                 "completion_tokens": self.completion_tokens, "model_seconds": round(self.seconds, 2), "errors": self.errors,
                 "nebius_usd": round(self.usd, 6), "providers": self.providers,
-                "finish_reasons": self.finish, "parse_failures": self.parse_failures, "parse_log": self.parse_log[:10], "last_reply_head": (self.last or "")[:300], **({"trace_calls": self.calls_log} if self.trace else {})}
+                "finish_reasons": self.finish, "parse_failures": self.parse_failures, "cache_hits": self.cache_hits, "parse_log": self.parse_log[:10], "last_reply_head": (self.last or "")[:300], **({"trace_calls": self.calls_log} if self.trace else {})}
 
     def call_json(self, messages: list[dict], tag: str, tier: str = "s2", max_tokens: int = 800, model: str | None = None,
                   retries: int = 1) -> dict:
@@ -58,6 +62,23 @@ class Meter:
         return out or {}
 
     def call(self, messages: list[dict], tag: str, tier: str = "s2", max_tokens: int = 800, model: str | None = None) -> str:
+        key = None
+        if os.environ.get("LLM_CACHE", "1") == "1" and _temperature() == 0:
+            import hashlib
+            key = hashlib.sha256(json.dumps([messages, model, tier, max_tokens], sort_keys=True, default=str).encode()).hexdigest()
+            if key in self.cache:
+                self.cache_hits += 1
+                if self.trace:
+                    self.calls_log.append({"i": None, "tag": tag, "cached": True, "prompt_hash": "sha256:" + key[:16], "cost_usd": 0.0,
+                                           "reply_head": self.cache[key][:600]})
+                self.last = self.cache[key]
+                return self.cache[key]
+        out = self._call(messages, tag, tier, max_tokens, model)
+        if key is not None:
+            self.cache[key] = out
+        return out
+
+    def _call(self, messages: list[dict], tag: str, tier: str = "s2", max_tokens: int = 800, model: str | None = None) -> str:
         if self.calls >= self.max_calls:
             raise BudgetExceeded(f"max_calls={self.max_calls} reached")
         self.calls += 1
@@ -102,6 +123,14 @@ class Meter:
                         "prompt_tokens": self.prompt_tokens - pt0, "completion_tokens": self.completion_tokens - ct0,
                         "cost_usd": round(self.usd - usd0, 6), "reply_head": (out or "")[:600]})
         return out
+
+
+def _temperature() -> float:
+    try:
+        from . import nebius
+        return float(nebius.TEMPERATURE)
+    except Exception:
+        return 0.0
 
 
 class NebiusHardStop(BaseException):

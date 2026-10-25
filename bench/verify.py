@@ -36,7 +36,7 @@ def llm_verify(m, question: str, packet: dict) -> tuple[float | None, str]:
 
 def loop(m, question: str, generate, check) -> dict:
     """generate(feedback|None) -> result; check(result) -> (packet, det 0-100, det_notes list[str])."""
-    attempts, best, fb, stale = [], None, None, 0
+    attempts, best, fb, stale, decs = [], None, None, 0, []
     for k in range(MAX_ATTEMPTS):
         res = generate(fb)
         packet, det, notes = check(res)
@@ -49,10 +49,13 @@ def loop(m, question: str, generate, check) -> dict:
             best, stale = (score, res, k), 0
         else:
             stale += 1
-        if score >= THRESHOLD or stale >= PATIENCE:
+        act = "ACCEPT" if score >= THRESHOLD else ("STOP" if stale >= PATIENCE or k + 1 >= MAX_ATTEMPTS else "RETRY")
+        decs.append({"decision": "verify", "state": {"attempt": k + 1, "score": score, "det": round(det, 2), "verifier": v, "stale": stale},
+                     "action": act, "reason": {"ACCEPT": f"score {score} >= {THRESHOLD}", "STOP": "no improvement for PATIENCE attempts or attempt cap", "RETRY": f"score {score} < {THRESHOLD}"}[act], "source": "verify_retry"})
+        if act != "RETRY":
             break
         fb = ("Independent verifier score " + str(score) + "/100. " + vfb + (" Deterministic checks failed: " + "; ".join(notes[:4]) if notes else "")
               + " Fix these problems and answer again in the same JSON format.")
     score, res, k = best
     return {**res, "confidence": round(score / 100, 3), "vr_score": score, "vr_attempts": attempts,
-            "vr_best_attempt": k + 1, "vr_n_attempts": len(attempts)}
+            "vr_best_attempt": k + 1, "vr_n_attempts": len(attempts), "vr_decisions": decs}

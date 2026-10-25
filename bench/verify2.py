@@ -24,6 +24,7 @@ from .common import nums, supported, gate_claim, conf01
 
 CR_THRESHOLD = float(os.environ.get("CR_THRESHOLD", "0.5"))
 CR_CONF_MAP = json.loads(os.environ.get("CR_CONF_MAP", "null") or "null")  # [[p_hi, conf], ...] fitted on TRAIN
+CR_ALWAYS_REVISE = os.environ.get("CR_ALWAYS_REVISE", "0") == "1"  # trace-fix 6: revise only when it can be used (was: always, for replay)
 SC_SAMPLES, SC_TEMP = 2, 0.7
 
 
@@ -140,11 +141,17 @@ def tat_pot(it, m) -> dict:
         v2["decision"] = "AGREE: independent executed program reproduces the answer"
         return {**base, "confidence": min(0.95, det + 0.15) if base["gate_passed"] else det, "confidence_det": min(0.95, det + 0.15) if base["gate_passed"] else det, "v2": v2}
     fb = (f"An independent recomputation from context values {json.dumps(p['pot_raw'].get('values'))[:400]} with "
-          f"{p['pot_raw'].get('expression')} gives {p['pot_value']} ({p['pot_scale'] or 'no scale'}), but you answered "
-          f"{base['answer']} ({base.get('scale') or 'no scale'}). Check the operands, the formula and the sign.")
+          f"{p['pot_raw'].get('expression')} gives {p['pot_value']}, but you answered "
+          f"{base['answer']}. Check the operands, the formula and the sign. Keep the scale exactly as the context states it.")
     out, log = _revise(it, m, {**(base.get("raw") or {}), "evidence": base.get("evidence")}, fb)
     from .tatqa import _pred
+    from . import fixes as FX
     r = _pred(out, it)
+    from .tatqa import context as _c
+    g = FX.revision_guard(base, r, it, _c(it["doc"]))
+    if g:
+        v2.update({"decision": f"DISAGREE -> revision rejected ({g})"})
+        return {**base, "v2": v2}
     agree = same_answer(r["answer"], p["pot_value"])
     passed = not log[-1]["reasons"]
     v2.update({"decision": "DISAGREE -> revised once" + (", revision agrees with PoT" if agree else ", still disagrees"), "revision_gate": log})
@@ -191,23 +198,20 @@ def tat_sc(it, m) -> dict:
 
 
 CRIT_SYS = ("You are a critic with tool access results. Check the candidate answer against the context: right rows/columns and "
-            "year, right formula and sign, right scale, shortest exact span for text answers. Use the TOOL RESULTS (recomputed "
+            "year, right formula and sign, right scale; for text answers the COMPLETE span exactly as worded in the context (never ask to shorten or trim a correct span; do not change the scale of a value the context states with a scale). Use the TOOL RESULTS (recomputed "
             "expression value, claim-gate reasons, operands missing from the cited evidence). Reply with JSON only: "
             "{\"p_correct\": probability 0-1 that the answer is exactly right, \"critique\": \"concrete problem to fix, or empty\"}.")
 
 
 def cr_conf(p: float | None, passed: bool) -> float:
-    if p is None:
-        return 0.2
-    if CR_CONF_MAP:
-        for hi, c in CR_CONF_MAP:
-            if p <= hi:
-                return c if passed else min(c, 0.2)
-    return p if passed else min(p, 0.2)
+    from .confidence import cr_tat, load_map
+    return cr_tat(p, passed, False, CR_CONF_MAP or load_map("tatqa"))
 
 
 def tat_cr(it, m) -> dict:
     from .tatqa import agent_markov, context, _pred
+    from . import fixes as FX
+    from .confidence import load_map
     base = agent_markov(it, m, False)
     T = tools(it, base)
     o = m.call_json([{"role": "system", "content": CRIT_SYS},
@@ -216,19 +220,46 @@ def tat_cr(it, m) -> dict:
                       + "\nTOOL RESULTS: " + json.dumps(T, default=str)}], "v2_critic", "s2", 300)
     p0 = conf01(o.get("p_correct"))
     v2 = {"strategy": "critic", "tools": T, "critic": {"p_correct": p0, "critique": str(o.get("critique") or "")[:400]}, "threshold": CR_THRESHOLD}
-    rev = None
-    if str(o.get("critique") or "").strip():  # always computed for the TRAIN replay; used only below threshold
+    rev, guard = None, None
+    want = p0 is not None and p0 < CR_THRESHOLD
+    if str(o.get("critique") or "").strip() and (want or CR_ALWAYS_REVISE):
         out, log = _revise(it, m, {**(base.get("raw") or {}), "evidence": base.get("evidence")}, "A critic with tool results says: " + str(o.get("critique"))[:600])
         rev = {**_pred(out, it), "gate_passed": not log[-1]["reasons"]}
         v2["revision"] = {"answer": rev["answer"], "scale": rev.get("scale"), "gate_passed": rev["gate_passed"], "gate": log}
-    use = rev is not None and p0 is not None and p0 < CR_THRESHOLD and rev["gate_passed"]
-    v2["decision"] = "REVISED (p_correct < threshold, revision passed gate)" if use else "KEPT agent_mk answer"
+        # trace-fixes 1 + 7: never accept a truncation of the original span or a pure magnitude/scale rewrite
+        from .tatqa import context as _c
+        guard = FX.revision_guard(base, rev, it, _c(it["doc"]))
+        v2["revision"]["guard"] = guard
+    use = rev is not None and want and rev["gate_passed"] and not guard
+    v2["decision"] = ("REVISED (p_correct < threshold, revision passed gate and guards)" if use
+                      else f"KEPT agent_mk answer (revision rejected: {guard})" if guard and want else "KEPT agent_mk answer")
     fin = {**base, **rev} if use else base
-    conf = cr_conf(p0, fin["gate_passed"]) if not use else 0.4  # revised answers: fixed declared 0.4 (TRAIN revision accuracy is reported)
-    return {**fin, "confidence": conf, "confidence_det": conf, "v2": v2}
+    cmap = CR_CONF_MAP or load_map("tatqa")
+    inputs = {"p_correct": p0, "gate_passed": fin["gate_passed"], "revised": bool(use), "cmap": cmap}
+    from .confidence import cr_tat
+    conf = cr_tat(**inputs)
+    return {**fin, "confidence": conf, "confidence_det": conf, "v2": v2, "conf_formula": "cr_tat", "conf_inputs": inputs}
 
 
-TAT_SYSTEMS = {"agent_pot": tat_pot, "agent_sc": tat_sc, "agent_cr": tat_cr}
+RULES = {"tat_pot": "AGREE -> min(0.95, tat_det+0.15) if gate passed; DISAGREE revised -> 0.75 agree / 0.35 not, 0.15 if gate failed",
+         "tat_sc": "MAJORITY -> 0.4+0.5*share if gate passed else 0.2*share+0.05; NO_MAJORITY -> 0.3 / 0.15",
+         "ib_sc": "min(0.9, 0.15 + 0.75 * mean insight agreement), 0.1 without insights"}
+
+
+def declared(fn, rule_id):
+    """trace-fix 8: when a config overrides the base confidence, log the config's declared rule (formula "fixed"),
+    so the trace's formula always reproduces the logged value."""
+    def run(*a, **k):
+        from .confidence import recompute
+        r = fn(*a, **k)
+        if recompute(r.get("conf_formula"), r.get("conf_inputs")) != r.get("confidence"):
+            r["conf_formula"], r["conf_inputs"] = "fixed", {"value": r.get("confidence"), "rule": RULES[rule_id] + " | " + str((r.get("v2") or {}).get("decision", ""))}
+        return r
+    run.__name__ = fn.__name__
+    return run
+
+
+TAT_SYSTEMS = {"agent_pot": declared(tat_pot, "tat_pot"), "agent_sc": declared(tat_sc, "tat_sc"), "agent_cr": tat_cr}
 
 
 # ============================================================ InsightBench
@@ -239,13 +270,15 @@ def _ib_ctx(task, con, tables, base):
 
 
 def _ib_gate(out, view):
-    from .insightbench import norm_ids
+    """Same deterministic gate as agent_mk (trace-fixes 2+3): empty/failed cited results are not sources and
+    comparatives/superlatives are checked against the cited tables."""
+    from .insightbench import norm_ids, gate_ib_claim
     ins = [i for i in (out.get("insights") or []) if isinstance(i, dict) and i.get("text")][:10]
     kept = []
     for i in ins:
         ev = norm_ids(i.get("evidence"), view)
-        src = [view[e] for e in ev] or list(view.values())
-        if not gate_claim(i["text"], src)[0]:
+        un, _, contra = gate_ib_claim({"text": i["text"], "evidence": ev}, view)
+        if not un and not contra:
             kept.append({"text": i["text"], "evidence": ev})
     return kept, len(ins) - len(kept)
 
@@ -312,9 +345,11 @@ def ib_cr(task, con, tables, m):
         if len(kept) >= max(3, len(claims) // 2):
             claims = kept
             base = {**base, "summary": w.get("summary") or base["summary"]}
-    p = v2["p_correct"]
-    conf = round(min(0.9, base["confidence_det"] * (0.5 + 0.5 * p)), 3) if p is not None else base["confidence_det"]
-    return {**base, "claims": claims, "insights": [c["text"] for c in claims], "confidence": conf, "confidence_det": conf, "v2": v2}
+    from .confidence import cr_ib, load_map
+    inputs = {"p_correct": v2["p_correct"], "base_det": base["confidence_det"], "cmap": load_map("insightbench")}
+    conf = cr_ib(**inputs)
+    return {**base, "claims": claims, "insights": [c["text"] for c in claims], "confidence": conf, "confidence_det": conf, "v2": v2,
+            "conf_formula": "cr_ib", "conf_inputs": inputs}
 
 
-IB_SYSTEMS = {"agent_pot": ib_pv, "agent_sc": ib_sc, "agent_cr": ib_cr}
+IB_SYSTEMS = {"agent_pot": ib_pv, "agent_sc": declared(ib_sc, "ib_sc"), "agent_cr": ib_cr}

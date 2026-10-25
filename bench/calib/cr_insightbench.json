@@ -1,0 +1,53 @@
+{
+ "bench": "insightbench",
+ "source": "bench/results/battery/insightbench-fixtune-agent_cr.jsonl",
+ "n": 29,
+ "fit_split": "tune",
+ "target": "summary_judge>=0.6",
+ "base_rate": 0.3103,
+ "map": [
+  [
+   0.6,
+   0.229
+  ],
+  [
+   0.72,
+   0.5
+  ],
+  [
+   0.85,
+   0.7
+  ]
+ ],
+ "ids": [
+  "flag-5",
+  "flag-16",
+  "flag-22",
+  "flag-24",
+  "flag-25",
+  "flag-29",
+  "flag-31",
+  "flag-32",
+  "flag-36",
+  "flag-37",
+  "flag-38",
+  "flag-41",
+  "flag-44",
+  "flag-49",
+  "flag-54",
+  "flag-57",
+  "flag-58",
+  "flag-62",
+  "flag-63",
+  "flag-65",
+  "flag-66",
+  "flag-70",
+  "flag-75",
+  "flag-88",
+  "flag-89",
+  "flag-97",
+  "flag-98",
+  "flag-99",
+  "flag-100"
+ ]
+}

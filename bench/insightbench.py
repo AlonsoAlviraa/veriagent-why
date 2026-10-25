@@ -13,6 +13,7 @@ from pathlib import Path
 import duckdb
 from app.bm25 import bm25
 from .common import gate_claim, gate_text, nums, safe_sql, conf01
+from .fixes import is_empty_result, usable, check_comparatives, sql_key
 from .llmio import JUDGE_MODEL, Meter, parse_json
 
 MAX_ROWS = 100  # v2: larger result window (v1: 40)
@@ -168,6 +169,7 @@ def agent(task, con, tables, m: Meter, vr: bool = False) -> dict:
     out = V.loop(m, task["metadata"]["goal"], generate, check)
     out.pop("_raw", None)
     out["confidence_det"] = out["confidence"]
+    out["conf_formula"], out["conf_inputs"] = "vr_score", {"vr_score": out["vr_score"]}
     return out
 
 
@@ -193,16 +195,33 @@ def norm_ids(ev, store: dict) -> list[str]:
 
 
 def det_confidence(results: dict, kept: list, dropped: list) -> float:
-    """Deterministic confidence (declared): share of SQL that ran x share of claims surviving the gate, capped."""
-    if not results or not kept:
-        return 0.1
-    ok = 1 - sum(r["result"].startswith("ERROR") for r in results.values()) / len(results)
-    surv = len(kept) / (len(kept) + len(dropped))
-    return round(min(0.9, 0.2 + 0.7 * ok * surv), 3)
+    """Deterministic confidence (declared): share of SQL results that are USABLE (ran and returned >=1 non-null row;
+    trace-fix 2/4: empty results used to count as successes) x share of claims surviving the gate, capped."""
+    return ib_det(len(results), sum(not usable(r["result"]) for r in results.values()), len(kept), len(dropped))
+
+
+def ib_det(n_q: int, n_unusable: int, n_kept: int, n_dropped: int) -> float:
+    from .confidence import ib_det as f
+    return f(n_q, n_unusable, n_kept, n_dropped)
+
+
+def gate_ib_claim(claim: dict, view: dict) -> tuple[list, list, list]:
+    """InsightBench claim gate (trace-fixes 2+3). Sources = the cited results that are usable; if the claim cites only
+    empty/failed results, its numbers have no source (unsupported); with no citation at all the usable results are the
+    pool (as before). Comparatives/superlatives are checked against the cited tables (deterministic argmax/argmin)."""
+    ev = [e for e in claim.get("evidence") or [] if e in view]
+    src = [view[e] for e in ev if usable(view[e])]
+    if not ev:
+        src = [v for v in view.values() if usable(v)]
+    un, nlog = gate_claim(claim["text"], src)
+    contra = check_comparatives(claim["text"], [view[e] for e in ev if usable(view[e])]) if ev else []
+    return un, nlog, contra
 
 
 def _fmt(results: dict) -> str:
-    return "\n".join(f"[{k}] {v['question']}\nSQL: {v['sql']}\n{v['result'][:RESULT_CHARS]}" for k, v in results.items())
+    """trace-fix 2: empty results are labelled so the Writer never cites numbers from them."""
+    return "\n".join(f"[{k}] {v['question']}\nSQL: {v['sql']}\n{v['result'][:RESULT_CHARS]}"
+                     + ("\n(0 rows: NO EVIDENCE - do not cite this id or state numbers from it)" if is_empty_result(v["result"]) else "") for k, v in results.items())
 
 
 def rag(task, con, tables, m: Meter, token_budget: int = 6000) -> dict:  # v2: 6000 (v1: 3000)
@@ -261,13 +280,15 @@ ERR_CHARS = 600  # fix B6: full DuckDB error incl. "Did you mean" / LINE context
 REPAIR_SYS = "Fix this DuckDB SQL query. Reply with JSON only: {\"sql\": str}."
 
 
-def repair_prompt(ctx: str, tables: list[str], question: str, sql: str, err: str) -> str:
+def repair_prompt(ctx: str, tables: list[str], question: str, sql: str, err: str, tried: list | None = None) -> str:
     """SQL repair prompt (fix B6): the only DuckDB tables are named explicitly (the planner kept using table names
     from the dataset description, e.g. `incidents`, `alm_hardware` -> Catalog Error) and the error is passed in full."""
     return (ctx + f"\nTHE ONLY TABLES ARE: {', '.join(tables)} (names in the dataset description are NOT table names; "
             "use the column names exactly as in SCHEMA; DuckDB dialect: use quantile_cont instead of PERCENTILE_CONT, "
             "CAST VARCHAR timestamps before comparing)."
-            + f"\nQUESTION: {question}\nSQL: {sql}\n{err}")
+            + f"\nQUESTION: {question}\nSQL: {sql}\n{err}"
+            + ("\nTHESE QUERIES ALREADY FAILED - do NOT return any of them again and do not reuse the construct named in the error; "
+               "if unsure, write a SIMPLER query (fewer joins, no window functions):\n" + "\n".join(f"- {t['sql']}  -> {t['error'][:160]}" for t in tried) if tried else ""))
 
 
 def agent_markov(task, con, tables, m: Meter, use_nv: bool = False, use_rerank: bool = False, ctl=None) -> dict:
@@ -283,29 +304,38 @@ def agent_markov(task, con, tables, m: Meter, use_nv: bool = False, use_rerank: 
                               {"role": "user", "content": ctx}], "plan", "s2", 1500)
     steps, results = list(plan.get("steps") or [])[:6], {}
     for rnd in range(max_rounds):
-        ok_before = sum(not r["result"].startswith("ERROR") for r in results.values())
+        ok_before = sum(usable(r["result"]) for r in results.values())
         for s in steps:
             qid = f"q{len(results) + 1}"
             sql = str(s.get("sql", "") or "")
             res, first_err, prev, att = run_sql(con, sql, ERR_CHARS), None, None, 0
-            while res.startswith("ERROR") and ctl.sql_repair(res, att, prev):
+            tried, repeat = [], False
+            while res.startswith("ERROR") and ctl.sql_repair(res, att, prev, repeat_sql=repeat):
                 first_err, prev, att = first_err or res, res, att + 1
+                tried.append({"sql": sql, "error": res})
                 fx = m.call_json([{"role": "system", "content": REPAIR_SYS},
-                                        {"role": "user", "content": repair_prompt(ctx, tables, s.get("question", ""), sql, res)}], "sqlfix", "s1", 600)
+                                        {"role": "user", "content": repair_prompt(ctx, tables, s.get("question", ""), sql, res, tried)}], "sqlfix", "s1", 600)
                 if not fx.get("sql"):
                     break
+                if sql_key(fx["sql"]) in {sql_key(t["sql"]) for t in tried}:  # trace-fix 5: identical repeat -> never re-run
+                    repeat = True
+                    continue
                 sql = str(fx["sql"])
                 res = run_sql(con, sql, ERR_CHARS)
             if res.startswith("ERROR") and not first_err:
                 first_err = res
             results[qid] = {"question": s.get("question", ""), "sql": sql, "result": res, "first_error": first_err}
-        n_ok = sum(not r["result"].startswith("ERROR") for r in results.values())
-        if not ctl.requery(rnd, n_ok, len(results) - n_ok, n_ok - ok_before, max_rounds):
+        n_ok = sum(usable(r["result"]) for r in results.values())
+        n_err = sum(r["result"].startswith("ERROR") for r in results.values())
+        n_empty = len(results) - n_ok - n_err
+        if not ctl.requery(rnd, n_ok, n_err, n_ok - ok_before, max_rounds, n_empty):
             break
         ev = m.call_json([{"role": "system", "content": "You are the Evidence Evaluator. Given the goal and the query results, decide whether the evidence is sufficient to explain WHY, or propose follow-up queries (drill-downs, comparisons, fixes for failed SQL). Reply with JSON only: {\"sufficient\": bool, \"new_steps\": [{\"question\": str, \"sql\": str}]} (max 4)."},
                                 {"role": "user", "content": ctx + "\nRESULTS\n" + _fmt(results)}], "evaluate", "s1", 1200)
         steps = list(ev.get("new_steps") or [])[:4]
-        if ev.get("sufficient") or not steps:
+        if ev.get("sufficient") and n_ok == 0 and steps:  # trace-fix 2: never "sufficient" with 0 usable rows
+            ctl._d("requery", {"round": rnd, "usable_results": 0, "evaluator_sufficient": True}, "OVERRIDE", "evaluator said sufficient but no result has rows; follow-up queries run")
+        elif ev.get("sufficient") or not steps:
             break
     msgs = [{"role": "system", "content": "You are the Writer of a root-cause analytics agent. " + OUT_SPEC},
             {"role": "user", "content": ctx + "\nRESULTS\n" + _fmt(results)}]
@@ -322,10 +352,9 @@ def agent_markov(task, con, tables, m: Meter, use_nv: bool = False, use_rerank: 
         bad, uncited = [], []
         for i in ins:
             i["evidence"] = norm_ids(i.get("evidence"), results)
-            src = [view[e] for e in i["evidence"]] or list(view.values())
-            un, nlog = gate_claim(i["text"], src)
-            i["unsupported_numbers"], i["number_log"] = un, nlog
-            if un:
+            un, nlog, contra = gate_ib_claim(i, view)
+            i["unsupported_numbers"], i["number_log"], i["contradictions"] = un, nlog, contra
+            if un or contra:
                 bad.append(i)
             elif not i["evidence"] and nums(i["text"]):
                 uncited.append(i)  # fix B8: numeric claim without a resolvable citation used to pass silently
@@ -335,8 +364,9 @@ def agent_markov(task, con, tables, m: Meter, use_nv: bool = False, use_rerank: 
             break
         prev, prev_bad = (out, ins), len(bad) + len(uncited)
         msgs = msgs + [{"role": "assistant", "content": draft},
-                       {"role": "user", "content": "Claim gate rejected these numbers as not present in the cited results: "
-                        + json.dumps([{"text": i["text"], "unsupported": i["unsupported_numbers"]} for i in bad] + ([{"summary": sum_un}] if sum_un else []))
+                       {"role": "user", "content": "Claim gate rejected these insights (numbers not present in the cited results, or a comparison/superlative "
+                        "contradicted by the cited table): "
+                        + json.dumps([{"text": i["text"], "unsupported": i["unsupported_numbers"], "contradicted_by_table": i.get("contradictions") or []} for i in bad] + ([{"summary": sum_un}] if sum_un else []))
                         + (". These insights cite no valid result id; cite the ids (e.g. [\"q2\"]) they come from: " + json.dumps([i["text"] for i in uncited]) if uncited else "")
                         + ". Rewrite. " + OUT_SPEC}]
     for i in ins:  # deterministic citation repair for still-uncited numeric claims (declared; never invents a citation)
@@ -344,9 +374,10 @@ def agent_markov(task, con, tables, m: Meter, use_nv: bool = False, use_rerank: 
             cand = [k for k, v in view.items() if not v.startswith("ERROR") and any(x["status"] == "direct" for x in gate_claim(i["text"], [v])[1])]
             if cand and not gate_claim(i["text"], [view[k] for k in cand])[0]:
                 i["evidence"], i["auto_cited"] = cand, True
-    kept = [i for i in ins if not i["unsupported_numbers"]]
-    dropped = [{"text": i["text"], "evidence": i["evidence"], "unsupported": i["unsupported_numbers"],
-                "reason": "numbers not in cited results nor recomputable from them"} for i in ins if i["unsupported_numbers"]]
+    kept = [i for i in ins if not i["unsupported_numbers"] and not i.get("contradictions")]
+    dropped = [{"text": i["text"], "evidence": i["evidence"], "unsupported": i["unsupported_numbers"], "contradictions": i.get("contradictions") or [],
+                "reason": "numbers not in cited results nor recomputable from them" if i["unsupported_numbers"] else "comparison/superlative contradicted by the cited table"}
+               for i in ins if i["unsupported_numbers"] or i.get("contradictions")]
     support, rerank_s = [], []
     if use_rerank:  # citation check: reranker p(cited evidence supports the claim); logged signal, never drops (uncalibrated here)
         from . import nv_rerank as NR
@@ -364,6 +395,8 @@ def agent_markov(task, con, tables, m: Meter, use_nv: bool = False, use_rerank: 
     return {"insights": [i["text"] for i in kept], "claims": [{"text": i["text"], "evidence": i["evidence"]} for i in kept],
             "summary": out.get("summary", ""), "confidence": conf01(out.get("confidence")),
             "confidence_det": det_confidence(results, kept, dropped),
+            "conf_formula": "ib_det", "conf_inputs": {"n_q": len(results), "n_unusable": sum(not usable(r["result"]) for r in results.values()), "n_kept": len(kept), "n_dropped": len(dropped)},
+            "empty_results": sum(is_empty_result(r["result"]) for r in results.values()),
             "dropped_by_gate": len(dropped), "dropped_claims": dropped, "gate": gate_log, "queries": len(results),
             "sql_errors": sum(r["result"].startswith("ERROR") for r in results.values()),
             "sql_errors_first_try": sum(1 for r in results.values() if r.get("first_error")),

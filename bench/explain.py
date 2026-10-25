@@ -72,21 +72,37 @@ def tat_metrics(out: dict, ctx: str) -> dict:
     ans_s = " ".join(ans) if isinstance(ans, list) else str(ans or "")
     used = nums(str(raw.get("expression") or "")) or nums(ans_s)
     nctx = _n(ctx)
-    ok = 0
+    rows = [_n(l) for l in str(ctx).splitlines() if "|" in l]
+    # trace-fix 8: citations_valid = the quote occurs in the context (verbatim, or every cell of a quoted table row
+    # occurs in ONE context table row). It used to also require a number used by the answer inside each quote, which
+    # marked row labels / header cells as invalid; that stricter check is kept separately as citations_relevant.
+    ok = rel = 0
+    found = []
     for e in ev:
-        if _n(e) and _n(e) in nctx:
-            if used:
-                if any(supported(abs(u), [abs(x) for x in nums(e)], free_small_ints=False) for u in used):
-                    ok += 1
-            elif set(_n(ans_s).split()) & set(_n(e).split()):
-                ok += 1
-    found = [e for e in ev if _n(e) and _n(e) in nctx]
+        if not cite_in_context(e, nctx, rows):
+            continue
+        ok += 1
+        found.append(e)
+        if used:
+            rel += any(supported(abs(u), [abs(x) for x in nums(e)], free_small_ints=False) for u in used)
+        elif set(_n(ans_s).split()) & set(_n(e).split()):
+            rel += 1
     a = nums(ans_s)
     if a:
         tr = bool(found) and all(_supp(v, found) for v in a)
     else:
         tr = bool(ans_s.strip()) and any(_n(ans_s) in _n(e) for e in found)
-    return {"citations": len(ev), "citations_valid": ok, "claims": 1, "claims_traceable": int(tr)}
+    return {"citations": len(ev), "citations_valid": ok, "citations_relevant": rel, "claims": 1, "claims_traceable": int(tr)}
+
+
+def cite_in_context(e: str, nctx: str, rows: list[str]) -> bool:
+    ne = _n(e)
+    if not ne:
+        return False
+    if ne in nctx:
+        return True
+    cells = [_n(c) for c in str(e).split("|") if _n(c)]
+    return len(cells) > 1 and any(all(c in r for c in cells) for r in rows)
 
 
 FAITH_SYSTEM = "You are a strict auditor of analytical explanations. You check whether an explanation is supported by the evidence it was given."
