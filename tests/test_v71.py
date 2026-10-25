@@ -138,7 +138,7 @@ def test_flag_off_no_v71_system(monkeypatch):
 def test_frozen_config_does_not_mention_v71():
     from pathlib import Path
     fz = Path(__file__).resolve().parents[1] / "bench" / "freeze" / "test500_v1.json"
-    assert "v71" not in fz.read_text().lower()
+    assert "v71" not in fz.read_text(encoding="utf-8").lower()
 
 
 # ---------- 6) semantic correctness ----------

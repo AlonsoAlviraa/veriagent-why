@@ -85,7 +85,7 @@ def test_pipeline_through_jdbc_backend(monkeypatch):
     from app import pipeline
     conn = FakeConn()
     monkeypatch.setattr(pipeline, "get_backend", lambda ds=None: z.ZetarisJdbcBackend(conn=conn))
-    inp = json.loads((ROOT / "input_examples" / "example_1.json").read_text())["input"]
+    inp = json.loads((ROOT / "input_examples" / "example_1.json").read_text(encoding="utf-8"))["input"]
     r = pipeline.run(inp, "test-jdbc")
     assert r["status"] == "success"
     assert r["output"]["result"]["analysis"]["top_cause_label"] == "carrier_sla_breach"

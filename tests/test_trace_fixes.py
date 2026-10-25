@@ -125,12 +125,12 @@ def test_calibration_files_declare_split(bench, fit_on):
     p = ROOT / "bench" / "calib" / f"cr_{bench}.json"
     if not p.exists():
         pytest.skip("calibration not fitted yet")
-    d = json.loads(p.read_text())
+    d = json.loads(p.read_text(encoding="utf-8"))
     assert d["fit_split"] == fit_on and d["n"] >= 25 and d["n"] == len(d["ids"])  # rows without p_correct are skipped
     ys = [y for _, y in d["map"]]
     assert ys == sorted(ys)
     if bench == "insightbench":
-        tune = set(json.loads((ROOT / "bench/splits/insightbench_split.json").read_text())["tune"])
+        tune = set(json.loads((ROOT / "bench/splits/insightbench_split.json").read_text(encoding="utf-8"))["tune"])
         assert set(d["ids"]) <= tune
 
 
@@ -200,7 +200,7 @@ def test_ib_agent_mk_max_calls_offline(tmp_path):
     from bench import run
     out = tmp_path / "r.jsonl"
     assert run.main(["--bench", "insightbench", "--offline", "--fixtures", "--out", str(out), "--max-calls", "50", "--systems", "agent_mk"]) == 0
-    r = json.loads(out.read_text().splitlines()[0])
+    r = json.loads(out.read_text(encoding="utf-8").splitlines()[0])
     assert not r.get("error")
     # plan + <=SQL repairs + <=1 evaluate per round + writer <= 3 rounds; the offline fake needs far fewer
     assert r["meter"]["calls"] <= 8
@@ -251,12 +251,12 @@ def test_generated_traces_validate_schema(tmp_path, bench):
     """Offline run -> per-item traces -> JSON schema + trace-fix invariants (failure set, split set, formula matches)."""
     jsonschema = pytest.importorskip("jsonschema")
     from bench import run
-    schema = json.loads((ROOT / "docs" / "audit_trace.schema.json").read_text())
+    schema = json.loads((ROOT / "docs" / "audit_trace.schema.json").read_text(encoding="utf-8"))
     out = tmp_path / "r.jsonl"
     systems = "agent,agent_mk,agent_vr" if bench == "tatqa" else "agent,agent_mk,agent_cr"
     assert run.main(["--bench", bench, "--offline", "--fixtures", "--out", str(out), "--max-calls", "60", "--systems", systems]) == 0
     from bench.audit_trace import build
-    rows = [json.loads(l) for l in out.read_text().splitlines()]
+    rows = [json.loads(l) for l in out.read_text(encoding="utf-8").splitlines()]
     assert rows and not any(r.get("error") for r in rows)
     data = ROOT / "bench" / "fixtures"
     for r in rows:
@@ -278,7 +278,7 @@ def test_generated_traces_validate_schema(tmp_path, bench):
 
 def test_ib_split_field():
     from bench.audit_trace import ib_split
-    sp = json.loads((ROOT / "bench/splits/insightbench_split.json").read_text())
+    sp = json.loads((ROOT / "bench/splits/insightbench_split.json").read_text(encoding="utf-8"))
     assert ib_split(sp["tune"][0]) == "tune" and ib_split(sp["eval"][0]) == "eval"
 
 

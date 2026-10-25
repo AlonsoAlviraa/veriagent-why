@@ -56,7 +56,7 @@ def test_three_questions_green_and_trace(db, tmp_path):
         r = run_question(qid, db, f"t-{qid}", tmp_path)
         v = verify_claims(db, r["claims"], run_id=f"t-{qid}", log_dir=tmp_path)
         assert v["all_green"], v["receipts"]
-        ev = [json.loads(l) for l in (tmp_path / f"trace-t-{qid}.jsonl").read_text().splitlines()]
+        ev = [json.loads(l) for l in (tmp_path / f"trace-t-{qid}.jsonl").read_text(encoding="utf-8").splitlines()]
         kinds = [e["event"] for e in ev]
         assert "hypothesis_update" in kinds and kinds.count("verify") == len(r["claims"])
         assert all(e["data"]["backend"] == "snapshot" for e in ev if e["event"] == "verify")
@@ -85,7 +85,7 @@ def test_why_diff_comes_only_from_trace_events(db, tmp_path):
     p = tmp_path / "trace-t-wd.jsonl"
     assert why_diff(p) == r["why_diff"]
     # Rewrite one recorded outcome in the trace file: the why-diff follows the file, not the run's memory.
-    lines = [json.loads(l) for l in p.read_text().splitlines()]
+    lines = [json.loads(l) for l in p.read_text(encoding="utf-8").splitlines()]
     for e in lines:
         if e["event"] == "hypothesis_update" and e["data"]["evidence_id"] == "q3_late":
             e["data"]["hyp_outcome"] = "refutes"

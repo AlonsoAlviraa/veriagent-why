@@ -94,7 +94,7 @@ def main():
     ap.add_argument("--train-sample", type=int, default=0, help="tatqa only: N seeded TRAIN questions")
     a = ap.parse_args()
     torch.manual_seed(0)
-    cfg = json.loads(Path(hf_hub_download(MID, "config.json")).read_text())  # no model_type key -> read raw
+    cfg = json.loads(Path(hf_hub_download(MID, "config.json")).read_text(encoding="utf-8"))  # no model_type key -> read raw
     tok = DebertaV2TokenizerFast.from_pretrained(MID)
     model = CustomModel.from_pretrained(MID).eval()  # init kwargs come from config.json (mixin)
     out, t0 = {}, time.time()

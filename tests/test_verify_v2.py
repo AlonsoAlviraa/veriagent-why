@@ -35,6 +35,6 @@ def test_offline_runs_write_traces(tmp_path):
         out = tmp_path / f"{b}.jsonl"
         assert main(["--bench", b, "--offline", "--fixtures", "--systems", "agent_pot,agent_sc,agent_cr", "--limit", "1",
                      "--out", str(out), "--trace-dir", str(tmp_path / "tr")]) == 0
-        rows = [json.loads(l) for l in out.read_text().splitlines()]
+        rows = [json.loads(l) for l in out.read_text(encoding="utf-8").splitlines()]
         assert len(rows) == 3 and all(not r.get("error") and r["output"]["v2"]["strategy"] for r in rows)
         assert (tmp_path / "tr" / b / "audit_index.jsonl").exists()

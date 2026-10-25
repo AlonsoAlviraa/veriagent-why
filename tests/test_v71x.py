@@ -158,7 +158,7 @@ def test_g5a_difference_negative_is_flagged():
 
 
 # ---------- diagnostic fixtures (eval400; never used to accept ideas) ----------
-FX = json.loads((Path(__file__).parent / "fixtures" / "v71_diag_eval400.json").read_text())
+FX = json.loads((Path(__file__).parent / "fixtures" / "v71_diag_eval400.json").read_text(encoding="utf-8"))
 
 
 def _norm(a):

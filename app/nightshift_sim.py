@@ -1,7 +1,7 @@
 """Nightshift-compatible LOCAL SIMULATOR. This is NOT Meterless Nightshift.
 
-Meterless Nightshift (the real product) was not available to us during the build window, so this
-module stands in for it with the same client-facing contract the app already uses
+The product runs on real Meterless Nightshift 1.2.7 (see eval/nightshift_live/). This module is kept
+for tests and offline development only; it serves the same client-facing contract the app uses
 (`LLM_PROVIDER=nightshift`): an OpenAI-compatible server on http://127.0.0.1:8088/v1 with a bearer
 token. It does no Meterless metering or routing of its own: it forwards each chat completion to
 
@@ -43,7 +43,7 @@ def load_token(path: Path | None = None) -> str:
         fd = os.open(str(p), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         with os.fdopen(fd, "w") as f:
             f.write(secrets.token_urlsafe(32))
-    t = p.read_text().strip()
+    t = p.read_text(encoding="utf-8").strip()
     if not t:
         raise RuntimeError(f"empty token file {p}")
     return t

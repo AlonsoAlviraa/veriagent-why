@@ -61,7 +61,7 @@ def main(argv=None) -> int:
             print("API or UI did not start"); return 2
         page = http("GET", a.ui + "/", raw=True).decode()
         print(f"[UI] {a.ui} serves the page ({len(page)} bytes); requests go through {a.ui}/api -> {a.api}")
-        inp = json.loads((ROOT / a.input).read_text())["input"]
+        inp = json.loads((ROOT / a.input).read_text(encoding="utf-8"))["input"]
         rid = f"e2e{int(time.time())}"
         print(f"[User] question: {inp.get('query', '')[:100]}")
         http("POST", a.ui + "/api/runs", {"input": inp, "run_id": rid})

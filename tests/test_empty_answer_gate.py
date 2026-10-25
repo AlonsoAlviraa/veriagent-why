@@ -8,7 +8,7 @@ from bench import tatqa as TQ
 from bench.markov import Controller
 from app.v9conf import row_decision
 
-ROWS = [json.loads(l) for l in (Path(__file__).parent / "fixtures/empty_answers_gen_v10.jsonl").read_text().splitlines()]
+ROWS = [json.loads(l) for l in (Path(__file__).parent / "fixtures/empty_answers_gen_v10.jsonl").read_text(encoding="utf-8").splitlines()]
 
 
 def test_fixture_counts_match_audit():
@@ -46,7 +46,7 @@ def test_decision_never_uses_verbal_confidence():
 
 def test_decision_matches_frozen_v9_full():
     from app import v9conf
-    fx = json.loads((Path(__file__).parent / "fixtures/v9_full_rows.json").read_text())
+    fx = json.loads((Path(__file__).parent / "fixtures/v9_full_rows.json").read_text(encoding="utf-8"))
     for row in fx:
         d = row_decision(row["output"])
         if row["output"].get("answer") not in (None, ""):

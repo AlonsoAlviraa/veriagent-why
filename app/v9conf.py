@@ -21,7 +21,7 @@ def enabled() -> bool:
 
 @lru_cache(maxsize=1)
 def model() -> dict:
-    return json.loads(MODEL_PATH.read_text())
+    return json.loads(MODEL_PATH.read_text(encoding="utf-8"))
 
 
 def vector(o: dict) -> list[float]:

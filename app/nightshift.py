@@ -56,11 +56,11 @@ def token() -> str:
         return k
     kf = env("NIGHTSHIFT_API_KEY_FILE")  # e.g. the local simulator's token file (app/nightshift_sim.py)
     if kf:
-        return Path(kf).expanduser().read_text().strip()
+        return Path(kf).expanduser().read_text(encoding="utf-8").strip()
     sd = env("NIGHTSHIFT_STATE_DIR") or (os.path.join(os.environ.get("LOCALAPPDATA", ""), "ai.meterless.runtime")
                                          if os.name == "nt" else os.path.expanduser("~/.meterless"))
     p = Path(sd) / "proxy-token"
-    return p.read_text().strip() if p.exists() else ""
+    return p.read_text(encoding="utf-8").strip() if p.exists() else ""
 
 
 def bound_messages(messages: list[dict], limit: int | None = None) -> tuple[list[dict], bool]:
@@ -88,8 +88,8 @@ def body(tier: str, messages: list[dict], max_tokens: int) -> dict:
         b["chat_template_kwargs"] = {"enable_thinking": False}
         b["reasoning_effort"] = "none"
     elif env("NIGHTSHIFT_S2_THINKING", "off").lower() in ("off", "0", "false"):
-        # Ultra with thinking on spent the whole 60/300-token budget on reasoning (finish_reason=length) in the
-        # first live Nightshift run; with enable_thinking=false it answers directly (finish_reason=stop).
+        # Ultra with thinking on spends the whole token budget on reasoning (finish_reason=length);
+        # with enable_thinking=false it answers directly (finish_reason=stop).
         b["chat_template_kwargs"] = {"enable_thinking": False}
     return b
 

@@ -1,6 +1,6 @@
 # Verify v2: three verification ideas on top of agent_mk
 
-All three configs keep agent_mk's claim-gate re-ask (agent_vr skipped it, which gave 28 gate failures versus 17).
+All three configs keep agent_mk's traceability-check re-ask (agent_vr skipped it, which gave 28 gate failures versus 17).
 Model: Lightning only. Calibration was fitted only on TAT-QA **train** (n=80).
 
 > **Caveats (external review, PR #8 verdict "acceptable as an experiment"):** numeric calibration was fit on train only, but the configs

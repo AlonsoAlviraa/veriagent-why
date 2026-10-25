@@ -17,15 +17,15 @@ def test_rows_record_provenance(monkeypatch, tmp_path):
     monkeypatch.setattr(R, "git_state", lambda: {"code_rev": "abc1234", "code_rev_full": "f" * 40, "dirty": False, "dirty_files": []})
     out = tmp_path / "o.jsonl"
     R.main(["--bench", "tatqa", "--systems", "agent", "--limit", "1", "--offline", "--fixtures", "--no-trace", "--repeat", "2", "--out", str(out)])
-    row = json.loads(out.read_text().splitlines()[0])
+    row = json.loads(out.read_text(encoding="utf-8").splitlines()[0])
     for k in ("code_rev", "code_rev_full", "dirty", "split", "seed", "model", "repeat"):
         assert k in row, k
     assert row["dirty"] is False and row["repeat"] == 2 and row["split"]["name"] == "fixture" and row["split"]["data_sha256"]
 
 
 def test_holdout_frozen_and_disjoint_from_contaminated():
-    h = json.loads((SPL / "holdout_v1.json").read_text())
-    c = json.loads((SPL / "contaminated.json").read_text())
+    h = json.loads((SPL / "holdout_v1.json").read_text(encoding="utf-8"))
+    c = json.loads((SPL / "contaminated.json").read_text(encoding="utf-8"))
     assert len(h["ids"]) == 100 == len(set(h["ids"])) and h["tatqa_split"] == "test_gold"
     assert hashlib.sha256("\n".join(h["ids"]).encode()).hexdigest() == h["ids_sha256"]
     assert not set(h["ids"]) & set(c["tatqa"]["dev_ids_touched"])
@@ -34,7 +34,7 @@ def test_holdout_frozen_and_disjoint_from_contaminated():
 
 
 def test_calibration_never_fit_on_holdout():
-    h = set(json.loads((SPL / "holdout_v1.json").read_text())["ids"])
+    h = set(json.loads((SPL / "holdout_v1.json").read_text(encoding="utf-8"))["ids"])
     calib = Path(__file__).resolve().parents[1] / "bench" / "calib"
     for f in calib.glob("*.json"):
-        assert not (h & set(f.read_text().split('"'))), f
+        assert not (h & set(f.read_text(encoding="utf-8").split('"'))), f

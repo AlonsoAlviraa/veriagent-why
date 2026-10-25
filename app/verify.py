@@ -51,7 +51,7 @@ def _log(trace_path: Path, run_id: str, rec: dict) -> None:
     trace_path.parent.mkdir(parents=True, exist_ok=True)
     trace_id = None
     if trace_path.exists():
-        for line in trace_path.read_text().splitlines()[:1]:
+        for line in trace_path.read_text(encoding="utf-8").splitlines()[:1]:
             trace_id = json.loads(line).get("trace_id")
     ev = {"ts": round(time.time(), 3), "run_id": run_id, "trace_id": trace_id, "agent": "verifier",
           "event": "verify", "data": rec}

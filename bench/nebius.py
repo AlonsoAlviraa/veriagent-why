@@ -12,7 +12,12 @@ Nebius bills the user's card automatically past the promo balance and has no pla
 Prices: USD per 1M tokens (input, output), Nebius Token Factory published prices as given 2026-10-22.
 """
 from __future__ import annotations
-import fcntl, json, os, time, urllib.request, urllib.error
+import json, os, time, urllib.request, urllib.error
+try:
+    import fcntl  # POSIX
+except ImportError:  # Windows: msvcrt byte-range lock on the lock file
+    fcntl = None
+    import msvcrt
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -48,7 +53,10 @@ def _locked():
     p = ledger_path()
     p.parent.mkdir(parents=True, exist_ok=True)
     with open(str(p) + ".lock", "w") as lk:
-        fcntl.flock(lk, fcntl.LOCK_EX)
+        if fcntl:
+            fcntl.flock(lk, fcntl.LOCK_EX)
+        else:
+            msvcrt.locking(lk.fileno(), msvcrt.LK_LOCK, 1)
         try:
             d = json.loads(p.read_text()) if p.exists() else {"spent_usd": 0.0, "reserved": {}, "calls": 0, "entries": []}
             yield d
@@ -56,7 +64,11 @@ def _locked():
             tmp.write_text(json.dumps(d, indent=1))
             tmp.replace(p)
         finally:
-            fcntl.flock(lk, fcntl.LOCK_UN)
+            if fcntl:
+                fcntl.flock(lk, fcntl.LOCK_UN)
+            else:
+                lk.seek(0)
+                msvcrt.locking(lk.fileno(), msvcrt.LK_UNLCK, 1)
 
 
 def status() -> dict:

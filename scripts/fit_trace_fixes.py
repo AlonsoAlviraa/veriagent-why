@@ -11,7 +11,7 @@ from bench import tatqa as TQ, fixes as FX
 ROOT = Path(__file__).resolve().parents[1]
 D = ROOT / "data" / "bench" / "tatqa"
 CAL = ROOT / "bench" / "calib"
-SPLIT = json.loads((ROOT / "bench/splits/insightbench_split.json").read_text())
+SPLIT = json.loads((ROOT / "bench/splits/insightbench_split.json").read_text(encoding="utf-8"))
 
 
 def assert_split(rows, allowed: set):
@@ -20,7 +20,7 @@ def assert_split(rows, allowed: set):
 
 
 def load(p):
-    return [r for r in (json.loads(l) for l in Path(p).read_text().splitlines()) if not r.get("error")]
+    return [r for r in (json.loads(l) for l in Path(p).read_text(encoding="utf-8").splitlines()) if not r.get("error")]
 
 
 def span(files):

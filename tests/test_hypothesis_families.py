@@ -5,7 +5,7 @@ import pytest
 from app.pipeline import run
 
 R = Path(__file__).parents[1]
-QS = {q["qid"]: q for q in json.loads((R / "eval" / "questions.json").read_text())}
+QS = {q["qid"]: q for q in json.loads((R / "eval" / "questions.json").read_text(encoding="utf-8"))}
 
 
 @pytest.fixture(scope="module", autouse=True)

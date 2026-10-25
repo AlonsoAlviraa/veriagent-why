@@ -75,7 +75,7 @@ def replay(updates: list[dict], drop: str | None = None) -> tuple[dict, dict]:
 
 
 def why_diff(trace_path: Path) -> dict:
-    ev = [json.loads(l) for l in Path(trace_path).read_text().splitlines()]
+    ev = [json.loads(l) for l in Path(trace_path).read_text(encoding="utf-8").splitlines()]
     ups = [e for e in ev if e["event"] == "hypothesis_update"]
     prior = [e["data"]["hyp"] for e in ups if e["data"]["before"] is None]
     final, score = replay(ups)
@@ -87,7 +87,7 @@ def why_diff(trace_path: Path) -> dict:
 
 
 def sensitivity(trace_path: Path) -> dict:
-    ev = [json.loads(l) for l in Path(trace_path).read_text().splitlines()]
+    ev = [json.loads(l) for l in Path(trace_path).read_text(encoding="utf-8").splitlines()]
     ups = [e for e in ev if e["event"] == "hypothesis_update"]
     base_status, base_score = replay(ups)
     base = top_cause(base_status, base_score)
@@ -151,7 +151,7 @@ def run_question(qid: str, db, run_id: str, log_dir: Path | None = None) -> dict
            "why_diff": wd, "sensitivity": sens, "backend": badge(db), "attribution": ATTRIBUTION,
            "hyp_text": {h["id"]: h["text"] for h in hyps}}
     tr.log("writer", "memo", claims=len(claims))
-    ts = [json.loads(l)["ts"] for l in tr.path.read_text().splitlines()]
+    ts = [json.loads(l)["ts"] for l in tr.path.read_text(encoding="utf-8").splitlines()]
     out["system_seconds"] = round(ts[-1] - ts[0], 3)
     tr.log("orchestrator", "done", system_seconds_so_far=out["system_seconds"], measured_from="trace ts")
     (log_dir / f"result-{run_id}.json").write_text(json.dumps(out, indent=1, default=str))

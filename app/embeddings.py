@@ -88,7 +88,7 @@ def embed(texts: list[str], kind: str = "passage", batch: int = 64) -> list[list
     for i, t in enumerate(texts):
         f = CACHE / (_key(model, kind, t) + ".json")
         if kind == "passage" and f.exists():
-            out[i] = json.loads(f.read_text()); STATS["cache_hits"] += 1
+            out[i] = json.loads(f.read_text(encoding="utf-8")); STATS["cache_hits"] += 1
         else:
             todo.append(i)
     for s in range(0, len(todo), batch):
