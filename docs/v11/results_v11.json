@@ -1,0 +1,1887 @@
+{
+ "n_items": 361,
+ "missing_rows": {
+  "agent_v9": 0,
+  "rag": 0
+ },
+ "errors": {
+  "V7": 27,
+  "RAG": 31
+ },
+ "accuracy": {
+  "V7": {
+   "semantic": 0.482,
+   "semantic_ci": [
+    0.4321,
+    0.5374
+   ],
+   "em": 0.3906
+  },
+  "RAG": {
+   "semantic": 0.3269,
+   "semantic_ci": [
+    0.2798,
+    0.3767
+   ],
+   "em": 0.2438
+  },
+  "trivial": {
+   "semantic": 0.0554,
+   "semantic_ci": [
+    0.0332,
+    0.0803
+   ],
+   "em": 0.0166
+  }
+ },
+ "paired_semantic_diff": {
+  "V7 - RAG": {
+   "diff": 0.1551,
+   "ci": [
+    0.1108,
+    0.2022
+   ]
+  },
+  "V7 - trivial": {
+   "diff": 0.4266,
+   "ci": [
+    0.3767,
+    0.4792
+   ]
+  },
+  "RAG - trivial": {
+   "diff": 0.2715,
+   "ci": [
+    0.2244,
+    0.3186
+   ]
+  }
+ },
+ "v9": {
+  "coverage": 0.3657,
+  "abstention_rate": 0.6343,
+  "selective_semantic_acc": 0.7727,
+  "selective_acc_ci": [
+   0.6964,
+   0.8411
+  ],
+  "realized_risk_wrong_answered_over_n": 0.0831,
+  "crc_alpha_target": 0.1,
+  "selective_minus_V7_acc": {
+   "diff": 0.2907,
+   "ci": [
+    0.2248,
+    0.3574
+   ]
+  },
+  "auroc": {
+   "V9_full": {
+    "value": 0.8342,
+    "ci": [
+     0.7899,
+     0.8741
+    ]
+   },
+   "V7_confidence_det": {
+    "value": 0.6731,
+    "ci": [
+     0.6226,
+     0.7225
+    ]
+   },
+   "traceability_gate": {
+    "value": 0.6376,
+    "ci": [
+     0.5911,
+     0.6819
+    ]
+   }
+  },
+  "auroc_diff_V9_minus_V7conf": [
+   0.1085,
+   0.2177
+  ]
+ },
+ "net_score_correct+1_wrong-1_abstain0": {
+  "V7+V9": 0.1994,
+  "V7": -0.036,
+  "RAG": -0.3463
+ },
+ "net_paired": {
+  "V7+V9 - RAG": {
+   "diff": 0.5457,
+   "ci": [
+    0.4598,
+    0.6371
+   ]
+  },
+  "V7+V9 - V7": {
+   "diff": 0.2355,
+   "ci": [
+    0.1551,
+    0.313
+   ]
+  }
+ },
+ "by_subtype": {
+  "Aggregation": {
+   "n": 49,
+   "V7": 0.469,
+   "RAG": 0.122,
+   "V9_coverage": 0.449
+  },
+  "ArithmeticCalculation": {
+   "n": 49,
+   "V7": 0.653,
+   "RAG": 0.388,
+   "V9_coverage": 0.49
+  },
+  "Comparison": {
+   "n": 25,
+   "V7": 0.6,
+   "RAG": 0.52,
+   "V9_coverage": 0.44
+  },
+  "Counting": {
+   "n": 50,
+   "V7": 0.16,
+   "RAG": 0.14,
+   "V9_coverage": 0.08
+  },
+  "Domain-Specific": {
+   "n": 13,
+   "V7": 0.308,
+   "RAG": 0.308,
+   "V9_coverage": 0.308
+  },
+  "MatchBased": {
+   "n": 21,
+   "V7": 1.0,
+   "RAG": 1.0,
+   "V9_coverage": 1.0
+  },
+  "Multi-hop FactChecking": {
+   "n": 22,
+   "V7": 0.818,
+   "RAG": 0.818,
+   "V9_coverage": 0.636
+  },
+  "Multi-hop NumericalReasoing": {
+   "n": 46,
+   "V7": 0.37,
+   "RAG": 0.109,
+   "V9_coverage": 0.304
+  },
+  "Ranking": {
+   "n": 8,
+   "V7": 0.75,
+   "RAG": 0.875,
+   "V9_coverage": 0.25
+  },
+  "StatisticalAnalysis": {
+   "n": 32,
+   "V7": 0.094,
+   "RAG": 0.0,
+   "V9_coverage": 0.094
+  },
+  "Time-basedCalculation": {
+   "n": 46,
+   "V7": 0.587,
+   "RAG": 0.391,
+   "V9_coverage": 0.283
+  }
+ },
+ "acceptance": {
+  "A1_V7_beats_RAG": true,
+  "A2_V9_discriminates_and_helps": true,
+  "A3_risk_within_alpha": true,
+  "A4_net_beats_RAG": true,
+  "verdict": "WORKS",
+  "rag_wins": false
+ },
+ "failures": [
+  {
+   "id": "v11tb-01cc27d3caf4e8c9",
+   "q": "How many earthquakes have a magnitude of 6.5 or higher?",
+   "gold": "4",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.0002,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-0323c4cb49888477",
+   "q": "What is the variance of the number of tries scored by Castleford Tigers across the years from 2004 to 2010?",
+   "gold": "65.90",
+   "v7": "100.56",
+   "v9_decision": "abstain",
+   "p": 0.3486,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-042e0ea557cc5039",
+   "q": "What is the total 2010 population (in thousands) of the top 5 districts with the highest GDP per capita?",
+   "gold": "4351",
+   "v7": "7500",
+   "v9_decision": "abstain",
+   "p": 0.1891,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-04ee0f17194c6801",
+   "q": "How many times did the captain who led the United States to the most victories captain the team?",
+   "gold": "3",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.0001,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-0506bf9a2878b416",
+   "q": "What is the variance of the number of wins across all years?",
+   "gold": "338.14",
+   "v7": "11.56",
+   "v9_decision": "abstain",
+   "p": 0.3347,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-06cf0ed5987ea698",
+   "q": "What is the total number of years served by all mayors listed in the table?",
+   "gold": "108",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-075477a3410897b7",
+   "q": "What is the median number of executions in persona across all tribunals in Portugal?",
+   "gold": "57",
+   "v7": "313",
+   "v9_decision": "answer",
+   "p": 0.87,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-07f3911a00b64694",
+   "q": "How many years had more than 25000 Indians admitted?",
+   "gold": "9",
+   "v7": "4",
+   "v9_decision": "answer",
+   "p": 0.7679,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-092c7277b67f6da7",
+   "q": "What is the minimum number of people that need to be added to the municipality with the smallest population in the \"la haute - c\u00f4te - nord\" regional county municipality to make its population equal to the average population of all municipalities in that region?",
+   "gold": "880.38",
+   "v7": "709",
+   "v9_decision": "abstain",
+   "p": 0.2065,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-0a53ffc65168d29f",
+   "q": "How many diesel cars are listed in the table?",
+   "gold": "111",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-0b3652d3488bbc50",
+   "q": "What is the percentage difference between average annual growth rate of the values in the `2011` and  the `2010` for the top 5 ranked countries?",
+   "gold": "-0.75%",
+   "v7": "10.55",
+   "v9_decision": "abstain",
+   "p": 0.0521,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-0b5b037022d36184",
+   "q": "What is the average size in cents of the intervals with a just ratio that involves the number 11?",
+   "gold": "380.49",
+   "v7": "366.72",
+   "v9_decision": "abstain",
+   "p": 0.5413,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-0e1001d55ac9d8f3",
+   "q": "How many rows have a value in the 'p\u014dl\u00f4' column that starts with the letter '\u0259'?",
+   "gold": "3",
+   "v7": "1",
+   "v9_decision": "abstain",
+   "p": 0.0514,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-101130aa9241715f",
+   "q": "How many seasons did Liverpool play in the Premier League?",
+   "gold": "7",
+   "v7": "6",
+   "v9_decision": "abstain",
+   "p": 0.3239,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-12419b5c2150c7e8",
+   "q": "What is the total s ton that has the highest increase from the previous year between 2000 and 2006?",
+   "gold": "3527469",
+   "v7": "370222",
+   "v9_decision": "abstain",
+   "p": 0.4059,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-13268aef491b17ad",
+   "q": "Locomotive Service Life is defined as the duration between the 'entered service' and 'withdrawn' dates for a locomotive. Based on this definition, what was the longest Locomotive Service Life of the locomotive?",
+   "gold": "121",
+   "v7": "1967",
+   "v9_decision": "abstain",
+   "p": 0.0002,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-15fc361cf762e783",
+   "q": "In which year did the number of typhus cases have the least difference compared to the number of smallpox cases?",
+   "gold": "1929",
+   "v7": "1913",
+   "v9_decision": "abstain",
+   "p": 0.3753,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-17e82bd1b98d9b57",
+   "q": "What is the percentage change in the value of 'l (mh / km)' when the 'frequency (hz)' increases from 1 to 100k, assuming the ratio of 'g (\u00ee\u00bcs / km)' to 'c (nf / km)' remains constant?",
+   "gold": "5.25",
+   "v7": "-5.25",
+   "v9_decision": "answer",
+   "p": 0.8268,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-1882bbbc5b4f7879",
+   "q": "What is the average points scored by songs with non-English language titles that have a points value greater than the median points value of all songs?",
+   "gold": "88.57",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-18efca5e27851af8",
+   "q": "What is the median population density of the European Union member states?",
+   "gold": "103.5",
+   "v7": "111",
+   "v9_decision": "abstain",
+   "p": 0.1795,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-1aad7f9160584376",
+   "q": "How many songs are in the French language?",
+   "gold": "4",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.6702,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-1aba704991b72a81",
+   "q": "What is the total average daily flights of all routes combined?",
+   "gold": "115.7",
+   "v7": "1157",
+   "v9_decision": "answer",
+   "p": 0.7314,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-1b9948ab23157ac3",
+   "q": "How many years had a natural change of more than 150 and death of less than 350?",
+   "gold": "6",
+   "v7": "4",
+   "v9_decision": "abstain",
+   "p": 0.3078,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-1d89eced1aa8f63f",
+   "q": "In 2005, what rank did the highest-rated indicator achieve?",
+   "gold": "7",
+   "v7": "13",
+   "v9_decision": "abstain",
+   "p": 0.017,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-1eeb4d900062e9c6",
+   "q": "What is the total population of the top 5 counties in 1948?",
+   "gold": "2844677",
+   "v7": "3123551",
+   "v9_decision": "abstain",
+   "p": 0.5795,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-1fec869ba7e574c1",
+   "q": "Goal Percentage is defined as the ratio of goals scored to the total number of appearances made by a player or a team in a specific season or overall career. What is the Goal Percentage of Liverpool in the 1995-1996 season?",
+   "gold": "18.87%",
+   "v7": "11.32",
+   "v9_decision": "answer",
+   "p": 0.73,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-2617d273bcf35352",
+   "q": "How many more years was the 'Empress of Austria' in service compared to the 'Cyclops'?",
+   "gold": "3",
+   "v7": "4",
+   "v9_decision": "abstain",
+   "p": 0.6559,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-269d45d8e00d4b4d",
+   "q": "What is the difference in performance between the High-efficiency air source heat pump (ASHP) at 35 \u00b0C and the Ground source heat pump (GSHP) at 35 \u00b0C?",
+   "gold": "2.8",
+   "v7": "-1.7",
+   "v9_decision": "abstain",
+   "p": 0.4601,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-2883b5cdde8c423f",
+   "q": "How many craters are there with a diameter (km) larger than 33?",
+   "gold": "15",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.3308,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-28c3c56d475d8da3",
+   "q": "What is the standard deviation of the total points across all countries in the table?",
+   "gold": "3.19",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-29ba53ce7ca43a97",
+   "q": "What is the average number of tropical cyclones per season?",
+   "gold": "10.6",
+   "v7": "9.91",
+   "v9_decision": "abstain",
+   "p": 0.5918,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-2ac96562739ccc78",
+   "q": "What is the average number of viewers (in millions) for the TV show during the seasons that had more than 20 episodes?",
+   "gold": "4.576",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-2b81e914d4115c9b",
+   "q": "What is the median population density of the cities/municipalities in the table?",
+   "gold": "1660.15",
+   "v7": "7447.32",
+   "v9_decision": "abstain",
+   "p": 0.0895,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-2be360d4087f2692",
+   "q": "What is the total research funding (in thousands) of all the universities in London?",
+   "gold": "33496",
+   "v7": "47195",
+   "v9_decision": "answer",
+   "p": 0.8341,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-2c88de66d669ea75",
+   "q": "What is the standard deviation of the 'size (cents)' column?",
+   "gold": "185.85",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-2cc20a5dd6173fff",
+   "q": "How much greater is the value of 'dp / da' in the 2004 election compared to the 1999 election?",
+   "gold": "7",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.0887,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-2cc3663accdc89ab",
+   "q": "What is the average number of floors in buildings constructed between 1960 and 1980?",
+   "gold": "22",
+   "v7": "18.5",
+   "v9_decision": "abstain",
+   "p": 0.2473,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-3a93c52237b905ea",
+   "q": "What is the median winnings for drivers who have driven a Chevrolet car?",
+   "gold": "155712",
+   "v7": "130",
+   "v9_decision": "abstain",
+   "p": 0.0028,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-3b25f146ef2692ab",
+   "q": "How many countries have a population of over 50 million according to the 2013 projection?",
+   "gold": "4",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.0081,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-3ba617b11797d522",
+   "q": "What is the total population of all regions in China where the percentage of Manchu population is greater than 5%?",
+   "gold": "3123625869",
+   "v7": "365319129",
+   "v9_decision": "abstain",
+   "p": 0.2796,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-3c1bac47a547c64e",
+   "q": "In the context of hydrology, the \"confluence\" of two rivers refers to the point where they meet. Based on the provided data, what is the average length of the rivers that converge with the Lahn river at a confluence point below 100 km?",
+   "gold": "20.73",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-3ca51f974a30120a",
+   "q": "What is the average number of points received by the singers in this competition?",
+   "gold": "23.47",
+   "v7": "25.59",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-3dd80c36b2f40f02",
+   "q": "What is the correlation coefficient between the 'draw' and 'points' columns?",
+   "gold": "-0.02",
+   "v7": "0.01",
+   "v9_decision": "abstain",
+   "p": 0.3506,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-3df36d0c0c2a1cb5",
+   "q": "What is the total number of goals scored by Lincoln City in the Third Division North?",
+   "gold": "49",
+   "v7": "95",
+   "v9_decision": "abstain",
+   "p": 0.408,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-3e1a5d8854ccc787",
+   "q": "What is the average percentage of votes for the Progressive Conservative party across all polling firms and dates?",
+   "gold": "69.75%",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-3f1070733ba468d9",
+   "q": "If  in kyrgyzstan the domestic use accounts for 39% of the total, how many billion cubic meters of freshwater is used domestically in kyrgyzstan?",
+   "gold": "7.69",
+   "v7": "3.93",
+   "v9_decision": "answer",
+   "p": 0.6867,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-426ece7cddb74096",
+   "q": "What is the total number of students at the universities located in London?",
+   "gold": "38375",
+   "v7": "45995",
+   "v9_decision": "answer",
+   "p": 0.8201,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-43859ed558c9b8de",
+   "q": "What is the total number of viewers (in millions) for episodes that have a rating/share of 3.0 or higher and a rank (timeslot) of 1?",
+   "gold": "67.68",
+   "v7": "95",
+   "v9_decision": "abstain",
+   "p": 0.5906,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-44a22e6c2f07d8e5",
+   "q": "What is the variance of goals scored by teams in the Third Division North?",
+   "gold": "211",
+   "v7": "10.56",
+   "v9_decision": "abstain",
+   "p": 0.3479,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-45f4f92e48b51678",
+   "q": "What is the variance of the 'average' points per dance for couples who have performed more than 7 dances?",
+   "gold": "17.7",
+   "v7": "25.53",
+   "v9_decision": "abstain",
+   "p": 0.332,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-463ca07b585e49a3",
+   "q": "What is the average percentage of national votes won by all leaders in the table?",
+   "gold": "37.64%",
+   "v7": "38.55",
+   "v9_decision": "abstain",
+   "p": 0.2364,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-47201224a74c098e",
+   "q": "What is the mean height of buildings in Winnipeg that have more than 10 floors?",
+   "gold": "47.67",
+   "v7": "51.18",
+   "v9_decision": "abstain",
+   "p": 0.37,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-47219e7225da35f6",
+   "q": "What is the median GDP per capita of the top 20 countries by world rank?",
+   "gold": "24395",
+   "v7": "23419.5",
+   "v9_decision": "answer",
+   "p": 0.7578,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-48c12564a70819de",
+   "q": "What is the average melamine content (mg / kg) of the dairy products that had at least 5 samples taken?",
+   "gold": "403.88",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-497d0cfbfd118d9d",
+   "q": "What is the total number of tropical storms in the year with the highest number of major hurricanes between 1870 and 1878?",
+   "gold": "29",
+   "v7": "11",
+   "v9_decision": "abstain",
+   "p": 0.2765,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-4a24ebf059841b63",
+   "q": "What is the standard deviation of the \"Political Rights\" scores from 1975 to 1990?",
+   "gold": "0.34",
+   "v7": "1.35",
+   "v9_decision": "abstain",
+   "p": 0.1845,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-4b4ff8f17963fa7b",
+   "q": "What is the total number of wins by teams that have a win percentage greater than 0.7?",
+   "gold": "65",
+   "v7": "101",
+   "v9_decision": "abstain",
+   "p": 0.3468,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-4cc489011d65d97a",
+   "q": "How many hand combinations have a payout of 100 or more for 1 credit?",
+   "gold": "4",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.0002,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-4f1d765413de5719",
+   "q": "How many players have scored more than 3 goals in total?",
+   "gold": "5",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.2875,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-4f347ffe247bafe3",
+   "q": "Can you calculate the standard deviation of the average comprehension scores across all cities?",
+   "gold": "1.20",
+   "v7": "2.05",
+   "v9_decision": "abstain",
+   "p": 0.3307,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-50a1c817a7b50bcd",
+   "q": "In the context of demographics, the population dependency ratio is defined as the ratio of the population aged 0-10 and 60+ to the population aged 11-59. Based on the provided data, what is the approximate population dependency ratio in 2002?",
+   "gold": "52.66%",
+   "v7": "0.24",
+   "v9_decision": "abstain",
+   "p": 0.1715,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-50ba63ef02d5f99c",
+   "q": "How many saints were martyred in the 19th century?",
+   "gold": "7",
+   "v7": "8",
+   "v9_decision": "abstain",
+   "p": 0.0497,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-5111df4c8ab0075f",
+   "q": "What is the difference between the total number of Primary schools in the top 3 countries with the most Primary schools and the total number of Career-related schools in all countries?",
+   "gold": "583",
+   "v7": "465",
+   "v9_decision": "abstain",
+   "p": 0.115,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-521d1b7034109e20",
+   "q": "What is the average total points of all couples who have performed more than 10 dances?",
+   "gold": "353.2",
+   "v7": "19.82",
+   "v9_decision": "abstain",
+   "p": 0.0817,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-5269641b7bf357e8",
+   "q": "How many more points did the singer with the highest 'points' score receive than the singer with the 5th highest 'points' score?",
+   "gold": "31",
+   "v7": "40",
+   "v9_decision": "abstain",
+   "p": 0.033,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-531afa6132809309",
+   "q": "What is the median number of televotes received by performers with rank higher than 10 (including 10)?",
+   "gold": "7153.5",
+   "v7": "3834",
+   "v9_decision": "abstain",
+   "p": 0.1,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-5329a545b17787e7",
+   "q": "In which season did the TV show have the highest rank?",
+   "gold": "2",
+   "v7": "season 4",
+   "v9_decision": "abstain",
+   "p": 0.0012,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-53b60df40c509bb2",
+   "q": "How many banks have total assets of more than 10,000 million TL?",
+   "gold": "15",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-540d28c2cbf41498",
+   "q": "What is the average population density of municipalities with an area greater than 700 km 2 and a human development index above 0.7?",
+   "gold": "211.19",
+   "v7": "59.55",
+   "v9_decision": "abstain",
+   "p": 0.2794,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-5493c5c3be6eea36",
+   "q": "Aircraft Fleet Capacity Change is defined as the variation in the total seating capacity of an airline's fleet over a specified period. Based on this definition, how did the total seating capacity of the airline's fleet change from 2004 to 2008?",
+   "gold": "244",
+   "v7": "100",
+   "v9_decision": "abstain",
+   "p": 0.0076,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-552dcdcf1bd1de6d",
+   "q": "What is the total average rating of all TV dramas in the table?",
+   "gold": "321",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-56035c2708fa7025",
+   "q": "What is the average annual increase in issue price from 2007 to 2011?",
+   "gold": "5",
+   "v7": "103.95",
+   "v9_decision": "abstain",
+   "p": 0.3022,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-566c9200cea18c99",
+   "q": "What is the total intake of all 'primary' schools that have a 'dcsf number' less than 2200?",
+   "gold": "60",
+   "v7": "120",
+   "v9_decision": "answer",
+   "p": 0.6911,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-577472b9c44b1017",
+   "q": "How many states have a value greater than 0.3 in the 2001-05 time period?",
+   "gold": "6",
+   "v7": "5",
+   "v9_decision": "answer",
+   "p": 0.7628,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-58c12f5c85dc3306",
+   "q": "How much higher is the average high temperature in July compared to January across all cities?",
+   "gold": "51.93",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-5921991ef07b397d",
+   "q": "How many delegates from Metro Manila won a pageant title?",
+   "gold": "2",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.0002,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-597ec51aa971e271",
+   "q": "What is the median elevation of the mountain peaks in Greece?",
+   "gold": "2262",
+   "v7": "2148",
+   "v9_decision": "abstain",
+   "p": 0.3814,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-5a02841251e9fe91",
+   "q": "How many municipalities have a population of 40,000 or more people speaking Spanish?",
+   "gold": "1",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.0052,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-5a6a21f05be43637",
+   "q": "How many mountains in Tanzania have an elevation above 3000 meters and a prominence less than 3000?",
+   "gold": "2",
+   "v7": "4",
+   "v9_decision": "abstain",
+   "p": 0.0008,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-5c61003ff264d8ec",
+   "q": "What is the total diameter of all craters with a diameter greater than 40 km?",
+   "gold": "601.3",
+   "v7": "105",
+   "v9_decision": "abstain",
+   "p": 0.5782,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-60670a8d9b1e39dd",
+   "q": "Can you calculate the standard deviation of the number of screens operated by the top 5 movie theater chains?",
+   "gold": "2472.33",
+   "v7": "2013.53",
+   "v9_decision": "abstain",
+   "p": 0.3441,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-629103144efe26a2",
+   "q": "How many nations have won at least one gold medal?",
+   "gold": "3",
+   "v7": "4",
+   "v9_decision": "abstain",
+   "p": 0.0014,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-63359e8db2964276",
+   "q": "How many companies in the banking industry are listed in the table?",
+   "gold": "4",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.0008,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-64b77c1e7f30ca23",
+   "q": "What is the average number of floors in buildings constructed from 1895 to 1980?",
+   "gold": "26.57",
+   "v7": "25.5",
+   "v9_decision": "abstain",
+   "p": 0.1008,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-651dfed1dce61e46",
+   "q": "What is the total number of people from all nationalities admitted over the 8-year period from 2000 to 2008?",
+   "gold": "423174",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-65aadc9add4b1a42",
+   "q": "How many individuals have a 'Number' value greater than 1500?",
+   "gold": "14",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.3653,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-65e3fbcba3509cbc",
+   "q": "What is the average revenue of the top 5 companies in the 'banking' industry?",
+   "gold": "30147.88",
+   "v7": "31498.34",
+   "v9_decision": "abstain",
+   "p": 0.0019,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-663af775c49891f6",
+   "q": "How many transcription factors have an occurrence count greater than 1?",
+   "gold": "3",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-66ba5aa71ed35406",
+   "q": "How many hurricanes occurred in the month of September?",
+   "gold": "19",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-66ea61b936831554",
+   "q": "How many elections did the party win75 or more seats?",
+   "gold": "13",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.0001,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-67698e1118741098",
+   "q": "What is the median diameter of craters on this celestial body?",
+   "gold": "23.95",
+   "v7": "33.8",
+   "v9_decision": "abstain",
+   "p": 0.0797,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-684c9fa318ef837c",
+   "q": "What is the difference in maximum pressure (in bar) between the ammunition type with the largest external area and the ammunition type with the smallest external area?",
+   "gold": "600",
+   "v7": "1.03",
+   "v9_decision": "abstain",
+   "p": 0.3907,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-68abb88ce95a7853",
+   "q": "What is the total number of locomotives introduced between 1867 and 1873, considering only the '2 - 4 - 0' and '0 - 6 - 0' types?",
+   "gold": "149",
+   "v7": "151",
+   "v9_decision": "abstain",
+   "p": 0.4041,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-6ba14be153d5a11f",
+   "q": "What is the percentage increase in the total number of trailers from 1923 to 1927?",
+   "gold": "146.25%",
+   "v7": "165",
+   "v9_decision": "abstain",
+   "p": 0.004,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-6bf0106b75631feb",
+   "q": "How many songs or hymns in the table have a source from the book of Psalms?",
+   "gold": "10",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-6f416284e0b16171",
+   "q": "How many coins were issued between 2000 and 2005?",
+   "gold": "6",
+   "v7": "35081",
+   "v9_decision": "abstain",
+   "p": 0.104,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-70d9755a3802ad91",
+   "q": "What is the total number of years that all ambassadors served?",
+   "gold": "80",
+   "v7": "55",
+   "v9_decision": "abstain",
+   "p": 0.5432,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-7160d3342f1a91cd",
+   "q": "What is the mean value of the 'P' column, excluding the rows with missing or null values?",
+   "gold": "384.46",
+   "v7": "351.54",
+   "v9_decision": "abstain",
+   "p": 0.309,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-72b56e932806834c",
+   "q": "What is the difference in boiling points (in \u02daC) between the component with the highest 'bp comp 1 (\u02dac)' value and the component with the lowest 'bp comp 1 (\u02dac)' value?",
+   "gold": "308.6",
+   "v7": "310.3",
+   "v9_decision": "answer",
+   "p": 0.7491,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-73a06f4dbbb1534f",
+   "q": "What is the total cost for systems that produce at least 2000 kwh/kwp/year, and have a cost per kwp of at most $1400?",
+   "gold": "43.8",
+   "v7": "100",
+   "v9_decision": "abstain",
+   "p": 0.0391,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-759da94748ad76ef",
+   "q": "What is the standard deviation of the build dates for all train cars in the dataset?",
+   "gold": "6.02",
+   "v7": "5.55",
+   "v9_decision": "abstain",
+   "p": 0.4701,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-767d183aa0245779",
+   "q": "What is the average population density of all municipalities in the table?",
+   "gold": "150.55",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-78f78dcbbb7c5ac9",
+   "q": "What is the average market value of the top 5 companies in the oil and gas industry?",
+   "gold": "276.06",
+   "v7": "263.54",
+   "v9_decision": "answer",
+   "p": 0.695,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-799372a4970b007e",
+   "q": "What is the total number of points earned by the top 5 (by place) singers?",
+   "gold": "251",
+   "v7": "249",
+   "v9_decision": "answer",
+   "p": 0.7162,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-79c7100e623e490d",
+   "q": "How many squadrons were built by 'brighton' in 1948?",
+   "gold": "16",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-7b2b22eab80f669c",
+   "q": "If the total student population of karolinska institutet and swedish university of agricultural sciences is increased by 18%, what would be the new combined student population?",
+   "gold": "10738",
+   "v7": "34788",
+   "v9_decision": "abstain",
+   "p": 0.3329,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-7b4144d4fe9ab8f8",
+   "q": "In which year did this athlete win both the Senior PGA Championship and Senior Players Championship titles\uff1f",
+   "gold": "1986",
+   "v7": "2005",
+   "v9_decision": "abstain",
+   "p": 0.0049,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-7c1ab41b76a1e613",
+   "q": "What is the median value of the CSAR No. column, excluding rows with missing values?",
+   "gold": "387",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-7dcf69b8604e3dd7",
+   "q": "What is the total number of bills originally cosponsored by the legislator in the years where they sponsored more than 50 bills?",
+   "gold": "854",
+   "v7": "803",
+   "v9_decision": "abstain",
+   "p": 0.5493,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-7dcfc5012f532ebc",
+   "q": "How many frequency measurements have a resistance value greater than 180?",
+   "gold": "3",
+   "v7": "2",
+   "v9_decision": "abstain",
+   "p": 0.023,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-7ee09fe1d48c37e5",
+   "q": "What is the average number of storeys of the top 3 buildings by rank that were completed before 1980?",
+   "gold": "20.3",
+   "v7": "19.33",
+   "v9_decision": "abstain",
+   "p": 0.1913,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-7fe4b8c7bbb482bd",
+   "q": "What is the average rating of the episodes that aired on Tuesdays?",
+   "gold": "1.73",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-839734f9a3d8150f",
+   "q": "What is the average profit (in US billion) of the top 5 companies in the table?",
+   "gold": "-3.24",
+   "v7": "-0.65",
+   "v9_decision": "abstain",
+   "p": 0.3757,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-85e54c4224379fa7",
+   "q": "What is the average prominence of mountain peaks in Morocco that have an elevation of at least 3000 meters and a col elevation of more than 1500 meters?",
+   "gold": "1718.33",
+   "v7": "1751.5",
+   "v9_decision": "abstain",
+   "p": 0.1416,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-8869ae21589a1ab5",
+   "q": "What is the minimum increase in GDP per capita required for West Germany to surpass the GDP per capita of France, assuming the population of both countries remains the same?",
+   "gold": "0",
+   "v7": "478",
+   "v9_decision": "answer",
+   "p": 0.7608,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-8963b2bbf83a74ac",
+   "q": "Eurovision Song Contest Points Average is defined as the average number of points received by a country's entry in the contest. What is the Eurovision Song Contest Points Average for countries whose language is not English?",
+   "gold": "52.79",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-8b247fcb51d1c607",
+   "q": "In which year did the athlete win a gold medal in the 400m event at the CARIFTA Games (U-20) with a personal best time?",
+   "gold": "2009,2010",
+   "v7": "2009",
+   "v9_decision": "answer",
+   "p": 0.7688,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-8bbcb834cd1f78b5",
+   "q": "What is the difference in total goals scored by the top-scoring forward (fw) and the top-scoring midfielder (mf) in the league?",
+   "gold": "7",
+   "v7": "1",
+   "v9_decision": "abstain",
+   "p": 0.0333,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-8c08ad04ed79ae91",
+   "q": "What is the average number of locomotives withdrawn per year from 1935 to 1943?",
+   "gold": "1160.5",
+   "v7": "1.22",
+   "v9_decision": "abstain",
+   "p": 0.0572,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-8c3668697e860104",
+   "q": "Duma Seat Share Change is defined as the variation in the percentage of seats held by each political party in the Russian Duma from one legislative period to another. Based on this definition, what is the Duma Seat Share Change of the Constitutional Democratic Party (Kadets) from the First Duma to the Second Duma?",
+   "gold": "-87",
+   "v7": "-11.32",
+   "v9_decision": "abstain",
+   "p": 0.6671,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-8d2fb18ef60aa689",
+   "q": "what is the difference of ghent's average final score from 2010 to 2011?",
+   "gold": "0.86",
+   "v7": "1.05",
+   "v9_decision": "abstain",
+   "p": 0.3155,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-8fe93b8586be5220",
+   "q": "In which year did the 'Political Rights' score first decrease by at least 2 point compared to the previous year?",
+   "gold": "1993",
+   "v7": "1974",
+   "v9_decision": "abstain",
+   "p": 0.2466,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-93fdf9fdfc3faa74",
+   "q": "What is the standard deviation of the horse-power of warships built before 1870?",
+   "gold": "91.65",
+   "v7": "50",
+   "v9_decision": "abstain",
+   "p": 0.2815,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-94a9383e2a483fdd",
+   "q": "If a player wins with a \"natural royal flush\" and a \"four of a kind\" in two separate games, both with a 3-credit bet, how much would they win in total?",
+   "gold": "915",
+   "v7": "1350",
+   "v9_decision": "abstain",
+   "p": 0.4163,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-977fbcfd2756614b",
+   "q": "How much greater is the population density in 2012 of the sector with the highest population density compared to the sector with the lowest population density?",
+   "gold": "487",
+   "v7": "420",
+   "v9_decision": "answer",
+   "p": 0.7821,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-9a6f45b58f3230e8",
+   "q": "What is the total length of all rivers that flow into the left side of the main river, in kilometers?",
+   "gold": "468.3",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-9ed3912eda93df52",
+   "q": "What is the average number of Indians admitted per year from 2000 to 2010?",
+   "gold": "26625.45",
+   "v7": "2612.27",
+   "v9_decision": "abstain",
+   "p": 0.2754,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-9fd3d8839e4a861d",
+   "q": "How many districts have a 2008 GDP per capita (USD) above 6700?",
+   "gold": "10",
+   "v7": "11",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-a0d083844e9797e0",
+   "q": "How many more males are there in the 10-29 age group than in the 60+ age group?",
+   "gold": "16",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.0336,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-a4f6d7cb86e12d53",
+   "q": "What is the average number of US viewers (in millions) for the episodes in Season 1?",
+   "gold": "8.45",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-a5a2c7fb09f32d55",
+   "q": "What is the total number of injuries (in thousands of US dollars) in the three-year period with the highest average CPSC toy safety funding?",
+   "gold": "598",
+   "v7": "626",
+   "v9_decision": "answer",
+   "p": 0.7484,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-a5de47ae8731889a",
+   "q": "How many cost categories have a percentage increase greater than 5% from 2017 to 2018?",
+   "gold": "8",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.3782,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-a6bf1a5c7ab44c86",
+   "q": "How many cities have a residential monthly usage of 1000 kwh above 12?",
+   "gold": "7",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-a79cd8ec27af6973",
+   "q": "What is the total number of jury votes received by artists who made it to the 'final'?",
+   "gold": "37",
+   "v7": "30",
+   "v9_decision": "abstain",
+   "p": 0.5982,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-a8f73d171ce1a708",
+   "q": "What is the total number of enrolled men and women in the regions where the 'e / vap ratio total' is greater than 105%?",
+   "gold": "6303623",
+   "v7": "1449966",
+   "v9_decision": "abstain",
+   "p": 0.6827,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-a9196b8ddb587ea9",
+   "q": "What is the average annual change in the 'district-wide' budget from 2001-2002 to 2006-2007?",
+   "gold": "835.6",
+   "v7": "-835.6",
+   "v9_decision": "abstain",
+   "p": 0.3926,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-ab5b14ac51dd8773",
+   "q": "How much shorter was the average tenure of ambassadors who served between 1956 and 1969 compared to those who served between 1981 and 2001?",
+   "gold": "0.71",
+   "v7": "10.5",
+   "v9_decision": "abstain",
+   "p": 0.2862,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-accf35669852e1aa",
+   "q": "What is the average score in the 'tumbling' category across all teams?",
+   "gold": "52.08",
+   "v7": "55.58",
+   "v9_decision": "answer",
+   "p": 0.73,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-b08634d7cd884455",
+   "q": "How many types of violent crimes are reported in the table?",
+   "gold": "4",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.1181,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-b60f42005fcd5f0e",
+   "q": "How many engines have a specific impulse greater than 1000 seconds?",
+   "gold": "4",
+   "v7": "3",
+   "v9_decision": "abstain",
+   "p": 0.0033,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-b6219d257925aa2a",
+   "q": "What is the average percentage of males across all states in India?",
+   "gold": "12.82",
+   "v7": "12.51",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-b68a92a9b123ed32",
+   "q": "What is the maximum number of years that a locomotive built in 1938 could have been in service, assuming it was withdrawn in the latest possible year?",
+   "gold": "27",
+   "v7": "26",
+   "v9_decision": "abstain",
+   "p": 0.052,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-b71bb2ae2d5e19e1",
+   "q": "What is the total number of goals scored by Liverpool in the Premier League?",
+   "gold": "55",
+   "v7": "66",
+   "v9_decision": "abstain",
+   "p": 0.3774,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-bb0fe05996adb719",
+   "q": "What is the difference between the average 'Composition' score of the top 3 painters with the highest 'Expression' scores and the average 'Drawing' score of the bottom 5 painters with the lowest 'Color' scores?",
+   "gold": "0.87",
+   "v7": "10.07",
+   "v9_decision": "abstain",
+   "p": 0.0211,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-bdfc75083d56bd56",
+   "q": "What is the total number of races won by Dani\u00ebl Willemsen?",
+   "gold": "68",
+   "v7": "70",
+   "v9_decision": "abstain",
+   "p": 0.6519,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-bdfcc7e1bb6dc5ee",
+   "q": "How many cantons have 'yes' in the 'separate secondary schools' column?",
+   "gold": "18",
+   "v7": "11",
+   "v9_decision": "abstain",
+   "p": 0.4154,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-be0223bd4b1d4dcf",
+   "q": "What is the total population of all districts in the city?",
+   "gold": "1652171",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-be503c55c3cf1fbe",
+   "q": "How much did the average issue price increase the most compared to the previous year?",
+   "gold": "445",
+   "v7": "2010",
+   "v9_decision": "abstain",
+   "p": 0.3633,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-c04b6beeac5ae498",
+   "q": "What is the minimum number of additional 'dp / da' values needed for the 2003 floor-crossing event to surpass the total 'dp / da' values of the 1999 election event, assuming the average 'dp / da' value of the 2003 floor-crossing event remains the same?",
+   "gold": "2",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-c053c02d128201b7",
+   "q": "How many universities are located in London?",
+   "gold": "4",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.0014,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-c1636b31680a83b5",
+   "q": "What is the total number of 12-inch guns on all ships?",
+   "gold": "24",
+   "v7": "12",
+   "v9_decision": "answer",
+   "p": 0.6971,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-c195eb7689321829",
+   "q": "What is the average time of all athletes in the table?",
+   "gold": "48.98",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-c2d0e0b5e2f5835d",
+   "q": "What is the total number of seats won by the party across all elections listed in the table?",
+   "gold": "1702",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-c3ce5811d8041e24",
+   "q": "What is the value in the year with the highest increase in value between 1850 and 1870?",
+   "gold": "387203",
+   "v7": "17223",
+   "v9_decision": "abstain",
+   "p": 0.5607,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-c804d4f121627a59",
+   "q": "What is the average percentage weight loss of the top 3 contestants who lost the most weight in kilograms?",
+   "gold": "38.07%",
+   "v7": "41.14",
+   "v9_decision": "answer",
+   "p": 0.7355,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-c8a0829ce6f11dd2",
+   "q": "What is the average prominence of mountain peaks in the Democratic Republic of the Congo that have an elevation of at least 3000 meters?",
+   "gold": "2606.25",
+   "v7": "2371",
+   "v9_decision": "abstain",
+   "p": 0.6068,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-cb37ba0ccd1bfa2a",
+   "q": "What is the difference in total days of inclement weather (snow, storms, and fog) between the year with the most sunshine and the year with the least sunshine?",
+   "gold": "61",
+   "v7": "100",
+   "v9_decision": "abstain",
+   "p": 0.2745,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-cb663d0399df511c",
+   "q": "How many mountains are located in Austria?",
+   "gold": "12",
+   "v7": "10",
+   "v9_decision": "answer",
+   "p": 0.7299,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-cbcc7b1e8b1ce025",
+   "q": "How many regions in Italy have a population of more than 4 million?",
+   "gold": "7",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.0003,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-cf78a80569325500",
+   "q": "How many racing series did the driver participate in during the 2004-2007 season?",
+   "gold": "12",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.0001,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-cf9dd52a762be973",
+   "q": "How many parties have won 10 or fewer seats in the election?",
+   "gold": "13",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.0012,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-d0a1f61b05fa1d4c",
+   "q": "What is the average market value of companies in the oil and gas industry that have sales of at least 300 billion?",
+   "gold": "269.28",
+   "v7": "215.55",
+   "v9_decision": "abstain",
+   "p": 0.3516,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-d35caf05d6485bf3",
+   "q": "How many dates in the table fall in the year 1990 or later?",
+   "gold": "8",
+   "v7": "10",
+   "v9_decision": "abstain",
+   "p": 0.0004,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-d36f751dac69318f",
+   "q": "What is the total number of medals won by all nations listed in the table?",
+   "gold": "42",
+   "v7": "34",
+   "v9_decision": "answer",
+   "p": 0.8674,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-d4b8c6cc2e2a7c52",
+   "q": "What is the standard deviation of the `points for` column across all rugby clubs?",
+   "gold": "126.17",
+   "v7": "141.51",
+   "v9_decision": "abstain",
+   "p": 0.4169,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-d8ac38ac5b420685",
+   "q": "What is the average number of episodes per season for 'The Wire' between 2002 and 2004?",
+   "gold": "18.33",
+   "v7": "9.17",
+   "v9_decision": "answer",
+   "p": 0.685,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-dd391b7413df6438",
+   "q": "What is the total number of people deported from all regions listed in the table?",
+   "gold": "18533.76",
+   "v7": "93779",
+   "v9_decision": "answer",
+   "p": 0.7595,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-dd778956ba0b5266",
+   "q": "What is the average magnitude of earthquakes that have resulted in a death toll of at least 1,000 and have a depth of less than 30 km?",
+   "gold": "7.25",
+   "v7": "6.85",
+   "v9_decision": "answer",
+   "p": 0.8747,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-e22a374e08794276",
+   "q": "What is the total quantity of orders placed in the earliest two years represented in the table?",
+   "gold": "31",
+   "v7": "21",
+   "v9_decision": "abstain",
+   "p": 0.3945,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-e5356a64fb82a5d4",
+   "q": "What is the standard deviation of the percentage of national votes across all elections?",
+   "gold": "0.07",
+   "v7": "10.51",
+   "v9_decision": "abstain",
+   "p": 0.3289,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-e64c2ddce62c76ba",
+   "q": "What is the total revenue of all companies in the oil industry?",
+   "gold": "838478.3",
+   "v7": "258195.1",
+   "v9_decision": "answer",
+   "p": 0.6858,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-e98478f17f738dd3",
+   "q": "How many cities/municipalities have a population density of over 3000 per km square?",
+   "gold": "5",
+   "v7": "3",
+   "v9_decision": "abstain",
+   "p": 0.0012,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-eae1a64ad02ae991",
+   "q": "What is the total number of votes cast in the counties where Obama received more than 60% of the votes?",
+   "gold": "443589",
+   "v7": "313250",
+   "v9_decision": "answer",
+   "p": 0.794,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-ebcf933b38559429",
+   "q": "How many countries have at least one semifinalist?",
+   "gold": "12",
+   "v7": "14",
+   "v9_decision": "abstain",
+   "p": 0.0859,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-f19e3c32d88171eb",
+   "q": "What is the average value of the 2001 general election across all regions in Italy?",
+   "gold": "6.16",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-f23997671da61c46",
+   "q": "In the context of seismology, the Magnitude of an earthquake is a measure of its size, with higher magnitudes indicating more powerful earthquakes. What is the average Magnitude of the top 5 earthquakes in the table, ranked by their Death toll?",
+   "gold": "7.52",
+   "v7": "7.88",
+   "v9_decision": "answer",
+   "p": 0.7135,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-f336acf7ae082519",
+   "q": "What is the average total value per year from 2005 to 2009?",
+   "gold": "69.29",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-f4292e392fff8cf6",
+   "q": "Mach Number Threshold is defined as the maximum speed of an aircraft in terms of Mach number. Based on this definition, how many pilots in the table have exceeded a Mach Number Threshold of 5.5 during their flights?",
+   "gold": "8",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.0007,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-f51a77d4ffba1aed",
+   "q": "Which animal has the highest metabolic rate among all the females?",
+   "gold": "6",
+   "v7": "1956.1",
+   "v9_decision": "abstain",
+   "p": 0.4258,
+   "rag_correct": true
+  },
+  {
+   "id": "v11tb-f54fdc8f3471782a",
+   "q": "How much higher is the elevation of the mountain with the highest elevation than the mountain with the lowest elevation?",
+   "gold": "1207",
+   "v7": "",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-f557ff1c99aaf41e",
+   "q": "What is the median number of aircraft movements among the top 10 busiest airports in the table?",
+   "gold": "500.5",
+   "v7": "201",
+   "v9_decision": "abstain",
+   "p": 0.2466,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-f70dbcddfad0dc93",
+   "q": "What is the difference in elevation (in meters) between the highest peak and the lowest peak in the table?",
+   "gold": "2851",
+   "v7": "2676",
+   "v9_decision": "abstain",
+   "p": 0.6286,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-f72902b09ecc9fc2",
+   "q": "How many years had 3 or fewer hurricanes?",
+   "gold": "4",
+   "v7": "5",
+   "v9_decision": "abstain",
+   "p": 0.0025,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-fb02efe3a1c329c7",
+   "q": "What is the median points scored by artists who sang in languages other than French?",
+   "gold": "3",
+   "v7": "2",
+   "v9_decision": "abstain",
+   "p": 0.0105,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-fc54ee44f3ad6ef3",
+   "q": "How many counties have a per capita income between $18,000 and $27,000?",
+   "gold": "22",
+   "v7": "11",
+   "v9_decision": "abstain",
+   "p": 0.0,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-ffc1869f9aac5f70",
+   "q": "What is the average change in the qualifying score for the 'all around' event from the 'olympic trials' to the 'us championships' in 2008?",
+   "gold": "0.65",
+   "v7": "-0.65",
+   "v9_decision": "answer",
+   "p": 0.7382,
+   "rag_correct": false
+  },
+  {
+   "id": "v11tb-ffe5d38c4973ddc4",
+   "q": "What is the total number of Outright Titles won by all schools in Belfast?",
+   "gold": "91",
+   "v7": "101",
+   "v9_decision": "abstain",
+   "p": 0.418,
+   "rag_correct": false
+  }
+ ]
+}
