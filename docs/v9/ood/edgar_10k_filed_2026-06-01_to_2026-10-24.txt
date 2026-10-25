@@ -1,0 +1,552 @@
+10-K             21Shares Polkadot ETF                                         2054247     2026-06-29  edgar/data/2054247/0001213900-26-073214.txt         
+10-K             ADDENTAX GROUP CORP.                                          1650101     2026-06-29  edgar/data/1650101/0001493152-26-031055.txt         
+10-K             AETHLON MEDICAL INC                                           882291      2026-06-10  edgar/data/882291/0001683168-26-004710.txt          
+10-K             AIR T INC                                                     353184      2026-06-29  edgar/data/353184/0000353184-26-000054.txt          
+10-K             AMERICAN HONDA FINANCE CORP                                   864270      2026-06-18  edgar/data/864270/0000864270-26-000006.txt          
+10-K             AMERIGUARD SECURITY SERVICES, INC.                            1514443     2026-06-29  edgar/data/1514443/0001213900-26-073232.txt         
+10-K             ANVI GLOBAL HOLDINGS, INC.                                    1570132     2026-06-03  edgar/data/1570132/0001079973-26-000779.txt         
+10-K             Aeries Technology, Inc.                                       1853044     2026-06-08  edgar/data/1853044/0001829126-26-006123.txt         
+10-K             AeroVironment Inc                                             1368622     2026-06-29  edgar/data/1368622/0001104659-26-078906.txt         
+10-K             Alternus Clean Energy, Inc.                                   1883984     2026-06-15  edgar/data/1883984/0001437749-26-020545.txt         
+10-K             American Outdoor Brands, Inc.                                 1808997     2026-06-25  edgar/data/1808997/0001808997-26-000031.txt         
+10-K             Anterix Inc.                                                  1304492     2026-06-25  edgar/data/1304492/0001304492-26-000027.txt         
+10-K             Arax Holdings Corp                                            1566243     2026-06-10  edgar/data/1566243/0001753926-26-000995.txt         
+10-K             Artificial Intelligence Technology Solutions Inc.             1498148     2026-06-09  edgar/data/1498148/0001493152-26-027796.txt         
+10-K             BIO KEY INTERNATIONAL INC                                     1019034     2026-06-12  edgar/data/1019034/0001437749-26-020446.txt         
+10-K             BROWN FORMAN CORP                                             14693       2026-06-12  edgar/data/14693/0000014693-26-000024.txt           
+10-K             Bark, Inc.                                                    1819574     2026-06-10  edgar/data/1819574/0001628280-26-042242.txt         
+10-K             Beneficient                                                   1775734     2026-06-30  edgar/data/1775734/0001775734-26-000018.txt         
+10-K             Beyond Air, Inc.                                              1641631     2026-06-26  edgar/data/1641631/0001493152-26-030287.txt         
+10-K             Borealis Foods Inc.                                           1852973     2026-06-02  edgar/data/1852973/0001213900-26-063777.txt         
+10-K             C3.ai, Inc.                                                   1577526     2026-06-24  edgar/data/1577526/0001577526-26-000078.txt         
+10-K             CASEYS GENERAL STORES INC                                     726958      2026-06-22  edgar/data/726958/0000726958-26-000046.txt          
+10-K             CEA Industries Inc.                                           1482541     2026-06-23  edgar/data/1482541/0001482541-26-000019.txt         
+10-K             COLUMBUS MCKINNON CORP                                        1005229     2026-06-08  edgar/data/1005229/0001005229-26-000022.txt         
+10-K             CROWN CRAFTS INC                                              25895       2026-06-24  edgar/data/25895/0001437749-26-021496.txt           
+10-K             Canopy Growth Corp                                            1737927     2026-06-15  edgar/data/1737927/0001193125-26-270260.txt         
+10-K             Capstone Energy Plus, Inc.                                    1009759     2026-06-25  edgar/data/1009759/0001104659-26-077817.txt         
+10-K             Central Plains Bancshares, Inc.                               1979332     2026-06-18  edgar/data/1979332/0001193125-26-275962.txt         
+10-K             Cineverse Corp.                                               1173204     2026-06-26  edgar/data/1173204/0001193125-26-284027.txt         
+10-K             Clean Energy Technologies, Inc.                               1329606     2026-06-05  edgar/data/1329606/0001493152-26-027409.txt         
+10-K             Cluster Group Holdings Ltd Co                                 1346287     2026-06-12  edgar/data/1346287/0001683168-26-004784.txt         
+10-K             Credo Technology Group Holding Ltd                            1807794     2026-06-15  edgar/data/1807794/0001628280-26-043303.txt         
+10-K             Crypto Co                                                     1688126     2026-06-24  edgar/data/1688126/0001493152-26-029927.txt         
+10-K             DAKTRONICS INC /SD/                                           915779      2026-06-24  edgar/data/915779/0001628280-26-045262.txt          
+10-K             ECO SCIENCE SOLUTIONS, INC.                                   1490873     2026-06-09  edgar/data/1490873/0001477932-26-003725.txt         
+10-K             ELITE PHARMACEUTICALS INC /NV/                                1053369     2026-06-29  edgar/data/1053369/0001493152-26-031070.txt         
+10-K             EMERSON RADIO CORP                                            32621       2026-06-26  edgar/data/32621/0001437749-26-021828.txt           
+10-K             Earth Science Tech, Inc.                                      1538495     2026-06-18  edgar/data/1538495/0001493152-26-029160.txt         
+10-K             Elastic N.V.                                                  1707753     2026-06-08  edgar/data/1707753/0001707753-26-000018.txt         
+10-K             Electronic Servitor Publication Network, Inc.                 1709542     2026-06-11  edgar/data/1709542/0001683168-26-004740.txt         
+10-K             FRIEDMAN INDUSTRIES INC                                       39092       2026-06-11  edgar/data/39092/0001437749-26-020323.txt           
+10-K             Franklin Ethereum Trust                                       2011535     2026-06-29  edgar/data/2011535/0001140361-26-026753.txt         
+10-K             Franklin Solana Trust                                         2057388     2026-06-29  edgar/data/2057388/0001140361-26-026719.txt         
+10-K             Franklin Templeton Digital Holdings Trust                     1992870     2026-06-29  edgar/data/1992870/0001140361-26-026744.txt         
+10-K             Franklin Templeton Holdings Trust                             1858258     2026-06-29  edgar/data/1858258/0001140361-26-026742.txt         
+10-K             Franklin XRP Trust                                            2059438     2026-06-29  edgar/data/2059438/0001140361-26-026732.txt         
+10-K             Freedom Holding Corp.                                         924805      2026-06-01  edgar/data/924805/0000924805-26-000012.txt          
+10-K             GRAHAM CORP                                                   716314      2026-06-08  edgar/data/716314/0001193125-26-260688.txt          
+10-K             GROOVE BOTANICALS INC.                                        918573      2026-06-29  edgar/data/918573/0001477932-26-004080.txt          
+10-K             GSI TECHNOLOGY INC                                            1126741     2026-06-05  edgar/data/1126741/0001104659-26-070962.txt         
+10-K             Grace Therapeutics, Inc.                                      1444192     2026-06-18  edgar/data/1444192/0001140361-26-025662.txt         
+10-K             Greenwave Technology Solutions, Inc.                          1589149     2026-06-15  edgar/data/1589149/0001493152-26-028562.txt         
+10-K             Greenwich LifeSciences, Inc.                                  1799788     2026-06-01  edgar/data/1799788/0001493152-26-026651.txt         
+10-K             HIVE Digital Technologies Ltd.                                1720424     2026-06-02  edgar/data/1720424/0001062993-26-002973.txt         
+10-K             Honda Auto Receivables 2023-1 Owner Trust                     1962487     2026-06-22  edgar/data/1962487/0001193125-26-277284.txt         
+10-K             Honda Auto Receivables 2023-2 Owner Trust                     1976562     2026-06-22  edgar/data/1976562/0001193125-26-277290.txt         
+10-K             Honda Auto Receivables 2023-3 Owner Trust                     1985449     2026-06-22  edgar/data/1985449/0001193125-26-277295.txt         
+10-K             Honda Auto Receivables 2023-4 Owner Trust                     1996308     2026-06-22  edgar/data/1996308/0001193125-26-277300.txt         
+10-K             Honda Auto Receivables 2024-1 Owner Trust                     2008953     2026-06-22  edgar/data/2008953/0001193125-26-277324.txt         
+10-K             Honda Auto Receivables 2024-2 Owner Trust                     2019551     2026-06-22  edgar/data/2019551/0001193125-26-277327.txt         
+10-K             Honda Auto Receivables 2024-3 Owner Trust                     2029555     2026-06-22  edgar/data/2029555/0001193125-26-277329.txt         
+10-K             Honda Auto Receivables 2024-4 Owner Trust                     2037549     2026-06-22  edgar/data/2037549/0001193125-26-277334.txt         
+10-K             Honda Auto Receivables 2025-1 Owner Trust                     2052479     2026-06-22  edgar/data/2052479/0001193125-26-277338.txt         
+10-K             Honda Auto Receivables 2025-2 Owner Trust                     2062789     2026-06-22  edgar/data/2062789/0001193125-26-277340.txt         
+10-K             Honda Auto Receivables 2025-3 Owner Trust                     2077602     2026-06-22  edgar/data/2077602/0001193125-26-277342.txt         
+10-K             Honda Auto Receivables 2025-4 Owner Trust                     2089171     2026-06-22  edgar/data/2089171/0001193125-26-277344.txt         
+10-K             Honda Auto Receivables 2026-1 Owner Trust                     2100818     2026-06-22  edgar/data/2100818/0001193125-26-277347.txt         
+10-K             IEH Corp                                                      50292       2026-06-12  edgar/data/50292/0001213900-26-068122.txt           
+10-K             INTERNATIONAL BATTERY METALS LTD.                             1786318     2026-06-18  edgar/data/1786318/0001193125-26-274679.txt         
+10-K             INVO Fertility, Inc.                                          1417926     2026-06-02  edgar/data/1417926/0001493152-26-026775.txt         
+10-K             International Media Acquisition Corp.                         1846235     2026-06-25  edgar/data/1846235/0001213900-26-072115.txt         
+10-K             J M SMUCKER Co                                                91419       2026-06-09  edgar/data/91419/0000091419-26-000050.txt           
+10-K             JOHN WILEY & SONS, INC.                                       107140      2026-06-24  edgar/data/107140/0001628280-26-045111.txt          
+10-K             Jerash Holdings (US), Inc.                                    1696558     2026-06-18  edgar/data/1696558/0001213900-26-070227.txt         
+10-K             KB Global Holdings Ltd                                        1897525     2026-06-03  edgar/data/1897525/0001829126-26-006016.txt         
+10-K             KEWAUNEE SCIENTIFIC CORP /DE/                                 55529       2026-06-26  edgar/data/55529/0000055529-26-000020.txt           
+10-K             KORN FERRY                                                    56679       2026-06-26  edgar/data/56679/0000056679-26-000021.txt           
+10-K             Korth Direct Mortgage Inc.                                    1695963     2026-06-01  edgar/data/1695963/0001214659-26-006969.txt         
+10-K             LA-Z-BOY INC                                                  57131       2026-06-16  edgar/data/57131/0000057131-26-000019.txt           
+10-K             La Rosa Holdings Corp.                                        1879403     2026-06-04  edgar/data/1879403/0001213900-26-065276.txt         
+10-K             Libity                                                        1852889     2026-06-22  edgar/data/1852889/0001829126-26-006699.txt         
+10-K             LiveOne, Inc.                                                 1491419     2026-06-29  edgar/data/1491419/0001437749-26-021987.txt         
+10-K             MADE IN USA INC.                                              1977837     2026-06-22  edgar/data/1977837/0001683168-26-005043.txt         
+10-K             MEDICAL EXERCISE INC.                                         2001249     2026-06-29  edgar/data/2001249/0001213900-26-073032.txt         
+10-K             MESA LABORATORIES INC /CO/                                    724004      2026-06-03  edgar/data/724004/0000724004-26-000047.txt          
+10-K             METHODE ELECTRONICS INC                                       65270       2026-06-24  edgar/data/65270/0000065270-26-000031.txt           
+10-K             MEXCO ENERGY CORP                                             66418       2026-06-29  edgar/data/66418/0001493152-26-030386.txt           
+10-K             MOTORCAR PARTS OF AMERICA INC                                 918251      2026-06-08  edgar/data/918251/0001140361-26-024463.txt          
+10-K             Macquarie Infrastructure Fund, L.P.                           2079966     2026-06-26  edgar/data/2079966/0001193125-26-283312.txt         
+10-K             McGraw Hill, Inc.                                             1951070     2026-06-11  edgar/data/1951070/0001951070-26-000022.txt         
+10-K             Medtronic plc                                                 1613103     2026-06-18  edgar/data/1613103/0001628280-26-044354.txt         
+10-K             MiniMed Group, Inc.                                           2062583     2026-06-29  edgar/data/2062583/0001628280-26-045915.txt         
+10-K             Modular Medical, Inc.                                         1074871     2026-06-29  edgar/data/1074871/0001213900-26-073223.txt         
+10-K             Monroe Federal Bancorp, Inc.                                  2024899     2026-06-25  edgar/data/2024899/0001104659-26-077799.txt         
+10-K             NATHANS FAMOUS, INC.                                          69733       2026-06-09  edgar/data/69733/0001437749-26-019923.txt           
+10-K             NOBLE ROMANS INC                                              709005      2026-06-08  edgar/data/709005/0001654954-26-005747.txt          
+10-K             Natics Corp.                                                  1933359     2026-06-09  edgar/data/1933359/0001683168-26-004650.txt         
+10-K             NetApp, Inc.                                                  1002047     2026-06-05  edgar/data/1002047/0001193125-26-259683.txt         
+10-K             Nissan Auto Lease Trust 2024-A                                1999583     2026-06-26  edgar/data/1999583/0001193125-26-284904.txt         
+10-K             Nissan Auto Lease Trust 2024-B                                2029406     2026-06-26  edgar/data/2029406/0001193125-26-284915.txt         
+10-K             Nissan Auto Lease Trust 2025-A                                2050756     2026-06-26  edgar/data/2050756/0001193125-26-284927.txt         
+10-K             Nissan Auto Lease Trust 2025-B                                2071585     2026-06-26  edgar/data/2071585/0001193125-26-284943.txt         
+10-K             Nissan Auto Lease Trust 2026-A                                2105816     2026-06-26  edgar/data/2105816/0001193125-26-284958.txt         
+10-K             Nissan Auto Receivables 2022-A Owner Trust                    1905655     2026-06-26  edgar/data/1905655/0001193125-26-284968.txt         
+10-K             Nissan Auto Receivables 2022-B Owner Trust                    1941405     2026-06-26  edgar/data/1941405/0001193125-26-284975.txt         
+10-K             Nissan Auto Receivables 2023-A Owner Trust                    1971902     2026-06-26  edgar/data/1971902/0001193125-26-285005.txt         
+10-K             Nissan Auto Receivables 2023-B Owner Trust                    1995403     2026-06-26  edgar/data/1995403/0001193125-26-285012.txt         
+10-K             Nissan Auto Receivables 2024-A Owner Trust                    2017943     2026-06-26  edgar/data/2017943/0001193125-26-285017.txt         
+10-K             Nissan Auto Receivables 2024-B Owner Trust                    2035264     2026-06-26  edgar/data/2035264/0001193125-26-285022.txt         
+10-K             Nissan Auto Receivables 2025-A Owner Trust                    2063629     2026-06-26  edgar/data/2063629/0001193125-26-285029.txt         
+10-K             Nissan Auto Receivables 2025-B Owner Trust                    2091790     2026-06-26  edgar/data/2091790/0001193125-26-285162.txt         
+10-K             OLENOX INDUSTRIES INC.                                        1023994     2026-06-30  edgar/data/1023994/0001213900-26-073749.txt         
+10-K             ORACLE CORP                                                   1341439     2026-06-22  edgar/data/1341439/0001193125-26-277521.txt         
+10-K             ORION ENERGY SYSTEMS, INC.                                    1409375     2026-06-04  edgar/data/1409375/0001193125-26-257468.txt         
+10-K             Onar Holding Corp                                             1682265     2026-06-11  edgar/data/1682265/0001477932-26-003805.txt         
+10-K             Outdoor Holding Co                                            1015383     2026-06-22  edgar/data/1015383/0001193125-26-276653.txt         
+10-K             PCS Edventures!, Inc.                                         1122020     2026-06-26  edgar/data/1122020/0001493152-26-030242.txt         
+10-K             PETMED EXPRESS INC                                            1040130     2026-06-02  edgar/data/1040130/0001040130-26-000019.txt         
+10-K             PILLARSTONE CAPITAL REIT                                      928953      2026-06-15  edgar/data/928953/0001437749-26-020616.txt          
+10-K             PYXUS INTERNATIONAL, INC.                                     939930      2026-06-04  edgar/data/939930/0000939930-26-000017.txt          
+10-K             Perfect Moment Ltd.                                           1849221     2026-06-29  edgar/data/1849221/0001493152-26-030418.txt         
+10-K             PetVivo Holdings, Inc.                                        1512922     2026-06-29  edgar/data/1512922/0001493152-26-031136.txt         
+10-K             Piermont Valley Acquisition Corp                              1865248     2026-06-18  edgar/data/1865248/0001477932-26-003931.txt         
+10-K             PodcastOne, Inc.                                              1940177     2026-06-29  edgar/data/1940177/0001437749-26-021988.txt         
+10-K             Powerfleet, Inc.                                              1774170     2026-06-15  edgar/data/1774170/0001628280-26-043187.txt         
+10-K             ProPhase Labs, Inc.                                           868278      2026-06-01  edgar/data/868278/0000868278-26-000005.txt          
+10-K             QDM International Inc.                                        1094032     2026-06-29  edgar/data/1094032/0001213900-26-073119.txt         
+10-K             QUANTUM CORP /DE/                                             709283      2026-06-25  edgar/data/709283/0001628280-26-045602.txt          
+10-K             Quantumsphere Acquisition Corp                                2070900     2026-06-15  edgar/data/2070900/0001829126-26-006482.txt         
+10-K             RIVERVIEW BANCORP INC                                         1041368     2026-06-12  edgar/data/1041368/0001041368-26-000007.txt         
+10-K             Replimune Group, Inc.                                         1737953     2026-06-29  edgar/data/1737953/0001628280-26-045886.txt         
+10-K             Roadzen Inc.                                                  1868640     2026-06-29  edgar/data/1868640/0001493152-26-031069.txt         
+10-K             SCORES HOLDING CO INC                                         831489      2026-06-30  edgar/data/831489/0001104659-26-079238.txt          
+10-K             SMITH & WESSON BRANDS, INC.                                   1092796     2026-06-17  edgar/data/1092796/0001193125-26-274254.txt         
+10-K             Salamander Innisbrook, LLC                                    1418372     2026-06-18  edgar/data/1418372/0001193125-26-275979.txt         
+10-K             Seneca Foods Corp                                             88948       2026-06-11  edgar/data/88948/0001437749-26-020290.txt           
+10-K             Senmiao Technology Ltd                                        1711012     2026-06-30  edgar/data/1711012/0001213900-26-073684.txt         
+10-K             Sentinel Holdings Ltd.                                        889353      2026-06-05  edgar/data/889353/0001096906-26-000918.txt          
+10-K             Somitos Corp.                                                 2074643     2026-06-17  edgar/data/2074643/0001683168-26-004903.txt         
+10-K             Sonoma Pharmaceuticals, Inc.                                  1367083     2026-06-16  edgar/data/1367083/0001683168-26-004871.txt         
+10-K             Stark Focus Group, Inc.                                       1794942     2026-06-02  edgar/data/1794942/0001640334-26-000977.txt         
+10-K             Sunbelt Rentals Holdings, Inc.                                2083785     2026-06-23  edgar/data/2083785/0001628280-26-044888.txt         
+10-K             Sundance Strategies, Inc.                                     1171838     2026-06-29  edgar/data/1171838/0001493152-26-031046.txt         
+10-K             TECHPRECISION CORP                                            1328792     2026-06-25  edgar/data/1328792/0001104659-26-077758.txt         
+10-K             TEL INSTRUMENT ELECTRONICS CORP                               96885       2026-06-30  edgar/data/96885/0001185185-26-002742.txt           
+10-K             TOYOTA MOTOR CREDIT CORP                                      834071      2026-06-02  edgar/data/834071/0001193125-26-252796.txt          
+10-K             Terra Innovatum Global N.V.                                   2067627     2026-06-16  edgar/data/2067627/0001213900-26-068933.txt         
+10-K             UNIVERSAL CORP /VA/                                           102037      2026-06-01  edgar/data/102037/0001628280-26-039511.txt          
+10-K             UPAY                                                          1677897     2026-06-02  edgar/data/1677897/0001575872-26-000390.txt         
+10-K             US NUCLEAR CORP.                                              1543623     2026-06-23  edgar/data/1543623/0001213900-26-070875.txt         
+10-K             VITASPRING BIOMEDICAL CO. LTD.                                1697884     2026-06-08  edgar/data/1697884/0001640334-26-001019.txt         
+10-K             VITASPRING BIOMEDICAL CO. LTD.                                1697884     2026-06-17  edgar/data/1697884/0001640334-26-001082.txt         
+10-K             Virtuix Holdings Inc.                                         1606242     2026-06-25  edgar/data/1606242/0001213900-26-072079.txt         
+10-K             Vistagen Therapeutics, Inc.                                   1411685     2026-06-15  edgar/data/1411685/0001628280-26-043271.txt         
+10-K             WORLD ACCEPTANCE CORP                                         108385      2026-06-04  edgar/data/108385/0000108385-26-000014.txt          
+10-K             Yellowstone Group Ltd.                                        2071489     2026-06-25  edgar/data/2071489/0001493152-26-030051.txt         
+10-K             1 800 FLOWERS COM INC                                         1084869     2026-09-11  edgar/data/1084869/0001084869-26-000029.txt         
+10-K             21Shares Hyperliquid Staking ETF                              2090011     2026-09-23  edgar/data/2090011/0001213900-26-102705.txt         
+10-K             5E Advanced Materials, Inc.                                   1888654     2026-09-17  edgar/data/1888654/0001193125-26-394541.txt         
+10-K             AAR CORP                                                      1750        2026-07-22  edgar/data/1750/0001104659-26-085459.txt            
+10-K             ACCURAY INC                                                   1138723     2026-08-27  edgar/data/1138723/0001437749-26-029098.txt         
+10-K             ADM TRONICS UNLIMITED, INC.                                   849401      2026-07-10  edgar/data/849401/0001437749-26-023316.txt          
+10-K             ADMIRAL FINANCIAL CORP                                        828530      2026-09-23  edgar/data/828530/0001553350-26-000138.txt          
+10-K             ADVANCED OXYGEN TECHNOLOGIES INC                              352991      2026-09-21  edgar/data/352991/0001477932-26-005718.txt          
+10-K             AEHR TEST SYSTEMS                                             1040470     2026-07-27  edgar/data/1040470/0001654954-26-006919.txt         
+10-K             AIRWA INC.                                                    1674440     2026-09-21  edgar/data/1674440/0001493152-26-043608.txt         
+10-K             ALEXANDER TECH CORP                                           1347491     2026-08-13  edgar/data/1347491/0001347491-26-000017.txt         
+10-K             ALLIANCE ENTERTAINMENT HOLDING CORP                           1823584     2026-09-10  edgar/data/1823584/0001493152-26-042141.txt         
+10-K             ALPHA & OMEGA SEMICONDUCTOR Ltd                               1387467     2026-08-27  edgar/data/1387467/0001628280-26-059261.txt         
+10-K             AMERICAN BATTERY TECHNOLOGY Co                                1576873     2026-09-14  edgar/data/1576873/0001493152-26-042497.txt         
+10-K             AMERICAS CARMART INC                                          799850      2026-07-14  edgar/data/799850/0001628280-26-048191.txt          
+10-K             AMREP CORP.                                                   6207        2026-07-24  edgar/data/6207/0001104659-26-086659.txt            
+10-K             ANGIODYNAMICS INC                                             1275187     2026-07-14  edgar/data/1275187/0001628280-26-048138.txt         
+10-K             APEX 11 INC.                                                  1578329     2026-07-13  edgar/data/1578329/0001578329-26-000004.txt         
+10-K             APPLIED INDUSTRIAL TECHNOLOGIES INC                           109563      2026-08-13  edgar/data/109563/0000109563-26-000033.txt          
+10-K             ASTROTECH Corp                                                1001907     2026-09-25  edgar/data/1001907/0001437749-26-031175.txt         
+10-K             AURA SYSTEMS INC                                              826253      2026-09-10  edgar/data/826253/0001213900-26-098484.txt          
+10-K             AUTOMATIC DATA PROCESSING INC                                 8670        2026-08-05  edgar/data/8670/0000008670-26-000030.txt            
+10-K             AVAI BIO, INC.                                                1740797     2026-07-14  edgar/data/1740797/0001740797-26-000017.txt         
+10-K             AVIAT NETWORKS, INC.                                          1377789     2026-08-27  edgar/data/1377789/0001628280-26-059187.txt         
+10-K             AVNET INC                                                     8858        2026-08-14  edgar/data/8858/0001104659-26-096346.txt            
+10-K             AYTU BIOPHARMA, INC                                           1385818     2026-09-22  edgar/data/1385818/0001437749-26-030908.txt         
+10-K             Aeluma, Inc.                                                  1828805     2026-09-16  edgar/data/1828805/0001213900-26-100584.txt         
+10-K             Affirm Holdings, Inc.                                         1820953     2026-08-27  edgar/data/1820953/0001628280-26-059279.txt         
+10-K             Agentix Corp.                                                 1603345     2026-07-01  edgar/data/1603345/0001477932-26-004133.txt         
+10-K             Alzamend Neuro, Inc.                                          1677077     2026-07-22  edgar/data/1677077/0001214659-26-008832.txt         
+10-K             Amcor plc                                                     1748790     2026-08-14  edgar/data/1748790/0001748790-26-000022.txt         
+10-K             Amesite Inc.                                                  1807166     2026-09-23  edgar/data/1807166/0001213900-26-102676.txt         
+10-K             Amplify Commodity Trust                                       1610940     2026-09-25  edgar/data/1610940/0001213900-26-103611.txt         
+10-K             Antiaging Quantum Living Inc.                                 1672571     2026-07-14  edgar/data/1672571/0001493152-26-033212.txt         
+10-K             Applied Digital Corp.                                         1144879     2026-07-29  edgar/data/1144879/0001144879-26-000048.txt         
+10-K             Armlogi Holding Corp.                                         1972529     2026-09-28  edgar/data/1972529/0001213900-26-103636.txt         
+10-K             Artisan Consumer Goods, Inc.                                  1530425     2026-09-28  edgar/data/1530425/0001477932-26-005828.txt         
+10-K             AtlasClear Holdings, Inc.                                     1963088     2026-09-24  edgar/data/1963088/0001493152-26-044008.txt         
+10-K             Atlassian Corp                                                1650372     2026-08-14  edgar/data/1650372/0001650372-26-000036.txt         
+10-K             Axil Brands, Inc.                                             1718500     2026-08-18  edgar/data/1718500/0001520138-26-000360.txt         
+10-K             Axos Financial, Inc.                                          1299709     2026-08-20  edgar/data/1299709/0001299709-26-000060.txt         
+10-K             BALTIC INTERNATIONAL USA INC                                  918545      2026-08-17  edgar/data/918545/0000918545-26-000004.txt          
+10-K             BILL Holdings, Inc.                                           1786352     2026-08-20  edgar/data/1786352/0001628280-26-058238.txt         
+10-K             BIO-TECHNE Corp                                               842023      2026-08-24  edgar/data/842023/0001104659-26-100322.txt          
+10-K             BIOMERICA INC                                                 73290       2026-08-31  edgar/data/73290/0001493152-26-040851.txt           
+10-K             BION ENVIRONMENTAL TECHNOLOGIES INC                           875729      2026-09-29  edgar/data/875729/0001079973-26-001301.txt          
+10-K             BIOTRICITY INC.                                               1630113     2026-07-14  edgar/data/1630113/0001493152-26-033207.txt         
+10-K             BIOVIE INC.                                                   1580149     2026-08-13  edgar/data/1580149/0001520138-26-000332.txt         
+10-K             BLOOMIA HOLDINGS, INC.                                        875355      2026-09-21  edgar/data/875355/0001104659-26-109274.txt          
+10-K             BRADY CORP                                                    746598      2026-09-03  edgar/data/746598/0000746598-26-000044.txt          
+10-K             BRINKER INTERNATIONAL, INC                                    703351      2026-08-19  edgar/data/703351/0000703351-26-000029.txt          
+10-K             BROADRIDGE FINANCIAL SOLUTIONS, INC.                          1383312     2026-08-04  edgar/data/1383312/0001628280-26-052243.txt         
+10-K             BUTLER NATIONAL CORP                                          15847       2026-07-08  edgar/data/15847/0000015847-26-000020.txt           
+10-K             Bakhu Holdings, Corp.                                         1440153     2026-07-20  edgar/data/1440153/0001096906-26-001097.txt         
+10-K             Barnes & Noble Education, Inc.                                1634117     2026-07-09  edgar/data/1634117/0001634117-26-000070.txt         
+10-K             Benitec Biopharma Inc.                                        1808898     2026-09-14  edgar/data/1808898/0001193125-26-390570.txt         
+10-K             Black Rock Petroleum Co                                       1580095     2026-08-06  edgar/data/1580095/0001171520-26-000217.txt         
+10-K             Blue Chip Capital Group Inc.                                  1932213     2026-09-04  edgar/data/1932213/0001493152-26-041491.txt         
+10-K             Blue Line Holdings, Inc.                                      2029586     2026-09-28  edgar/data/2029586/0001493152-26-044498.txt         
+10-K             BlueOne Technologies, Inc.                                    1496690     2026-07-14  edgar/data/1496690/0001683168-26-005495.txt         
+10-K             Bowen Acquisition Corp                                        1973056     2026-09-30  edgar/data/1973056/0001493152-26-044953.txt         
+10-K             Brightline Interactive, Inc./NV                               1854445     2026-09-28  edgar/data/1854445/0001493152-26-044574.txt         
+10-K             CACI INTERNATIONAL INC /DE/                                   16058       2026-08-06  edgar/data/16058/0001628280-26-054195.txt           
+10-K             CAL-MAINE FOODS INC                                           16160       2026-07-22  edgar/data/16160/0001562762-26-000080.txt           
+10-K             CAMPBELL'S Co                                                 16732       2026-09-24  edgar/data/16732/0000016732-26-000026.txt           
+10-K             CANNABIS SUISSE CORP.                                         1680132     2026-09-25  edgar/data/1680132/0001680132-26-000010.txt         
+10-K             CARDINAL HEALTH INC                                           721371      2026-08-11  edgar/data/721371/0000721371-26-000038.txt          
+10-K             CARPENTER TECHNOLOGY CORP                                     17843       2026-08-12  edgar/data/17843/0000017843-26-000034.txt           
+10-K             CHAMPIONS ONCOLOGY, INC.                                      771856      2026-07-27  edgar/data/771856/0001628280-26-049834.txt          
+10-K             CIMPRESS plc                                                  1262976     2026-08-07  edgar/data/1262976/0001262976-26-000027.txt         
+10-K             CINTAS CORP                                                   723254      2026-07-29  edgar/data/723254/0000723254-26-000028.txt          
+10-K             CISCO SYSTEMS, INC.                                           858877      2026-09-02  edgar/data/858877/0000858877-26-000132.txt          
+10-K             CLOROX CO /DE/                                                21076       2026-08-07  edgar/data/21076/0000021076-26-000034.txt           
+10-K             COHERENT CORP.                                                820318      2026-08-14  edgar/data/820318/0000820318-26-000020.txt          
+10-K             CONAGRA BRANDS INC.                                           23217       2026-07-15  edgar/data/23217/0001104659-26-083905.txt           
+10-K             CONSUMERS BANCORP INC /OH/                                    1006830     2026-09-10  edgar/data/1006830/0001437749-26-030039.txt         
+10-K             COPART INC                                                    900075      2026-09-29  edgar/data/900075/0001193125-26-405731.txt          
+10-K             COTY INC.                                                     1024305     2026-08-20  edgar/data/1024305/0001024305-26-000048.txt         
+10-K             CRACKER BARREL OLD COUNTRY STORE, INC                         1067294     2026-09-25  edgar/data/1067294/0001104659-26-110772.txt         
+10-K             CULP INC                                                      723603      2026-07-17  edgar/data/723603/0001193125-26-307064.txt          
+10-K             CXJ GROUP CO., Ltd                                            1823635     2026-09-11  edgar/data/1823635/0001493152-26-042301.txt         
+10-K             Cactus Acquisition Corp. 1 Ltd                                1865861     2026-07-29  edgar/data/1865861/0001493152-26-035259.txt         
+10-K             Calor Del Sol Inc.                                            2008027     2026-08-17  edgar/data/2008027/0001477932-26-005127.txt         
+10-K             Caro Holdings Inc.                                            1678105     2026-07-15  edgar/data/1678105/0001640334-26-001184.txt         
+10-K             Chi Special Acquisition Corp.                                 1858007     2026-07-16  edgar/data/1858007/0001213900-26-078438.txt         
+10-K             ChronoScale Holdings Corp                                     1549084     2026-08-19  edgar/data/1549084/0001628280-26-058018.txt         
+10-K             Cibatella Corp.                                               2079546     2026-09-28  edgar/data/2079546/0001683168-26-007453.txt         
+10-K             Covista Inc.                                                  730464      2026-08-06  edgar/data/730464/0001104659-26-092044.txt          
+10-K             Crona Corp.                                                   1696411     2026-09-23  edgar/data/1696411/0001477932-26-005753.txt         
+10-K             CytoDyn Inc.                                                  1175680     2026-08-31  edgar/data/1175680/0001175680-26-000014.txt         
+10-K             DARDEN RESTAURANTS INC                                        940944      2026-07-24  edgar/data/940944/0000940944-26-000025.txt          
+10-K             DONALDSON Co INC                                              29644       2026-09-25  edgar/data/29644/0000029644-26-000085.txt           
+10-K             DeltaSoft Corp                                                2020919     2026-07-10  edgar/data/2020919/0001683168-26-005450.txt         
+10-K             EGAIN Corp                                                    1066194     2026-09-10  edgar/data/1066194/0001104659-26-106739.txt         
+10-K             EON Resources Inc.                                            1842556     2026-09-28  edgar/data/1842556/0001213900-26-103762.txt         
+10-K             ESPEY MFG & ELECTRONICS CORP                                  33533       2026-09-23  edgar/data/33533/0001174947-26-000891.txt           
+10-K             ESTEE LAUDER COMPANIES INC                                    1001250     2026-08-19  edgar/data/1001250/0001001250-26-000041.txt         
+10-K             ETHAN ALLEN INTERIORS INC                                     896156      2026-09-03  edgar/data/896156/0001437749-26-029578.txt          
+10-K             ETHEMA HEALTH Corp                                            792935      2026-07-01  edgar/data/792935/0001903596-26-000271.txt          
+10-K             EVI INDUSTRIES, INC.                                          65312       2026-09-08  edgar/data/65312/0001437749-26-029759.txt           
+10-K             EVOLUTION PETROLEUM CORP                                      1006655     2026-09-16  edgar/data/1006655/0001104659-26-108258.txt         
+10-K             EXTREME NETWORKS INC                                          1078271     2026-08-17  edgar/data/1078271/0001193125-26-352872.txt         
+10-K             Electromed, Inc.                                              1488917     2026-08-25  edgar/data/1488917/0001437749-26-028914.txt         
+10-K             Electronic Servitor Publication Network, Inc.                 1709542     2026-07-06  edgar/data/1709542/0001683168-26-005287.txt         
+10-K             Elite Performance Holding Corp                                1753681     2026-09-04  edgar/data/1753681/0001477932-26-005425.txt         
+10-K             Elventix Technology Corp                                      2076765     2026-08-31  edgar/data/2076765/0002076765-26-000009.txt         
+10-K             Exascale Labs Holdings Inc.                                   2109869     2026-09-28  edgar/data/2109869/0001829126-26-010462.txt         
+10-K             FEDEX CORP                                                    1048911     2026-07-20  edgar/data/1048911/0001048911-26-000105.txt         
+10-K             FERRELLGAS FINANCE CORP                                       922360      2026-09-25  edgar/data/922360/0001104659-26-110592.txt          
+10-K             FERRELLGAS L P                                                922359      2026-09-25  edgar/data/922359/0001104659-26-110592.txt          
+10-K             FERRELLGAS PARTNERS FINANCE CORP                              1012493     2026-09-25  edgar/data/1012493/0001104659-26-110592.txt         
+10-K             FERRELLGAS PARTNERS L P                                       922358      2026-09-25  edgar/data/922358/0001104659-26-110592.txt          
+10-K             FLEXSTEEL INDUSTRIES INC                                      37472       2026-08-19  edgar/data/37472/0001193125-26-357097.txt           
+10-K             FRANKLIN WIRELESS CORP                                        722572      2026-09-28  edgar/data/722572/0001683168-26-007446.txt          
+10-K             FREQUENCY ELECTRONICS INC                                     39020       2026-07-17  edgar/data/39020/0001185185-26-002997.txt           
+10-K             Fabrinet                                                      1408710     2026-08-18  edgar/data/1408710/0001408710-26-000028.txt         
+10-K             FedEx Freight Holding Company, Inc.                           2082247     2026-08-05  edgar/data/2082247/0001628280-26-053359.txt         
+10-K             Flux Power Holdings, Inc.                                     1083743     2026-08-20  edgar/data/1083743/0001493152-26-039471.txt         
+10-K             Fly-E Group, Inc.                                             1975940     2026-07-23  edgar/data/1975940/0001213900-26-080973.txt         
+10-K             Forgent Power Solutions, Inc.                                 2080126     2026-09-15  edgar/data/2080126/0002080126-26-000035.txt         
+10-K             Fox Corp                                                      1754301     2026-08-06  edgar/data/1754301/0001628280-26-053960.txt         
+10-K             Foxx Development Holdings Inc.                                2013807     2026-09-28  edgar/data/2013807/0001213900-26-104028.txt         
+10-K             FreeCast, Inc.                                                1633369     2026-09-28  edgar/data/1633369/0001213900-26-104155.txt         
+10-K             GENERAL MILLS INC                                             40704       2026-07-01  edgar/data/40704/0001628280-26-046466.txt           
+10-K             GEORGE RISK INDUSTRIES, INC.                                  84112       2026-08-07  edgar/data/84112/0001493152-26-036522.txt           
+10-K             GOLDENWELL BIOTECH, INC.                                      1800373     2026-07-01  edgar/data/1800373/0001477932-26-004130.txt         
+10-K             GPO Plus, Inc.                                                1673475     2026-08-11  edgar/data/1673475/0001640334-26-001304.txt         
+10-K             GPODS, INC.                                                   1748232     2026-07-14  edgar/data/1748232/0001493152-26-033140.txt         
+10-K             GREENE COUNTY BANCORP INC                                     1070524     2026-09-09  edgar/data/1070524/0001140361-26-035998.txt         
+10-K             GREYSTONE LOGISTICS, INC.                                     1088413     2026-08-31  edgar/data/1088413/0001437749-26-029307.txt         
+10-K             GULF RESOURCES, INC.                                          885462      2026-08-17  edgar/data/885462/0001193805-26-001105.txt          
+10-K             GenFlat Holdings, Inc.                                        1796949     2026-09-25  edgar/data/1796949/0001683168-26-007433.txt         
+10-K             Global Arena Holding, Inc.                                    1138724     2026-08-11  edgar/data/1138724/0001493152-26-037140.txt         
+10-K             Global-Smart.Tech Inc.                                        1940243     2026-08-13  edgar/data/1940243/0001940243-26-000019.txt         
+10-K             Gold.com, Inc.                                                1591588     2026-09-10  edgar/data/1591588/0001193125-26-386799.txt         
+10-K             Golden Star Resource Corp.                                    1375348     2026-09-28  edgar/data/1375348/0001493152-26-044417.txt         
+10-K             Goliath Film & Media Holdings                                 820771      2026-07-28  edgar/data/820771/0001493152-26-034872.txt          
+10-K             GraniteShares Gold Trust                                      1690437     2026-08-13  edgar/data/1690437/0001493152-26-037707.txt         
+10-K             GraniteShares Platinum Trust                                  1690842     2026-08-13  edgar/data/1690842/0001493152-26-037704.txt         
+10-K             Grayscale Bitcoin Cash Trust (BCH)                            1732409     2026-09-03  edgar/data/1732409/0001193125-26-381856.txt         
+10-K             Grayscale CoinDesk Crypto 5 ETF                               1729997     2026-09-03  edgar/data/1729997/0001193125-26-381861.txt         
+10-K             Grayscale Litecoin Trust (LTC)                                1732406     2026-09-03  edgar/data/1732406/0001193125-26-381869.txt         
+10-K             Great Elm Group, Inc.                                         1831096     2026-08-26  edgar/data/1831096/0001193125-26-368246.txt         
+10-K             Guidewire Software, Inc.                                      1528396     2026-09-11  edgar/data/1528396/0001528396-26-000046.txt         
+10-K             H&R BLOCK INC                                                 12659       2026-08-14  edgar/data/12659/0000012659-26-000026.txt           
+10-K             HAIN CELESTIAL GROUP INC                                      910406      2026-09-14  edgar/data/910406/0001193125-26-390505.txt          
+10-K             Hawkeye Digital, Inc.                                         1750777     2026-09-11  edgar/data/1750777/0001683168-26-007087.txt         
+10-K             HeartSciences Inc.                                            1468492     2026-07-23  edgar/data/1468492/0001437749-26-024337.txt         
+10-K             Home Federal Bancorp, Inc. of Louisiana                       1500375     2026-09-25  edgar/data/1500375/0001140361-26-037680.txt         
+10-K             Hyperliquid Strategies Inc                                    2078856     2026-08-27  edgar/data/2078856/0001193125-26-370281.txt         
+10-K             IBEX Ltd                                                      1720420     2026-09-10  edgar/data/1720420/0001720420-26-000025.txt         
+10-K             IDT CORP                                                      1005731     2026-09-29  edgar/data/1005731/0001437749-26-031469.txt         
+10-K             IMMERSION CORP                                                1058811     2026-07-24  edgar/data/1058811/0001193125-26-316089.txt         
+10-K             INTEGRATED BIOPHARMA INC                                      1016504     2026-09-25  edgar/data/1016504/0001437749-26-031241.txt         
+10-K             INTELLIGENT BIO SOLUTIONS INC.                                1725430     2026-08-19  edgar/data/1725430/0001493152-26-039136.txt         
+10-K             INTERGROUP CORP                                               69422       2026-09-28  edgar/data/69422/0001493152-26-044490.txt           
+10-K             INTUIT INC.                                                   896878      2026-09-09  edgar/data/896878/0000896878-26-000037.txt          
+10-K             IREN Ltd                                                      1878848     2026-08-27  edgar/data/1878848/0001878848-26-000052.txt         
+10-K             InMed Pharmaceuticals Inc.                                    1728328     2026-09-09  edgar/data/1728328/0001213900-26-098419.txt         
+10-K             Incannex Healthcare Inc.                                      1873875     2026-09-25  edgar/data/1873875/0001628280-26-063506.txt         
+10-K             InnovAge Holding Corp.                                        1834376     2026-09-09  edgar/data/1834376/0001834376-26-000049.txt         
+10-K             Intapp, Inc.                                                  1565687     2026-08-14  edgar/data/1565687/0001565687-26-000073.txt         
+10-K             Integrated Wellness Acquisition Corp                          1877557     2026-08-21  edgar/data/1877557/0001104659-26-099329.txt         
+10-K             Invest Acquisition Corp                                       1857410     2026-09-28  edgar/data/1857410/0001829126-26-010437.txt         
+10-K             Ispire Technology Inc.                                        1948455     2026-09-15  edgar/data/1948455/0001213900-26-100146.txt         
+10-K             JACK HENRY & ASSOCIATES INC                                   779152      2026-08-28  edgar/data/779152/0000779152-26-000067.txt          
+10-K             Jingbo Technology, Inc.                                       1647822     2026-07-20  edgar/data/1647822/0001493152-26-033861.txt         
+10-K             KENNAMETAL INC                                                55242       2026-08-12  edgar/data/55242/0001628280-26-056143.txt           
+10-K             KESTRA MEDICAL TECHNOLOGIES, LTD.                             1877184     2026-07-14  edgar/data/1877184/0001193125-26-303397.txt         
+10-K             KEY TRONIC CORP                                               719733      2026-09-24  edgar/data/719733/0000719733-26-000033.txt          
+10-K             KLA CORP                                                      319201      2026-08-06  edgar/data/319201/0000319201-26-000027.txt          
+10-K             KOSS CORP                                                     56701       2026-08-28  edgar/data/56701/0000056701-26-000034.txt           
+10-K             Karbon-X Corp.                                                1729637     2026-09-15  edgar/data/1729637/0001477932-26-005627.txt         
+10-K             Kearny Financial Corp.                                        1617242     2026-08-21  edgar/data/1617242/0001617242-26-000020.txt         
+10-K             Kentucky First Federal Bancorp                                1297341     2026-09-28  edgar/data/1297341/0001213900-26-103633.txt         
+10-K             Kimball Electronics, Inc.                                     1606757     2026-08-19  edgar/data/1606757/0001606757-26-000032.txt         
+10-K             King Resources, Inc.                                          774415      2026-07-14  edgar/data/774415/0001683168-26-005522.txt          
+10-K             LAM RESEARCH CORP                                             707549      2026-08-07  edgar/data/707549/0000707549-26-000037.txt          
+10-K             LANTRONIX INC                                                 1114925     2026-08-27  edgar/data/1114925/0001683168-26-006754.txt         
+10-K             LEGEND SPICES, INC.                                           1970129     2026-08-12  edgar/data/1970129/0001683168-26-006219.txt         
+10-K             LESAKA TECHNOLOGIES INC                                       1041514     2026-09-09  edgar/data/1041514/0001562762-26-000104.txt         
+10-K             LIGHTPATH TECHNOLOGIES INC                                    889971      2026-09-11  edgar/data/889971/0001437749-26-030106.txt          
+10-K             LSEB Creative Corp.                                           1888740     2026-08-04  edgar/data/1888740/0001683168-26-005925.txt         
+10-K             LSI INDUSTRIES INC                                            763532      2026-09-03  edgar/data/763532/0001437749-26-029621.txt          
+10-K             Lamb Weston Holdings, Inc.                                    1679273     2026-07-24  edgar/data/1679273/0001679273-26-000026.txt         
+10-K             Laredo Oil, Inc.                                              1442492     2026-09-14  edgar/data/1442492/0001199835-26-000334.txt         
+10-K             Legacy Education Inc.                                         1836754     2026-09-24  edgar/data/1836754/0001493152-26-044147.txt         
+10-K             Lifevantage Corp                                              849146      2026-08-27  edgar/data/849146/0001193125-26-371257.txt          
+10-K             Lite Strategy, Inc.                                           1262104     2026-09-28  edgar/data/1262104/0001193125-26-405328.txt         
+10-K             Londax Corp.                                                  1985554     2026-09-15  edgar/data/1985554/0001683168-26-007169.txt         
+10-K             Longduoduo Co Ltd                                             1892316     2026-09-30  edgar/data/1892316/0001213900-26-105343.txt         
+10-K             Longevity Diversified Holdings, Inc.                          787496      2026-09-15  edgar/data/787496/0001829126-26-010112.txt          
+10-K             Lucky Strike Entertainment Corp                               1840572     2026-08-27  edgar/data/1840572/0001628280-26-059179.txt         
+10-K             Lumentum Holdings Inc.                                        1633978     2026-08-17  edgar/data/1633978/0001628280-26-057358.txt         
+10-K             Luvu Brands, Inc.                                             1374567     2026-09-29  edgar/data/1374567/0001654954-26-008640.txt         
+10-K             MALIBU BOATS, INC.                                            1590976     2026-08-27  edgar/data/1590976/0001590976-26-000037.txt         
+10-K             MARINE PETROLEUM TRUST                                        62362       2026-09-25  edgar/data/62362/0001193125-26-402574.txt           
+10-K             MARZETTI CO                                                   57515       2026-08-25  edgar/data/57515/0000057515-26-000019.txt           
+10-K             MATRIX SERVICE CO                                             866273      2026-09-03  edgar/data/866273/0000866273-26-000057.txt          
+10-K             MERCURY SYSTEMS INC                                           1049521     2026-08-18  edgar/data/1049521/0001049521-26-000045.txt         
+10-K             MICROSOFT CORP                                                789019      2026-07-29  edgar/data/789019/0001193125-26-323660.txt          
+10-K             MILLERKNOLL, INC.                                             66382       2026-07-20  edgar/data/66382/0000066382-26-000092.txt           
+10-K             MMEX Resources Corp                                           1440799     2026-07-29  edgar/data/1440799/0001477932-26-004593.txt         
+10-K             MOVING iMAGE TECHNOLOGIES INC.                                1770236     2026-09-28  edgar/data/1770236/0001437749-26-031299.txt         
+10-K             MYX Inc.                                                      2087656     2026-09-02  edgar/data/2087656/0001683168-26-006873.txt         
+10-K             MacKenzie Realty Capital, Inc.                                1550913     2026-09-28  edgar/data/1550913/0001140361-26-037858.txt         
+10-K             Madison Square Garden Entertainment Corp.                     1952073     2026-08-12  edgar/data/1952073/0001628280-26-056286.txt         
+10-K             Madison Square Garden Sports Corp.                            1636519     2026-08-13  edgar/data/1636519/0001628280-26-056812.txt         
+10-K             Marathon Bancorp, Inc. /MD/                                   1835385     2026-09-16  edgar/data/1835385/0001104659-26-108076.txt         
+10-K             Marwynn Holdings, Inc.                                        2030522     2026-07-30  edgar/data/2030522/0001213900-26-083383.txt         
+10-K             Marygold Companies, Inc.                                      1005101     2026-09-18  edgar/data/1005101/0001493152-26-043341.txt         
+10-K             MasterCraft Boat Holdings, Inc.                               1638290     2026-09-10  edgar/data/1638290/0001193125-26-387432.txt         
+10-K             Mercalot Inc.                                                 2029014     2026-09-21  edgar/data/2029014/0001683168-26-007268.txt         
+10-K             NANOVIRICIDES, INC.                                           1379006     2026-09-28  edgar/data/1379006/0001104659-26-111390.txt         
+10-K             NAPC Defense, Inc.                                            1703625     2026-08-13  edgar/data/1703625/0001199835-26-000287.txt         
+10-K             NAPCO SECURITY TECHNOLOGIES, INC                              69633       2026-08-24  edgar/data/69633/0001104659-26-100081.txt           
+10-K             NATIONAL BEVERAGE CORP                                        69891       2026-07-01  edgar/data/69891/0001437749-26-022315.txt           
+10-K             NATIONAL RURAL UTILITIES COOPERATIVE FINANCE CORP /DC/        70502       2026-07-31  edgar/data/70502/0000070502-26-000511.txt           
+10-K             NATURAL ALTERNATIVES INTERNATIONAL INC                        787253      2026-09-28  edgar/data/787253/0001437749-26-031343.txt          
+10-K             NEOGEN CORP                                                   711377      2026-07-30  edgar/data/711377/0001193125-26-326092.txt          
+10-K             NETSOL TECHNOLOGIES INC                                       1039280     2026-09-28  edgar/data/1039280/0001493152-26-044483.txt         
+10-K             NEWS CORP                                                     1564708     2026-08-07  edgar/data/1564708/0001564708-26-000175.txt         
+10-K             NIKE, Inc.                                                    320187      2026-07-15  edgar/data/320187/0000320187-26-000088.txt          
+10-K             NIOCORP DEVELOPMENTS LTD                                      1512228     2026-09-25  edgar/data/1512228/0001193125-26-402806.txt         
+10-K             NaturalShrimp Inc                                             1465470     2026-07-22  edgar/data/1465470/0001493152-26-034187.txt         
+10-K             NeoVolta Inc.                                                 1748137     2026-09-23  edgar/data/1748137/0001683168-26-007333.txt         
+10-K             Neuphoria Therapeutics Inc.                                   1191070     2026-09-18  edgar/data/1191070/0001193125-26-395536.txt         
+10-K             New Horizon Aircraft Ltd.                                     1930021     2026-07-16  edgar/data/1930021/0001213900-26-078490.txt         
+10-K             Nordicus Partners Corp                                        1011060     2026-07-14  edgar/data/1011060/0001493152-26-033203.txt         
+10-K             Nova Minerals Corp                                            1852551     2026-09-30  edgar/data/1852551/0001493152-26-045120.txt         
+10-K             Nutanix, Inc.                                                 1618732     2026-09-18  edgar/data/1618732/0001193125-26-394793.txt         
+10-K             OFA Group                                                     2036307     2026-07-14  edgar/data/2036307/0001493152-26-033093.txt         
+10-K             OPEN TEXT CORP                                                1002638     2026-08-06  edgar/data/1002638/0001002638-26-000068.txt         
+10-K             OSI SYSTEMS INC                                               1039065     2026-08-21  edgar/data/1039065/0001104659-26-099752.txt         
+10-K             Ocean Capital Acquisition Corp                                1926314     2026-09-28  edgar/data/1926314/0001493152-26-044555.txt         
+10-K             Ocean Power Technologies, Inc.                                1378140     2026-08-19  edgar/data/1378140/0001493152-26-039261.txt         
+10-K             Orion Bliss Corp.                                             1854183     2026-07-08  edgar/data/1854183/0001683168-26-005342.txt         
+10-K             PALATIN TECHNOLOGIES INC                                      911216      2026-09-28  edgar/data/911216/0001493152-26-044572.txt          
+10-K             PAYCHEX INC                                                   723531      2026-07-17  edgar/data/723531/0001193125-26-307785.txt          
+10-K             PELOTON INTERACTIVE, INC.                                     1639825     2026-08-06  edgar/data/1639825/0001639825-26-000038.txt         
+10-K             PHIBRO ANIMAL HEALTH CORP                                     1069899     2026-08-26  edgar/data/1069899/0001104659-26-101493.txt         
+10-K             PILLARSTONE CAPITAL REIT                                      928953      2026-08-13  edgar/data/928953/0001437749-26-027474.txt          
+10-K             PORTSMOUTH SQUARE INC                                         79661       2026-09-28  edgar/data/79661/0001493152-26-044485.txt           
+10-K             PREAXIA HEALTH CARE PAYMENT SYSTEMS INC.                      1350156     2026-09-04  edgar/data/1350156/0001350156-26-000010.txt         
+10-K             PRECISION OPTICS CORPORATION, INC.                            867840      2026-09-28  edgar/data/867840/0001683168-26-007462.txt          
+10-K             PRO DEX INC                                                   788920      2026-09-03  edgar/data/788920/0001079973-26-001215.txt          
+10-K             PROCTER & GAMBLE Co                                           80424       2026-08-04  edgar/data/80424/0000080424-26-000103.txt           
+10-K             PROSPECT CAPITAL CORP                                         1287032     2026-08-20  edgar/data/1287032/0001287032-26-000269.txt         
+10-K             PROVIDENT FINANCIAL HOLDINGS INC                              1010470     2026-09-02  edgar/data/1010470/0001010470-26-000010.txt         
+10-K             Palo Alto Networks Inc                                        1327567     2026-09-10  edgar/data/1327567/0001327567-26-000023.txt         
+10-K             Paramount Gold Nevada Corp.                                   1629210     2026-09-17  edgar/data/1629210/0001193125-26-394400.txt         
+10-K             Parker-Hannifin Corp                                          76334       2026-08-21  edgar/data/76334/0000076334-26-000105.txt           
+10-K             Paylocity Holding Corp                                        1591698     2026-08-05  edgar/data/1591698/0001591698-26-000069.txt         
+10-K             Performance Food Group Co                                     1618673     2026-08-12  edgar/data/1618673/0001193125-26-346886.txt         
+10-K             PharmaCyte Biotech, Inc.                                      1157075     2026-07-29  edgar/data/1157075/0001683168-26-005836.txt         
+10-K             Pluri Inc.                                                    1158780     2026-09-10  edgar/data/1158780/0001213900-26-098862.txt         
+10-K             Propanc Biopharma, Inc.                                       1517681     2026-09-25  edgar/data/1517681/0001493152-26-044373.txt         
+10-K             Prospect Floating Rate & Alternative Income Fund, Inc.        1521945     2026-09-28  edgar/data/1521945/0001521945-26-000095.txt         
+10-K             Protagenic Therapeutics, Inc.\new                             1022899     2026-08-14  edgar/data/1022899/0001493152-26-038255.txt         
+10-K             ProtoKinetix, Inc.                                            1128189     2026-09-03  edgar/data/1128189/0001079973-26-001218.txt         
+10-K             QUINSTREET, INC                                               1117297     2026-08-26  edgar/data/1117297/0001193125-26-367160.txt         
+10-K             Quanome Technologies, Inc.                                    1996192     2026-09-25  edgar/data/1996192/0001213900-26-103571.txt         
+10-K             RADIANT LOGISTICS, INC                                        1171155     2026-09-14  edgar/data/1171155/0001193125-26-390768.txt         
+10-K             RAVE RESTAURANT GROUP, INC.                                   718332      2026-09-24  edgar/data/718332/0001140361-26-037514.txt          
+10-K             REGIS CORP                                                    716643      2026-09-01  edgar/data/716643/0000716643-26-000031.txt          
+10-K             RESMED INC                                                    943819      2026-08-13  edgar/data/943819/0000943819-26-000047.txt          
+10-K             RESOURCES CONNECTION, INC.                                    1084765     2026-07-24  edgar/data/1084765/0001084765-26-000051.txt         
+10-K             REST EZ Inc.                                                  1733861     2026-08-28  edgar/data/1733861/0001213900-26-094478.txt         
+10-K             RICHARDSON ELECTRONICS, LTD.                                  355948      2026-08-03  edgar/data/355948/0000355948-26-000002.txt          
+10-K             RPM INTERNATIONAL INC/DE/                                     110621      2026-07-22  edgar/data/110621/0001193125-26-312142.txt          
+10-K             Radiant Strategies Corp                                       2056016     2026-07-10  edgar/data/2056016/0001493152-26-032759.txt         
+10-K             Ranger Gold Corp.                                             1434740     2026-07-14  edgar/data/1434740/0001477932-26-004299.txt         
+10-K             Readvantage Corp.                                             2057381     2026-09-22  edgar/data/2057381/0002057381-26-000021.txt         
+10-K             ReposiTrak, Inc.                                              50471       2026-09-28  edgar/data/50471/0001437749-26-031392.txt           
+10-K             Research Solutions, Inc.                                      1386301     2026-09-11  edgar/data/1386301/0001104659-26-107044.txt         
+10-K             Rezolute, Inc.                                                1509261     2026-09-24  edgar/data/1509261/0001104659-26-110420.txt         
+10-K             Rocky Mountains Group Ltd                                     2034288     2026-07-31  edgar/data/2034288/0001493152-26-035556.txt         
+10-K             Royale Energy, Inc.                                           1694617     2026-07-13  edgar/data/1694617/0001185185-26-002897.txt         
+10-K             SANFILIPPO JOHN B & SON INC                                   880117      2026-08-19  edgar/data/880117/0001193125-26-356919.txt          
+10-K             SCANSOURCE, INC.                                              918965      2026-08-20  edgar/data/918965/0000918965-26-000044.txt          
+10-K             SCHOLASTIC CORP                                               866729      2026-07-24  edgar/data/866729/0000866729-26-000018.txt          
+10-K             SEGUIN NATURAL HAIR PRODUCTS INC.                             1642363     2026-09-24  edgar/data/1642363/0001214659-26-011950.txt         
+10-K             SOUTHERN MISSOURI BANCORP, INC.                               916907      2026-09-11  edgar/data/916907/0001104659-26-107119.txt          
+10-K             SPARTA COMMERCIAL SERVICES, INC.                              318299      2026-08-13  edgar/data/318299/0001493152-26-037876.txt          
+10-K             SR Bancorp, Inc.                                              1951276     2026-09-25  edgar/data/1951276/0001437749-26-031222.txt         
+10-K             STANDEX INTERNATIONAL CORP/DE/                                310354      2026-08-14  edgar/data/310354/0001437749-26-027789.txt          
+10-K             STARGUIDE GROUP, INC.                                         1803096     2026-08-14  edgar/data/1803096/0001640334-26-001377.txt         
+10-K             STRATTEC SECURITY CORP                                        933034      2026-08-28  edgar/data/933034/0001193125-26-374333.txt          
+10-K             SUNHYDROGEN, INC.                                             1481028     2026-09-25  edgar/data/1481028/0001213900-26-103598.txt         
+10-K             SYNAPTICS Inc                                                 817720      2026-08-10  edgar/data/817720/0000817720-26-000055.txt          
+10-K             SYSCO CORP                                                    96021       2026-08-21  edgar/data/96021/0000096021-26-000033.txt           
+10-K             Sandisk Corp                                                  2023554     2026-08-17  edgar/data/2023554/0001628280-26-057406.txt         
+10-K             Seagate Technology Holdings plc                               1137789     2026-08-04  edgar/data/1137789/0001137789-26-000159.txt         
+10-K             Seebeks Corp.                                                 2078730     2026-08-27  edgar/data/2078730/0001683168-26-006745.txt         
+10-K             SelectQuote, Inc.                                             1794783     2026-08-25  edgar/data/1794783/0001794783-26-000057.txt         
+10-K             Singularity Future Technology Ltd.                            1422892     2026-09-29  edgar/data/1422892/0001213900-26-104650.txt         
+10-K             Sino Green Land Corp.                                         1433551     2026-09-28  edgar/data/1433551/0001493152-26-044625.txt         
+10-K             Sports Entertainment Gaming Global Corp                       1673481     2026-07-10  edgar/data/1673481/0001493152-26-032786.txt         
+10-K             Star Gold Corp.                                               1401835     2026-07-22  edgar/data/1401835/0001437749-26-024054.txt         
+10-K             Stimcell Energetics Inc.                                      1493712     2026-08-31  edgar/data/1493712/0001493712-26-000010.txt         
+10-K             Stitch Fix, Inc.                                              1576942     2026-09-24  edgar/data/1576942/0001628280-26-063365.txt         
+10-K             Stride, Inc.                                                  1157408     2026-08-05  edgar/data/1157408/0001104659-26-090515.txt         
+10-K             Super Micro Computer, Inc.                                    1375365     2026-08-31  edgar/data/1375365/0001375365-26-000022.txt         
+10-K             SusGlobal Energy Corp.                                        1652539     2026-07-14  edgar/data/1652539/0001062993-26-003641.txt         
+10-K             Synera Studio Inc                                             2076167     2026-08-03  edgar/data/2076167/0001477932-26-004669.txt         
+10-K             TAPESTRY, INC.                                                1116132     2026-08-13  edgar/data/1116132/0001116132-26-000018.txt         
+10-K             TAYLOR DEVICES, INC.                                          96536       2026-08-18  edgar/data/96536/0001376474-26-000567.txt           
+10-K             THOR INDUSTRIES INC                                           730263      2026-09-22  edgar/data/730263/0000730263-26-000027.txt          
+10-K             TOP Financial Group Ltd                                       1848275     2026-07-07  edgar/data/1848275/0001213900-26-075954.txt         
+10-K             TRIO-TECH INTERNATIONAL                                       732026      2026-09-24  edgar/data/732026/0001437749-26-031124.txt          
+10-K             TWIN DISC INC                                                 100378      2026-09-04  edgar/data/100378/0001437749-26-029700.txt          
+10-K             Tamboran Resources Corp                                       1997652     2026-09-25  edgar/data/1997652/0001628280-26-063492.txt         
+10-K             Tech Tonic Group Corp.                                        2029303     2026-08-27  edgar/data/2029303/0001477932-26-005286.txt         
+10-K             Tilray Brands, Inc.                                           1731348     2026-07-28  edgar/data/1731348/0001437749-26-024698.txt         
+10-K             Transglobal Management Group, Inc.                            1434601     2026-09-15  edgar/data/1434601/0001683168-26-007174.txt         
+10-K             U S GLOBAL INVESTORS INC                                      754811      2026-09-03  edgar/data/754811/0001437749-26-029613.txt          
+10-K             U.S. GOLD CORP.                                               27093       2026-07-29  edgar/data/27093/0001493152-26-035188.txt           
+10-K             UNIFI INC                                                     100726      2026-08-26  edgar/data/100726/0000100726-26-000012.txt          
+10-K             UNITED NATURAL FOODS INC                                      1020859     2026-09-14  edgar/data/1020859/0001020859-26-000025.txt         
+10-K             UNIVERSAL SAFETY PRODUCTS, INC.                               102109      2026-07-02  edgar/data/102109/0001104659-26-080359.txt          
+10-K             UPEXI, INC.                                                   1775194     2026-09-17  edgar/data/1775194/0001477932-26-005668.txt         
+10-K             URANIUM ENERGY CORP                                           1334933     2026-09-29  edgar/data/1334933/0001437749-26-031414.txt         
+10-K             UY Scuti Acquisition Corp.                                    2036973     2026-07-14  edgar/data/2036973/0001185185-26-002932.txt         
+10-K             Ubiquiti Inc.                                                 1511737     2026-08-21  edgar/data/1511737/0001511737-26-000056.txt         
+10-K             Uranium Royalty Corp.                                         2143673     2026-07-28  edgar/data/2143673/0001193125-26-321135.txt         
+10-K             VAIL RESORTS INC                                              812011      2026-09-28  edgar/data/812011/0000812011-26-000049.txt          
+10-K             VALUE LINE INC                                                717720      2026-07-29  edgar/data/717720/0001437749-26-024817.txt          
+10-K             VERDE RESOURCES, INC.                                         1506929     2026-09-14  edgar/data/1506929/0001493152-26-042498.txt         
+10-K             VIAVI SOLUTIONS INC.                                          912093      2026-08-13  edgar/data/912093/0001628280-26-056765.txt          
+10-K             VIP Play, Inc.                                                1832161     2026-09-29  edgar/data/1832161/0001493152-26-044688.txt         
+10-K             VanEck BNB ETF                                                2066824     2026-09-17  edgar/data/2066824/0000930413-26-002904.txt         
+10-K             Venyra Corp                                                   2074652     2026-07-29  edgar/data/2074652/0002074652-26-000011.txt         
+10-K             VitaNova Life Sciences Corp                                   1699709     2026-07-29  edgar/data/1699709/0001683168-26-005837.txt         
+10-K             VivoSim Labs, INC.                                            1497253     2026-07-14  edgar/data/1497253/0001193125-26-303316.txt         
+10-K             WASTE ENERGY CORP.                                            1515139     2026-07-14  edgar/data/1515139/0001493152-26-033196.txt         
+10-K             WESTERN DIGITAL CORP                                          106040      2026-08-14  edgar/data/106040/0001628280-26-057139.txt          
+10-K             WEWARDS, INC.                                                 1616156     2026-09-14  edgar/data/1616156/0001079973-26-001253.txt         
+10-K             WOLFSPEED, INC.                                               895419      2026-08-20  edgar/data/895419/0000895419-26-000054.txt          
+10-K             WORTHINGTON ENTERPRISES, INC.                                 108516      2026-07-30  edgar/data/108516/0001193125-26-325872.txt          
+10-K             Westin Acquisition Corp                                       2076192     2026-09-29  edgar/data/2076192/0001213900-26-104251.txt         
+10-K             WidFit Inc.                                                   1912954     2026-07-09  edgar/data/1912954/0001912954-26-000008.txt         
+10-K             Winchester Bancorp, Inc./MD/                                  2047235     2026-09-16  edgar/data/2047235/0001193125-26-392194.txt         
+10-K             Woodbridge Liquidation Trust                                  1785494     2026-09-25  edgar/data/1785494/0001140361-26-037688.txt         
+10-K             Worthington Steel, Inc.                                       1968487     2026-07-30  edgar/data/1968487/0001968487-26-000026.txt         
+10-K             XERIANT, INC.                                                 1481504     2026-09-28  edgar/data/1481504/0001477932-26-005837.txt         
+10-K             Yinfu Gold Corp.                                              1438461     2026-07-14  edgar/data/1438461/0001640334-26-001178.txt         
+10-K             ZRCN Inc.                                                     1901297     2026-09-28  edgar/data/1901297/0001493152-26-044549.txt         
+10-K             Zhanling International Ltd                                    1489300     2026-08-10  edgar/data/1489300/0001493152-26-036752.txt         
+10-K             Zone Frontier Inc.                                            1956741     2026-09-28  edgar/data/1956741/0001213900-26-104157.txt         
+10-K             Zoomcar Holdings, Inc.                                        1854275     2026-07-14  edgar/data/1854275/0001213900-26-078029.txt         
+10-K             Zscaler, Inc.                                                 1713683     2026-09-03  edgar/data/1713683/0001713683-26-000157.txt         
+10-K             iBio, Inc.                                                    1420720     2026-08-28  edgar/data/1420720/0001420720-26-000020.txt         
+10-K             ACUITY INC. (DE)                                              1144215     2026-10-23  edgar/data/1144215/0001144215-26-000052.txt         
+10-K             APPlife Digital Solutions Inc                                 1755101     2026-10-08  edgar/data/1755101/0001096906-26-001522.txt         
+10-K             ATLANTIC AMERICAN CORP                                        8177        2026-10-16  edgar/data/8177/0001140361-26-039933.txt            
+10-K             Accenture plc                                                 1467373     2026-10-16  edgar/data/1467373/0001467373-26-000049.txt         
+10-K             Advanced Biomed Inc.                                          1941029     2026-10-13  edgar/data/1941029/0001213900-26-109029.txt         
+10-K             Awaysis Capital, Inc.                                         1021917     2026-10-16  edgar/data/1021917/0001493152-26-047301.txt         
+10-K             Birdie Win Corp                                               1873213     2026-10-13  edgar/data/1873213/0001493152-26-046747.txt         
+10-K             COMMERCIAL METALS Co                                          22444       2026-10-16  edgar/data/22444/0000022444-26-000065.txt           
+10-K             COMTECH TELECOMMUNICATIONS CORP /DE/                          23197       2026-10-14  edgar/data/23197/0000023197-26-000114.txt           
+10-K             COSTCO WHOLESALE CORP /NEW                                    909832      2026-10-07  edgar/data/909832/0000909832-26-000093.txt          
+10-K             Cavitation Technologies, Inc.                                 1376793     2026-10-06  edgar/data/1376793/0001683168-26-007653.txt         
+10-K             ClimateRock                                                   1903392     2026-10-16  edgar/data/1903392/0001213900-26-109923.txt         
+10-K             ESCALON MEDICAL CORP                                          862668      2026-10-13  edgar/data/862668/0001628280-26-065683.txt          
+10-K             EvoAir Holdings Inc.                                          1700844     2026-10-14  edgar/data/1700844/0001493152-26-046942.txt         
+10-K             FACTSET RESEARCH SYSTEMS INC                                  1013237     2026-10-20  edgar/data/1013237/0001628280-26-066391.txt         
+10-K             GHST World Inc.                                               1121795     2026-10-09  edgar/data/1121795/0001079973-26-001337.txt         
+10-K             HARBOR DIVERSIFIED, INC.                                      899394      2026-10-09  edgar/data/899394/0000899394-26-000033.txt          
+10-K             HOOPS SCOUTING USA                                            1721056     2026-10-23  edgar/data/1721056/0001477932-26-006442.txt         
+10-K             INTEGRAL TECHNOLOGIES INC                                     1018281     2026-10-14  edgar/data/1018281/0001437749-26-032587.txt         
+10-K             JABIL INC                                                     898293      2026-10-23  edgar/data/898293/0001628280-26-067038.txt          
+10-K             LINDSAY CORP                                                  836157      2026-10-22  edgar/data/836157/0001193125-26-428926.txt          
+10-K             Leopard Energy, Inc.                                          1230524     2026-10-16  edgar/data/1230524/0001477932-26-006284.txt         
+10-K             Lunai Bioworks Inc.                                           1527728     2026-10-13  edgar/data/1527728/0001731122-26-001339.txt         
+10-K             MAYS J W INC                                                  54187       2026-10-22  edgar/data/54187/0001206774-26-000572.txt           
+10-K             MICRON TECHNOLOGY INC                                         723125      2026-10-09  edgar/data/723125/0000723125-26-000023.txt          
+10-K             MSC INDUSTRIAL DIRECT CO INC                                  1003078     2026-10-22  edgar/data/1003078/0001003078-26-000110.txt         
+10-K             Mag Magna Corp                                                1949864     2026-10-07  edgar/data/1949864/0001683168-26-007689.txt         
+10-K             MedWellAI, Inc.                                               1520118     2026-10-13  edgar/data/1520118/0001477932-26-006180.txt         
+10-K             NightFood Holdings, Inc.                                      1593001     2026-10-13  edgar/data/1593001/0001493152-26-046844.txt         
+10-K             OKMIN RESOURCES, INC.                                         1848334     2026-10-13  edgar/data/1848334/0001400253-26-000019.txt         
+10-K             OZ VISION INC.                                                1751707     2026-10-13  edgar/data/1751707/0001493152-26-046693.txt         
+10-K             Oil-Dri Corp of America                                       74046       2026-10-08  edgar/data/74046/0001628280-26-065453.txt           
+10-K             PILLARSTONE CAPITAL REIT                                      928953      2026-10-07  edgar/data/928953/0001437749-26-032293.txt          
+10-K             Penguin Solutions, Inc.                                       1616533     2026-10-20  edgar/data/1616533/0001616533-26-000050.txt         
+10-K             Protopia Global Holdings Inc.                                 1959585     2026-10-07  edgar/data/1959585/0001829126-26-010860.txt         
+10-K             Shreya Acquisition Group                                      2083452     2026-10-13  edgar/data/2083452/0001829126-26-011085.txt         
+10-K             TREASURE GLOBAL INC                                           1905956     2026-10-13  edgar/data/1905956/0001213900-26-109073.txt         
+10-K             VILLAGE SUPER MARKET INC                                      103595      2026-10-08  edgar/data/103595/0000103595-26-000018.txt          
+10-K             VISIUM TECHNOLOGIES, INC.                                     1082733     2026-10-13  edgar/data/1082733/0001654954-26-008927.txt         
+10-K             WINNEBAGO INDUSTRIES INC                                      107687      2026-10-21  edgar/data/107687/0001628280-26-066701.txt          
+10-K             YAN CHUANG GROUP INC.                                         2086503     2026-10-13  edgar/data/2086503/0001683168-26-007792.txt         
+10-K             Zicix Corp                                                    1465311     2026-10-15  edgar/data/1465311/0001683168-26-007877.txt         
+10-K             alpha-En Corp                                                 1023298     2026-10-09  edgar/data/1023298/0001640334-26-001664.txt         
+10-K             iPower Inc.                                                   1830072     2026-10-02  edgar/data/1830072/0001683168-26-007580.txt         

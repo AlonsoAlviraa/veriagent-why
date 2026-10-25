@@ -235,6 +235,7 @@ def agent_markov(it: dict, m: Meter, use_nv: bool = False, use_rerank: bool = Fa
             {"role": "user", "content": ctx + "\nQUESTION: " + q["question"] + hist}]
     log, rel, rerank_s = [], [], []
     for g in range(2):
+        m.__dict__["v9_final"] = (msgs, r["model"])  # V9: the exact prompt of V7's final evidence call (no effect on V7)
         out = m.call_json(msgs, "tat_agent", "s2", 600, model=r["model"])
         reasons = gate(out, ctx)
         log.append({"round": g, "reasons": reasons, "out": {k: out.get(k) for k in ("answer", "scale", "expression", "evidence")}})  # audit trace
@@ -337,3 +338,6 @@ if _os.environ.get("V71") == "1":  # V7.1 ablation arms (docs/V71_ABLATION.md)
 if _os.environ.get("V8") == "1":  # V8 (development; docs/V8_ROUND_1.md)
     from .v8 import agent_v8 as _v8
     SYSTEMS["agent_v8"] = _v8
+if _os.environ.get("V9") == "1":  # V9 (development; docs/V9_ROUND_1.md)
+    from .v9 import agent_v9 as _v9
+    SYSTEMS["agent_v9"] = _v9
