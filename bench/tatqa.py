@@ -10,7 +10,7 @@ Scoring: official TAT-QA scorer (tatqa_metric.TaTQAEmAndF1, downloaded) + our 'u
 rate', applied identically to every system (see `traceable`).
 """
 from __future__ import annotations
-import ast, itertools, json, operator, re, sys
+import ast, itertools, json, operator, re, sys, time
 from pathlib import Path
 from app.bm25 import bm25
 from .common import nums, supported
@@ -61,12 +61,24 @@ def safe_eval(expr: str) -> float:
             return _OPS[type(n.op)](ev(n.left), ev(n.right))
         if isinstance(n, ast.UnaryOp) and type(n.op) in _OPS:
             return _OPS[type(n.op)](ev(n.operand))
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in _FUNCS and len(n.args) == 1 and not n.keywords:
+            return _FUNCS[n.func.id](ev(n.args[0]))  # fix B10: abs(x) / calc(x) / round(x) wrappers were "does not evaluate"
         raise ValueError("unsupported expression")
-    return ev(ast.parse(expr.replace(",", "").replace("$", "").replace("%", ""), mode="eval"))
+    e = str(expr).replace("\u2212", "-").split("=")[0]  # fix B10: "a + b = c" -> "a + b"; unicode minus
+    e = re.sub(r"\b[A-Z]{1,3}\$|[€£¥$%]|\b(?:thousand|million|billion)s?\b", "", e)
+    e = re.sub(r"(?<=\d),(?=\d{3}\b)", "", e)  # thousands separators only; a top-level comma list stays a tuple -> error
+    return ev(ast.parse(e, mode="eval"))
+
+
+_FUNCS = {"abs": abs, "calc": float, "round": lambda x: float(round(x, 2))}
 
 
 def _norm(s: str) -> str:
-    return re.sub(r"[\s$,()]+", " ", str(s).lower()).strip()
+    """Quote normaliser shared by the Claim Gate and the citation scorer. Fix B3: thousands commas are removed
+    (was: replaced by a space, so a quote '4351' never matched context '4,351') and table '|' separators are
+    ignored (a row quoted without pipes never matched the '| a | b |' table rendering)."""
+    s = re.sub(r"(?<=\d),(?=\d{3}\b)", "", str(s).lower()).replace("|", " ")
+    return re.sub(r"[\s$,()]+", " ", s).strip()
 
 
 def gate(out: dict, ctx: str) -> list[str]:
@@ -84,8 +96,8 @@ def gate(out: dict, ctx: str) -> list[str]:
             a = nums(str(ans))
             if a and abs(a[0] - val) > max(0.01, 0.006 * abs(val)) and abs(a[0] - val * 100) > max(0.01, 0.006 * abs(val * 100)):
                 reasons.append(f"answer {a[0]} != expression value {round(val, 4)}")
-        except Exception:
-            reasons.append("expression does not evaluate")
+        except Exception as e:  # audit #5: keep the exception type in the logged reason
+            reasons.append(f"expression does not evaluate ({type(e).__name__})")
     elif nums(str(ans)) and not traceable(str(ans), ctx):
         reasons.append("numeric answer not in context and no expression given")
     return reasons
@@ -114,9 +126,9 @@ def agent(it: dict, m: Meter) -> dict:
             {"role": "user", "content": ctx + "\nQUESTION: " + q["question"]}]
     log = []
     for g in range(2):
-        out = parse_json(m.call(msgs, "tat_agent", "s2", 600)) or {}
+        out = m.call_json(msgs, "tat_agent", "s2", 600)
         reasons = gate(out, ctx)
-        log.append({"round": g, "reasons": reasons})
+        log.append({"round": g, "reasons": reasons, "out": {k: out.get(k) for k in ("answer", "scale", "expression", "evidence")}})  # audit trace
         if not reasons:
             break
         msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
@@ -134,8 +146,8 @@ def rag(it: dict, m: Meter, k: int = 3) -> dict:
     ps = doc["paragraphs"]
     sc = bm25([p["text"] for p in ps], q["question"])
     top = [ps[i] for i in sorted(range(len(ps)), key=lambda i: -sc[i])[:k]]
-    out = parse_json(m.call([{"role": "system", "content": "Answer from the context. " + ANS},
-                             {"role": "user", "content": context(doc, top) + "\nQUESTION: " + q["question"]}], "tat_rag", "s2", 600)) or {}
+    out = m.call_json([{"role": "system", "content": "Answer from the context. " + ANS},
+                             {"role": "user", "content": context(doc, top) + "\nQUESTION: " + q["question"]}], "tat_rag", "s2", 600)
     return _pred(out, it)
 
 
@@ -144,8 +156,8 @@ def react(it: dict, m: Meter, max_steps: int = 4) -> dict:
     ctx = context(doc) + "\nQUESTION: " + q["question"]
     hist = ""
     for s in range(max_steps):
-        a = parse_json(m.call([{"role": "system", "content": "You are a ReAct analyst with one tool: calc (arithmetic). Each turn reply with JSON only: {\"thought\": str, \"action\": \"calc\", \"input\": expression} or {\"action\": \"final\"}."},
-                               {"role": "user", "content": ctx + hist}], "tat_react", "s2", 400)) or {}
+        a = m.call_json([{"role": "system", "content": "You are a ReAct analyst with one tool: calc (arithmetic). Each turn reply with JSON only: {\"thought\": str, \"action\": \"calc\", \"input\": expression} or {\"action\": \"final\"}."},
+                               {"role": "user", "content": ctx + hist}], "tat_react", "s2", 400)
         if a.get("action") != "calc":
             break
         try:
@@ -153,8 +165,8 @@ def react(it: dict, m: Meter, max_steps: int = 4) -> dict:
         except Exception as e:
             obs = f"error {type(e).__name__}"
         hist += f"\nACTION {s + 1}: calc({a.get('input')})\nOBSERVATION {s + 1}: {obs}"
-    out = parse_json(m.call([{"role": "system", "content": "Give the final answer. " + ANS},
-                             {"role": "user", "content": ctx + hist}], "tat_react_final", "s2", 600)) or {}
+    out = m.call_json([{"role": "system", "content": "Give the final answer. " + ANS},
+                             {"role": "user", "content": ctx + hist}], "tat_react_final", "s2", 600)
     return _pred(out, it)
 
 
@@ -170,7 +182,107 @@ def _pred(out: dict, it: dict | None = None) -> dict:
     return {**post, "raw": raw, "evidence": ev, "confidence": conf01(out.get("confidence"))}
 
 
-SYSTEMS = {"agent": agent, "rag": rag, "react": react}
+# fix B3: the model often 'quotes' reformatted cells ("Total Revenue $3,037,000 (2019)", "£m 2019: 0.8"), which the
+# verbatim gate rejects; the controller path states the quoting format explicitly (and the retry restates it).
+QUOTE_RULE = (' QUOTING: each "evidence" item must be copied character-for-character from the context: a whole table row as it '
+              'appears between the | separators, or a sentence fragment. Do not add years, labels, colons or units that are not there.')
+
+
+def agent_markov(it: dict, m: Meter, use_nv: bool = False, use_rerank: bool = False) -> dict:
+    """agent + Markovian control (bench/markov.py): route NUMERIC (calculator steps, react's strength) or EVIDENCE
+    (single call), optional DEEP final model from the NVIDIA classifier, expected-gain gate retry.
+    Both routes keep the agent's quoted evidence, expression, Claim Gate and deterministic confidence."""
+    from .markov import Controller, load_features, RELEVANCE_MIN
+    doc, q = it["doc"], it["q"]
+    ctl = Controller(use_nv, load_features("tatqa") if use_nv else None, "tatqa")
+    ctx = context(doc)
+    r = ctl.route(q["question"], it["id"])
+    hist = ""
+    if r["path"] == "NUMERIC":
+        for s in range(3):
+            a = m.call_json([{"role": "system", "content": "You are VeriAgent Why's numeric step with one tool: calc (arithmetic). Each turn reply with JSON only: {\"thought\": str, \"action\": \"calc\", \"input\": expression over context numbers} or {\"action\": \"final\"}."},
+                                   {"role": "user", "content": ctx + "\nQUESTION: " + q["question"] + hist}], "tat_mk_calc", "s2", 400)
+            if a.get("action") != "calc":
+                break
+            try:
+                obs = str(round(safe_eval(str(a.get("input", ""))), 6))
+            except Exception as e:
+                obs = f"error {type(e).__name__}"
+            hist += f"\nACTION {s + 1}: calc({a.get('input')})\nOBSERVATION {s + 1}: {obs}"
+    msgs = [{"role": "system", "content": "You are VeriAgent Why's evidence step. Answer only from the context; quote your evidence"  # fix B2: calc lines were quoted as evidence
+             + ("; reuse the calculator expression that produced the answer, but quote ONLY verbatim context text as evidence, never "
+                "ACTION/OBSERVATION calculator lines or computed values" if hist else "") + ". " + ANS + QUOTE_RULE},
+            {"role": "user", "content": ctx + "\nQUESTION: " + q["question"] + hist}]
+    log, rel, rerank_s = [], [], []
+    for g in range(2):
+        out = m.call_json(msgs, "tat_agent", "s2", 600, model=r["model"])
+        reasons = gate(out, ctx)
+        log.append({"round": g, "reasons": reasons, "out": {k: out.get(k) for k in ("answer", "scale", "expression", "evidence")}})  # audit trace
+        retry = ctl.gate_retry(reasons, g, traceable(str(out.get("answer")), ctx))
+        if use_rerank and not retry:
+            from . import nv_rerank as NR
+            try:
+                t_r = time.time()
+                p_rel = NR.rank(q["question"], [" | ".join(str(e) for e in (out.get("evidence") or [])) or "(no evidence)"])[0]
+                rerank_s.append(round(time.time() - t_r, 3))
+            except Exception as e:  # audit #5: logged, not swallowed
+                p_rel = None
+                m.parse_log.append({"tag": "rerank_error", "error": f"{type(e).__name__}: {str(e)[:100]}"})
+            rel.append(p_rel)
+            if ctl.evidence_check(p_rel, g, not reasons):
+                msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
+                               {"role": "user", "content": "Evidence check: your quoted evidence does not look relevant to the question. Re-read the question, quote the exact cells/sentences that answer it, recompute if needed. " + ANS}]
+                continue
+        if not retry:
+            break
+        msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
+                       {"role": "user", "content": "Claim gate rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS + QUOTE_RULE}]
+    p = _pred(out, it)
+    det = (0.8 if len(log) == 1 else 0.55) if not reasons else 0.2
+    if not traceable(str(p["answer"]), ctx):
+        det = min(det, 0.1)
+    if rel and rel[-1] is not None and rel[-1] < RELEVANCE_MIN:
+        det = min(det, 0.4)
+    return {**p, "gate_passed": not reasons, "gate": log, "confidence_det": det, "route": r, "decisions": ctl.log, "calc_history": hist,
+            "rerank_p": rel, "rerank_seconds": rerank_s}
+
+
+def agent_vr(it: dict, m: Meter) -> dict:
+    """fixed agent + verify-retry (bench/verify.py): Lightning generates, Super verifies (question + cited evidence only)."""
+    from . import verify as V
+    doc, q = it["doc"], it["q"]
+    ctx = context(doc)
+    base = [{"role": "system", "content": "You are VeriAgent Why's evidence step. Answer only from the context; quote your evidence. " + ANS},
+            {"role": "user", "content": ctx + "\nQUESTION: " + q["question"]}]  # same prompt as fixed agent
+    st = {"msgs": base, "last": None}
+
+    def generate(fb):
+        if fb and st["last"] is not None:
+            st["msgs"] = st["msgs"] + [{"role": "assistant", "content": json.dumps(st["last"])[:2000]}, {"role": "user", "content": fb + " " + ANS}]
+        out = m.call_json(st["msgs"], "tat_agent", "s2", 600)
+        st["last"] = out
+        return out
+
+    def check(out):
+        reasons = gate(out, ctx)
+        ev = [str(e) for e in (out.get("evidence") or [])] if isinstance(out.get("evidence"), list) else [str(out.get("evidence") or "")]
+        tr = traceable(str(out.get("answer")), " ".join(ev) or ctx)  # numbers traceable to the CITED evidence
+        notes = reasons + ([] if tr else ["answer number not traceable to the cited evidence"]) + ([] if any(e.strip() for e in ev) else ["no evidence cited"])
+        n = len(ev) + 3
+        packet = {"answer": out.get("answer"), "scale": out.get("scale"), "claims": [{"text": str(out.get("answer")), "expression": out.get("expression")}],
+                  "evidence": ev}
+        return packet, 100.0 * max(0.0, 1 - len(notes) / n), notes
+
+    out = V.loop(m, q["question"], generate, check)
+    p = _pred(out, it)
+    reasons = gate(out, ctx)
+    return {**p, "confidence": out["confidence"], "confidence_det": out["confidence"], "gate_passed": not reasons,
+            **{k: out[k] for k in ("vr_score", "vr_attempts", "vr_best_attempt", "vr_n_attempts")}}
+
+
+SYSTEMS = {"agent": agent, "agent_vr": agent_vr, "rag": rag, "react": react,
+           "agent_mk": lambda it, m: agent_markov(it, m, False), "agent_mknv": lambda it, m: agent_markov(it, m, True),
+           "agent_mkr": lambda it, m: agent_markov(it, m, True, True)}
 
 
 def official_scores(data_dir: Path, gold_items: list[dict], preds: dict[str, list]) -> dict:

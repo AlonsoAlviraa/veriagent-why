@@ -62,6 +62,7 @@ Limitations:
 The open-source Meterless reference engines (github.com/Meterless/Meterless, Apache-2.0, pinned commit in `vendor/meterless/README.md`) are vendored with one small declared change (an embedding override hook so H-MEM can use the same real embedder as retrieval; see "Local modifications" in `vendor/meterless/README.md`) and called through `meterless_bridge/` (a JSON-lines bridge run with `node`; prebuilt bundle committed, so SAMPLE_MODE needs no `npm install`).
 - **H-MEM** stores the evidence graph: every hypothesis, every Retriever tool call (`retrieval` node, `retrieved_for` edge), evidence node and support/refute edge is an H-MEM record (edges carry `derivedFrom=[evidence, hypothesis]`). The H-MEM trust ledger is exported per run to `logs/hmem-ledger-<run_id>.jsonl`. The Planner recalls H-MEM context when it plans.
 - **Markovian** drives the Evaluator → Planner rounds: each investigation round is one Markovian chunk, the round summary is the `[STATE_CHECKPOINT]` carryover, and `[TASK_COMPLETE]` ends the loop (max 3 chunks). Its run record (chunks, carryover, estimated tokens) is in the run output and trace.
+- **Markovian control (bench only):** a Markov decision policy (`bench/markov.py`, our own code, not part of the vendored engine) routes, stops loops, repairs SQL and skips LLM calls in the benchmark harness. Every decision is logged with its state and reason. It is not wired into `app/pipeline.py` yet. Results: `docs/BENCHMARKS.md` → "Markovian control, sample".
 - If `node` is missing, the pipeline uses a local in-process graph that is **not Meterless**. This fallback is announced on stderr, logged in the trace (`meterless_unavailable`) and shown in the memo's `Backends` line. Set `METERLESS_REQUIRED=1` to make it fatal instead (recommended for the judged run).
 - Known limitation: without `NVIDIA_API_KEY` (and always in SAMPLE_MODE) H-MEM uses the upstream hash mock embedder (FNV-1a, 64 dims), so H-MEM recall is lexical-hash quality only.
 
@@ -112,6 +113,7 @@ Models used by the product at runtime:
 - Benchmarks (PR #4) also use `nvidia/Nemotron-3_5-Lightning` on Nebius Token Factory under a hard spend guard.
 - SAMPLE_MODE uses no model at all.
 - Model output never supplies numbers or confidence: numbers come from SQL, confidence from a formula, and the Claim Gate checks every number in model-written text. Any model failure (empty reply, HTTP error, invalid JSON or label) falls back to the deterministic path and is logged.
+- Benchmarks only: Nebius `nvidia/Nemotron-3_5-Lightning` and `nvidia/nemotron-3-super-120b-a12b` (paid, small spend); NVIDIA `prompt-task-and-complexity-classifier` (open weights, CPU) and `llama-nemotron-rerank-vl-1b-v2` (free API endpoint) as inputs to the Markov controller.
 
 Agent framework: none; own Python orchestrator (`app/pipeline.py`) and own agentic retriever (`app/retrieval/agentic.py`).
 

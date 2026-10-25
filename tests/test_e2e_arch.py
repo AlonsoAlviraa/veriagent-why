@@ -68,3 +68,13 @@ def test_deadline_makes_model_calls_fail_fast(monkeypatch):
             llm.complete([{"role": "user", "content": "x"}], "s1", 5)
     finally:
         llm.set_deadline(None)
+
+
+def test_app_run_writes_audit_json_next_to_memo():
+    res = pipeline.run(INP, "e2e-audit")
+    d = ROOT / "logs" / "e2e-audit"
+    a = json.loads((d / "audit.json").read_text())
+    assert (d / "memo.md").exists()
+    for k in ("planner", "sql", "evidence", "requery", "cause_analyst", "writer", "claim_gate"):
+        assert a["flow"][k], k
+    assert a["confidence"] and "verify_retry_attempts" in a and a["secret_scan"]["redactions"] == 0 or a["secret_scan"]

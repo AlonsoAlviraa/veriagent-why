@@ -16,9 +16,11 @@ import re
 from .common import nums
 
 _PCT_Q = re.compile(r"percent|%|proportion|percentage", re.I)
-_UNIT = [("billion", re.compile(r"\bin\s+billions?\b|\$\s*billions?\b|\bbillions?\s+of\b|\(\s*billions?\s*\)", re.I)),
-         ("million", re.compile(r"\bin\s+millions?\b|\$\s*millions?\b|\bmillions?\s+of\b|\(\s*millions?\s*\)|\$\s*m\b|\$'?m\b|'000,000", re.I)),
-         ("thousand", re.compile(r"\bin\s+thousands?\b|\$\s*thousands?\b|\bthousands?\s+of\b|\(\s*thousands?\s*\)|\$\s*['‘’]?000s?\b|['‘’]000s?\b|\$k\b", re.I))]
+RULE_PARA = RULE_RESTATE = RULE_CUR = True  # each kept only because it raises scale accuracy on TAT-QA TRAIN (docs/BENCHMARKS.md)
+_CUR = r"(?:[€£¥$]|\b[A-Z]{1,3}\$|\bRMB|\bUS\$|\bEUR|\bGBP)\s*['‘’]?\s*"
+_UNIT = [("billion", re.compile((_CUR + r"billions?\b|" if RULE_CUR else "") + r"\bin\s+billions?\b|\$\s*billions?\b|\bbillions?\s+of\b|\(\s*billions?\s*\)", re.I)),
+         ("million", re.compile((_CUR + r"millions?\b|" if RULE_CUR else "") + r"\bin\s+millions?\b|\$\s*millions?\b|\bmillions?\s+of\b|\(\s*millions?\s*\)|\$\s*m\b|\$'?m\b|'000,000", re.I)),
+         ("thousand", re.compile((_CUR + r"thousands?\b|" if RULE_CUR else "") + r"\bin\s+thousands?\b|\$\s*thousands?\b|\bthousands?\s+of\b|\(\s*thousands?\s*\)|\$\s*['‘’]?000s?\b|['‘’]000s?\b|\$k\b", re.I))]
 
 
 def _unit_of(text: str) -> str:
@@ -32,9 +34,23 @@ def _close(a: float, b: float) -> bool:
     return abs(a - b) <= max(0.005, 1e-6 * abs(b))
 
 
+# fix (audit #2): paragraph/header unit statements not tied to the words "table|following"
+_PARA_UNIT = re.compile(r"(?:amounts?|expressed|presented|stated|figures|dollars)\s+(?:are\s+)?in\s+(thousands|millions|billions)"
+                        r"|\(\s*(?:\w+\s+)?in\s+(thousands|millions|billions)|in\s+(thousands|millions|billions)\s*(?:,|\)|of\b)"
+                        r"|(thousands|millions|billions)\)\s*:", re.I)
+
+
+def _clean(s) -> str:
+    """'S$467' -> '467'; unicode minus -> '-'; currency prefixes dropped (audit #2)."""
+    t = str(s).strip().replace("\u2212", "-").replace("\u2013", "-")
+    # an answer that spells its unit ("£41.5 million") stays a text span: TAT-QA gold keeps the words and scale ""
+    t = re.sub(r"^(-?)\s*(?:[A-Z]{1,3}\$|US\$|RMB|EUR|GBP|[€£¥$])\s*", r"\1", t)
+    return t.replace("$", "").replace(",", "").strip()
+
+
 def fmt_number(s: str) -> str:
-    t = str(s).strip().replace("$", "").replace(",", "").strip()
-    t = t.rstrip("%").strip()
+    t = _clean(s)
+    t = t.replace("%", "").strip()  # fix B11: "(39%)" raised ValueError in infer_scale (rstrip missed the ')' ) -> item error
     neg = t.startswith("(") and t.endswith(")")
     t = t.strip("()").strip()
     try:
@@ -49,7 +65,7 @@ def fmt_number(s: str) -> str:
 
 def _is_number(s) -> bool:
     try:
-        float(str(s).replace("$", "").replace(",", "").replace("%", "").strip().strip("()"))
+        float(_clean(s).replace("%", "").strip().strip("()"))
         return True
     except ValueError:
         return False
@@ -70,7 +86,7 @@ def infer_scale(question: str, answer, expression: str, doc: dict) -> str:
         return ""
     if all(float(fmt_number(x)) == int(float(fmt_number(x))) and 1900 <= float(fmt_number(x)) <= 2100 for x in vals) and re.search(r"\byears?\b|\bwhen\b", q, re.I):
         return ""
-    used = [abs(x) for x in nums(expression or "")] or [abs(float(fmt_number(x))) for x in vals]
+    used = [abs(x) for x in nums((expression or "").replace("\u2212", "-"))] or [abs(float(fmt_number(x))) for x in vals]
     table = doc["table"]["table"]
     head = " ".join(" ".join(r) for r in table[:3])
     paras = [p["text"] for p in doc.get("paragraphs", [])]
@@ -80,7 +96,28 @@ def infer_scale(question: str, answer, expression: str, doc: dict) -> str:
             if re.search(r"in (thousands|millions|billions)", p, re.I) and re.search(r"table|following", p, re.I):
                 t_unit = _unit_of(p)
                 break
-    cells = [abs(x) for r in table for c in r for x in nums(c)]
+    if RULE_PARA and not t_unit:  # fix (audit #2): "(Amounts in thousands, except ...)", "(in millions, except per-share)", "... thousands):"
+        for p in paras:
+            m = _PARA_UNIT.search(p)
+            if m:
+                t_unit = next(g for g in m.groups() if g).lower().rstrip("s")
+                break
+    cells = [abs(x) for r in table for c in r for x in nums(c.replace("\u2212", "-"))]
+    if RULE_RESTATE and not t_unit:  # fix (audit #2): a paragraph restates a table cell at a coarser unit ("$24.2 million" for cell 24,193)
+        for p in paras:
+            for m in re.finditer(r"\$?\s?(\d[\d,]*(?:\.(\d+))?)\s*(million|billion)\b", p, re.I):
+                x, dec = float(m.group(1).replace(",", "")), len(m.group(2) or "")
+                if dec == 0 or x == int(x) and x < 10:
+                    continue
+                tol = 0.5 * 10 ** -dec * 1000
+                for c in cells:
+                    if c >= 1000 and abs(x * 1000 - c) <= tol:
+                        t_unit = {"million": "thousand", "billion": "million"}[m.group(3).lower()]
+                        break
+                if t_unit:
+                    break
+            if t_unit:
+                break
     if t_unit and any(_close(u, c) for u in used for c in cells):
         return t_unit
     for p in paras:

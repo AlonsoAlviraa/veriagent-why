@@ -31,3 +31,4 @@ data/emb_cache/
 # Public benchmark data and runs (downloaded, never committed)
 data/bench/
 bench/results/
+logs/*/

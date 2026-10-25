@@ -70,7 +70,10 @@ def summarise(rows) -> list[dict]:
                 v = [r["scores"][k] for r in scored if r["scores"].get(k) is not None]
                 if v:
                     d[k] = mci(v + pad)
-            d["judge>=0.6 (secondary)"] = rate(sum((r["scores"].get("summary_judge") or 0) >= 0.6 for r in scored), len(scored) + d["errors"])
+            # fix (audit #6): a None verdict (judge reply unparseable) is excluded and counted, not scored as 0
+            jv = [r for r in scored if r["scores"].get("summary_judge") is not None]
+            d["judge_none"] = len(scored) - len(jv)
+            d["judge>=0.6 (secondary)"] = rate(sum(r["scores"]["summary_judge"] >= 0.6 for r in jv), len(jv) + d["errors"])
             d["rouge>=0.25 (secondary)"] = rate(sum(r["scores"]["insight_rouge1"] >= 0.25 for r in scored), len(scored) + d["errors"])
             q = sum(r["output"].get("queries") or 0 for r in ok)
             if q:
@@ -82,7 +85,7 @@ def summarise(rows) -> list[dict]:
                 d["claim_traceability"] = rate(sum(e.get("claims_traceable", 0) for e in ex), sum(e.get("claims", 0) for e in ex))
                 d["unsupported_number_rate"] = rate(sum(e.get("numbers_unsupported", 0) for e in ex), sum(e.get("numbers", 0) for e in ex))
                 d["faithfulness_judge"] = mci([e["faithfulness"] for e in ex if e.get("faithfulness") is not None])
-            good = lambda r: (r["scores"].get("summary_judge") or 0) >= 0.6
+            good = lambda r: (r["scores"].get("summary_judge") or 0) >= 0.6  # None -> not good (paired comparison; judge_none reported)
             d["calibration_self"] = calib(scored, "confidence", good)
             d["calibration_det"] = calib(scored, "confidence_det", good)
         else:

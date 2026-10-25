@@ -12,7 +12,7 @@ from __future__ import annotations
 import argparse, json, os, random, time, traceback
 from pathlib import Path
 from . import explain as EX, insightbench as IB, tatqa as TQ
-from .llmio import BudgetExceeded, Meter, NebiusHardStop
+from .llmio import JUDGE_MODEL, BudgetExceeded, Meter, NebiusHardStop
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "bench"
@@ -29,7 +29,7 @@ def select(bench: str, fixtures: bool, limit: int | None, ids: list[str] | None)
             t["_root"] = root
     else:
         root = FIX / "tatqa" if fixtures else DATA / "tatqa"
-        tasks = TQ.items(root / ("tatqa_fixture.json" if fixtures else "tatqa_dataset_dev.json"))
+        tasks = TQ.items(root / ("tatqa_fixture.json" if fixtures else f"tatqa_dataset_{os.environ.get('TATQA_SPLIT', 'dev')}.json"))  # TATQA_SPLIT=train: calibration only
         random.Random(SEED).shuffle(tasks)  # fixed, documented sample order (seed 2026) over the dev split
     if ids:
         tasks = [t for t in tasks if t["id"] in ids]
@@ -60,6 +60,8 @@ def main(argv=None):
     ap.add_argument("--max-calls-item", type=int, default=40, help="hard cap per item")
     ap.add_argument("--rpm", type=float, default=30.0)
     ap.add_argument("--no-judge", action="store_true")
+    ap.add_argument("--no-trace", action="store_true", help="do not write per-item audit traces (bench/results/traces/)")
+    ap.add_argument("--trace-dir", default=str(Path(__file__).resolve().parent / "results" / "traces"))
     ap.add_argument("--judge-insights", action="store_true", help="InsightBench o2m insight judge (|gt|x|pred| calls)")
     ap.add_argument("--faith-sample", type=int, default=30, help="InsightBench: LLM-judge faithfulness on the first N tasks per system (0=off)")
     ap.add_argument("--offline", action="store_true", help="scripted fake model, no network (CI)")
@@ -107,13 +109,14 @@ def main(argv=None):
                 sys_meter = m.snapshot()
                 jm = None if a.no_judge else Meter(10 if not a.judge_insights else 200, a.offline)
                 rec["scores"] = IB.score(t, res, jm, a.judge_insights)
-                if not (t.get("insights") or []):
+                if not [x for x in (t.get("insights") or []) if str(x).strip()]:  # fix (audit #3): flag-36 has 5 EMPTY strings, not []
                     rec["scores"]["excluded"] = "empty ground-truth insights in the dataset"
                 rec["explain"] = EX.insight_metrics(res)
                 if jm and a.faith_sample and order[t["id"]] < a.faith_sample:
                     jm.max_calls += 1
                     rec["explain"]["faithfulness"] = EX.faithfulness(jm, res)
                 rec["judge_meter"] = jm.snapshot() if jm else None
+                rec["judge_model"] = JUDGE_MODEL if jm else None
             else:
                 res = TQ.SYSTEMS[s](t, m)
                 sys_meter = m.snapshot()
@@ -127,6 +130,10 @@ def main(argv=None):
                 rec["explain"] = EX.tat_metrics(res, ctx)
                 rec["gold"] = {"answer": t["q"]["answer"], "scale": t["q"]["scale"], "answer_type": t["q"]["answer_type"], "answer_from": t["q"]["answer_from"]}
             rec["output"], rec["meter"] = res, sys_meter
+            # fix (audit #4): "model" is the configured default; models_used is what was actually called (Super on routed items)
+            rec["models_used"] = dict(sys_meter.get("providers") or {})
+            rec["question"] = (t.get("metadata") or {}).get("goal") if a.bench == "insightbench" else t["q"]["question"]  # audit trace
+            rec["code_rev"] = os.popen("git rev-parse --short HEAD 2>/dev/null").read().strip() or None
         except NebiusHardStop as e:
             print(f"HARD STOP (NEBIUS_STRICT=1): {e}; item not recorded, rerun to resume")
             break
@@ -137,8 +144,18 @@ def main(argv=None):
             rec["trace"] = traceback.format_exc()[-800:]
         rec["seconds"] = round(time.time() - t0, 2)
         total += m.calls + ((rec.get("judge_meter") or {}).get("calls") or 0)
+        full = [c.pop("prompt_full", None) for c in ((rec.get("meter") or {}).get("trace_calls") or [])]
         with out.open("a") as f:
-            f.write(json.dumps(rec, default=str) + "\n")
+            f.write(json.dumps(rec, default=str) + "\n")  # results row keeps truncated prompts only
+        if not a.no_trace:
+            try:
+                from .audit_trace import write_item_trace
+                for c, fp in zip((rec.get("meter") or {}).get("trace_calls") or [], full):
+                    if fp:
+                        c["prompt_full"] = fp
+                write_item_trace(rec, out, DATA if not a.fixtures else FIX, Path(a.trace_dir))
+            except Exception as e:  # a trace failure must not lose the scored row; logged
+                print(f"  TRACE ERROR {type(e).__name__}: {str(e)[:120]}")
         sc = rec.get("scores") or {}
         print(f"  {s:6s} {t['id'][:36]:36s} {rec['seconds']:6.1f}s calls={m.calls} {'ERR ' + rec['error'][:80] if rec.get('error') else json.dumps(sc)}")
     print(f"total model calls this run: {total}")
