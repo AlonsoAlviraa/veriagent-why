@@ -1,0 +1,293 @@
+{
+ "seed": 20261025,
+ "n": 800,
+ "n_traps": 400,
+ "n_controls": 400,
+ "detection_red": [
+  400,
+  400,
+  1.0,
+  [
+   0.9905,
+   1.0
+  ]
+ ],
+ "traps_passed_green (missed)": [
+  0,
+  400,
+  0.0,
+  [
+   0.0,
+   0.0095
+  ]
+ ],
+ "false_alarm_red": [
+  0,
+  400,
+  0.0,
+  [
+   0.0,
+   0.0095
+  ]
+ ],
+ "controls_not_green": [
+  0,
+  400,
+  0.0,
+  [
+   0.0,
+   0.0095
+  ]
+ ],
+ "by_type": {
+  "control/exact": {
+   "green": 100,
+   "n": 100,
+   "rate_red": 0.0,
+   "ci95_red": [
+    0.0,
+    0.037
+   ]
+  },
+  "control/jitter_inside_tol": {
+   "green": 100,
+   "n": 100,
+   "rate_red": 0.0,
+   "ci95_red": [
+    0.0,
+    0.037
+   ]
+  },
+  "control/rounded_0dp_count": {
+   "green": 100,
+   "n": 100,
+   "rate_red": 0.0,
+   "ci95_red": [
+    0.0,
+    0.037
+   ]
+  },
+  "control/rounded_1dp": {
+   "green": 100,
+   "n": 100,
+   "rate_red": 0.0,
+   "ci95_red": [
+    0.0,
+    0.037
+   ]
+  },
+  "trap/fabricated_row_ids": {
+   "red": 44,
+   "n": 44,
+   "rate_red": 1.0,
+   "ci95_red": [
+    0.9197,
+    1.0
+   ]
+  },
+  "trap/foreign_row_ids": {
+   "red": 44,
+   "n": 44,
+   "rate_red": 1.0,
+   "ci95_red": [
+    0.9197,
+    1.0
+   ]
+  },
+  "trap/inverse_rate": {
+   "red": 44,
+   "n": 44,
+   "rate_red": 1.0,
+   "ci95_red": [
+    0.9197,
+    1.0
+   ]
+  },
+  "trap/metric_swap": {
+   "red": 44,
+   "n": 44,
+   "rate_red": 1.0,
+   "ci95_red": [
+    0.9197,
+    1.0
+   ]
+  },
+  "trap/ratio_as_percent": {
+   "red": 45,
+   "n": 45,
+   "rate_red": 1.0,
+   "ci95_red": [
+    0.9213,
+    1.0
+   ]
+  },
+  "trap/segment_swap": {
+   "red": 45,
+   "n": 45,
+   "rate_red": 1.0,
+   "ci95_red": [
+    0.9213,
+    1.0
+   ]
+  },
+  "trap/shift_just_outside_tol": {
+   "red": 45,
+   "n": 45,
+   "rate_red": 1.0,
+   "ci95_red": [
+    0.9213,
+    1.0
+   ]
+  },
+  "trap/shift_large": {
+   "red": 45,
+   "n": 45,
+   "rate_red": 1.0,
+   "ci95_red": [
+    0.9213,
+    1.0
+   ]
+  },
+  "trap/window_swap": {
+   "red": 44,
+   "n": 44,
+   "rate_red": 1.0,
+   "ci95_red": [
+    0.9197,
+    1.0
+   ]
+  }
+ },
+ "examples_missed": [],
+ "examples_false_alarm": [],
+ "narrative": {
+  "trap_flagged": [
+   324,
+   400,
+   0.81,
+   [
+    0.7687,
+    0.8454
+   ]
+  ],
+  "control_flagged": [
+   173,
+   400,
+   0.4325,
+   [
+    0.3848,
+    0.4815
+   ]
+  ],
+  "by_type": {
+   "control/pct_1dp": {
+    "passed": 62,
+    "n": 62,
+    "rate_flagged": 0.0,
+    "ci95": [
+     0.0,
+     0.0583
+    ]
+   },
+   "control/pct_2dp": {
+    "passed": 70,
+    "n": 70,
+    "rate_flagged": 0.0,
+    "ci95": [
+     0.0,
+     0.052
+    ]
+   },
+   "control/plain": {
+    "passed": 95,
+    "n": 95,
+    "rate_flagged": 0.0,
+    "ci95": [
+     0.0,
+     0.0389
+    ]
+   },
+   "control/ratio_form": {
+    "flagged": 30,
+    "n": 30,
+    "rate_flagged": 1.0,
+    "ci95": [
+     0.8865,
+     1.0
+    ]
+   },
+   "control/thousands_sep": {
+    "flagged": 29,
+    "n": 29,
+    "rate_flagged": 1.0,
+    "ci95": [
+     0.883,
+     1.0
+    ]
+   },
+   "control/with_date": {
+    "flagged": 52,
+    "n": 52,
+    "rate_flagged": 1.0,
+    "ci95": [
+     0.9312,
+     1.0
+    ]
+   },
+   "control/with_year": {
+    "flagged": 62,
+    "n": 62,
+    "rate_flagged": 1.0,
+    "ci95": [
+     0.9417,
+     1.0
+    ]
+   },
+   "trap/digit_transposition": {
+    "flagged": 70,
+    "n": 70,
+    "rate_flagged": 1.0,
+    "ci95": [
+     0.948,
+     1.0
+    ]
+   },
+   "trap/spelled_out_wrong": {
+    "passed": 76,
+    "n": 76,
+    "rate_flagged": 0.0,
+    "ci95": [
+     0.0,
+     0.0481
+    ]
+   },
+   "trap/wrong_pct": {
+    "flagged": 85,
+    "n": 85,
+    "rate_flagged": 1.0,
+    "ci95": [
+     0.9568,
+     1.0
+    ]
+   },
+   "trap/wrong_plain": {
+    "flagged": 77,
+    "n": 77,
+    "rate_flagged": 1.0,
+    "ci95": [
+     0.9525,
+     1.0
+    ]
+   },
+   "trap/wrong_thousands_sep": {
+    "flagged": 92,
+    "n": 92,
+    "rate_flagged": 1.0,
+    "ci95": [
+     0.9599,
+     1.0
+    ]
+   }
+  }
+ }
+}
