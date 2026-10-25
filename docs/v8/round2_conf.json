@@ -1,0 +1,137 @@
+{
+ "n": 648,
+ "v7_em": 0.6806,
+ "coverage_target(lex@0.809)": 0.8225,
+ "signals": {
+  "lex_frozen": {
+   "auroc": 0.5754,
+   "ece": 0.1525,
+   "brier": 0.2477,
+   "aurc": 0.271,
+   "threshold": 0.809,
+   "coverage": 0.8225,
+   "selective_em": 0.6923
+  },
+  "lex_platt_oof": {
+   "auroc": 0.4925,
+   "ece": 0.0159,
+   "brier": 0.2186,
+   "aurc": 0.3287,
+   "threshold": 0.6776,
+   "coverage": 0.8426,
+   "selective_em": 0.6886
+  },
+  "lex_isotonic_oof": {
+   "auroc": 0.5632,
+   "ece": 0.1983,
+   "brier": 0.2543,
+   "aurc": 0.2924,
+   "threshold": 0.4298,
+   "coverage": 0.8627,
+   "selective_em": 0.6887
+  },
+  "v8_k2_oof": {
+   "auroc": 0.6657,
+   "ece": 0.0251,
+   "brier": 0.2007,
+   "aurc": 0.2322,
+   "threshold": 0.5085,
+   "coverage": 0.8225,
+   "selective_em": 0.7205
+  },
+  "v8_k2_checker_oof": {
+   "auroc": 0.6612,
+   "ece": 0.0244,
+   "brier": 0.2012,
+   "aurc": 0.2303,
+   "threshold": 0.4986,
+   "coverage": 0.8241,
+   "selective_em": 0.7172
+  },
+  "v8_k5_oof": {
+   "auroc": 0.6701,
+   "ece": 0.0373,
+   "brier": 0.1999,
+   "aurc": 0.2256,
+   "threshold": 0.5189,
+   "coverage": 0.8241,
+   "selective_em": 0.7322
+  },
+  "v8_k5_checker_oof": {
+   "auroc": 0.6726,
+   "ece": 0.0376,
+   "brier": 0.1997,
+   "aurc": 0.2188,
+   "threshold": 0.4999,
+   "coverage": 0.8225,
+   "selective_em": 0.7205
+  }
+ },
+ "v8_k2_oof_vs_lex_platt_oof": {
+  "d_auroc_ci95": [
+   0.1102,
+   0.2318
+  ],
+  "d_ece_ci95": [
+   -0.0188,
+   0.0426
+  ]
+ },
+ "v8_k2_oof_vs_lex_isotonic_oof": {
+  "d_auroc_ci95": [
+   0.043,
+   0.1615
+  ],
+  "d_ece_ci95": [
+   -0.1943,
+   -0.1101
+  ]
+ },
+ "v8_k5_oof_vs_lex_platt_oof": {
+  "d_auroc_ci95": [
+   0.1153,
+   0.2354
+  ],
+  "d_ece_ci95": [
+   -0.0102,
+   0.0596
+  ]
+ },
+ "v8_k5_oof_vs_lex_isotonic_oof": {
+  "d_auroc_ci95": [
+   0.0477,
+   0.1642
+  ],
+  "d_ece_ci95": [
+   -0.1825,
+   -0.1003
+  ]
+ },
+ "v8_k2_checker_oof_vs_lex_platt_oof": {
+  "d_auroc_ci95": [
+   0.1069,
+   0.229
+  ],
+  "d_ece_ci95": [
+   -0.0167,
+   0.04
+  ]
+ },
+ "v8_k2_checker_oof_vs_lex_isotonic_oof": {
+  "d_auroc_ci95": [
+   0.0401,
+   0.1564
+  ],
+  "d_ece_ci95": [
+   -0.1962,
+   -0.1107
+  ]
+ },
+ "v8_k2_checker_vs_v8_k2": {
+  "d_auroc_ci95": [
+   -0.0126,
+   0.0035
+  ]
+ },
+ "_cost_note": "k=2 uses 1+2 pointer calls/item on top of V7 (vs 1+5)"
+}

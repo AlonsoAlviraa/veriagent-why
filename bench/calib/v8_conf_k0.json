@@ -1,0 +1,46 @@
+{
+ "K": 0,
+ "answer": "V7 unchanged (agent_markov)",
+ "code": "bench/v8.py, bench/v8_r2.py:feats_k",
+ "confidence": "logistic on pointer-SC features, target=V7 EM",
+ "features": [
+  "agree",
+  "ptr0_valid",
+  "ptr0_agrees_vote",
+  "v7_agrees_vote",
+  "v7_gate_passed",
+  "lex"
+ ],
+ "fit_slice": "docs/v8/design.json sha256 2728213ad1bba18f2228cbbdffc2a89aa60ee2db0b41adb0303ebfe91c5fc4f7",
+ "model": "nvidia/Nemotron-3_5-Lightning",
+ "mu": [
+  0.697531,
+  0.697531,
+  0.697531,
+  0.464506,
+  0.902778,
+  0.731292
+ ],
+ "name": "v8_candidate_conf",
+ "role": "secondary",
+ "sc_t": 0.7,
+ "sd": [
+  0.459327,
+  0.459327,
+  0.459327,
+  0.498739,
+  0.29626,
+  0.190501
+ ],
+ "threshold": 0.490074,
+ "threshold_rule": "OOF (5-fold, seed 8008, by question) cut matching frozen lex@0.809 coverage, applied to the full-design refit",
+ "w": [
+  0.826043,
+  -0.1173,
+  -0.1173,
+  -0.1173,
+  0.76959,
+  0.340123,
+  -0.236616
+ ]
+}

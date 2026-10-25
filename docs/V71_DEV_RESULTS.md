@@ -40,3 +40,8 @@
 
 ## Conclusion
 As implemented, V7.1 does not improve on V7 on dev; the frozen V7 stays the reference. The sign rule and the empty/evidence block do help on their small categories. Any V7.1b fix (minimal-span selection, year-question routing, scale only when evidence unit is explicit and the question is numeric, keep multi-span lists) must be evaluated on a **new, disjoint** dev slice, not these 400 items.
+
+## Disclosure (added during V8): abstention-fit overlap
+The frozen abstention fit (`bench/calib/abstention_v7.json`) used dev rows = dev positions 0–149 of the seed-2026 order; 130 of
+them (positions 20–149) are inside eval400 (20–419). Coverage / selective EM for V7 and V7.1 on eval400 are therefore optimistic
+(in-sample threshold) for those 130 items; EM/F1 are unaffected. Cite selective metrics on eval400 excluding them.

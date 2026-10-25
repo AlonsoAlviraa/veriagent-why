@@ -334,3 +334,6 @@ if _os.environ.get("V71") == "1":  # V7.1 (development after the pre-registered 
 if _os.environ.get("V71") == "1":  # V7.1 ablation arms (docs/V71_ABLATION.md)
     from .v71x import systems as _v71x_systems
     SYSTEMS.update(_v71x_systems())
+if _os.environ.get("V8") == "1":  # V8 (development; docs/V8_ROUND_1.md)
+    from .v8 import agent_v8 as _v8
+    SYSTEMS["agent_v8"] = _v8
