@@ -55,7 +55,7 @@ Limitations:
 - **SAMPLE_MODE is a deterministic oracle, not the agent.** Its taxonomy, dimensions, rival hypotheses and thresholds were written by the same author as the synthetic generator (`app/agents/core.py`), so the sample-mode score (dev 21/22) shows the pipeline works, not that it generalises. The headline number is the live Nemotron one (dev 14/22).
 - All data is synthetic, from one generator; eval sets are different seeds of the same families.
 - Live Zetaris needs the local Zetaris platform, a Postgres source and the REST source running together; it is not reproducible from a clean clone. A recorded live trace with backend `zetaris-jdbc` has not been committed yet.
-- Real Meterless Nightshift was not available; `LLM_PROVIDER=nightshift` was only exercised against the local simulator below.
+- Meterless Nightshift 1.2.7 is the primary provider path (see below). As of 25 Oct 2026 the integration is tested offline against a mock with the real `meterless` response block; a live receipt needs the NVIDIA cloud key set in the Nightshift desktop app (Setup screen), which is still pending.
 - H-MEM uses the upstream hash mock embedder unless NVIDIA embeddings are configured.
 
 ## Meterless engines (how they are used)
@@ -66,17 +66,29 @@ The open-source Meterless reference engines (github.com/Meterless/Meterless, Apa
 - If `node` is missing, the pipeline uses a local in-process graph that is **not Meterless**. This fallback is announced on stderr, logged in the trace (`meterless_unavailable`) and shown in the memo's `Backends` line. Set `METERLESS_REQUIRED=1` to make it fatal instead (recommended for the judged run).
 - Known limitation: without `NVIDIA_API_KEY` (and always in SAMPLE_MODE) H-MEM uses the upstream hash mock embedder (FNV-1a, 64 dims), so H-MEM recall is lexical-hash quality only.
 
-## Model providers
-`LLM_PROVIDER=nightshift|nvidia|sample` (`SAMPLE_MODE=true` forces `sample`). `nightshift`: an OpenAI-compatible endpoint with the Meterless Nightshift contract (`NIGHTSHIFT_BASE_URL`, `NIGHTSHIFT_API_KEY` or `NIGHTSHIFT_API_KEY_FILE`). Real Meterless Nightshift was not available to us, so the repo ships a clearly labelled **local simulator** (see below). `nvidia`: NVIDIA API (`NVIDIA_API_KEY`, read from the environment only, never logged). Models: `REASONING_MODEL` (default `nvidia/nemotron-3.5-super-vl-120b-a12b`, S2: Planner, Cause Analyst, Writer) and `FAST_MODEL` (default `nvidia/nemotron-3.5-lightning-30b-a3b`, S1: relevance filter, Evaluator). Embeddings: `nvidia/nemotron-3-embed-1b` on the NVIDIA endpoint when `NVIDIA_API_KEY` is set (passage/query input types, disk cache in `data/emb_cache/`), else a deterministic hash embedder (`EMBED_PROVIDER=hash` forces it; SAMPLE_MODE always uses it). Model outputs are validated JSON; any failure (empty reply, HTTP error, invalid JSON or label) falls back to the deterministic path and is logged. Numbers always come from SQL.
+## Meterless Nightshift (primary model provider)
+`LLM_PROVIDER=nightshift` (the default outside SAMPLE_MODE) sends every model call to the local Meterless Nightshift runtime (OpenAI-compatible, `NIGHTSHIFT_BASE_URL`, default `http://127.0.0.1:8088/v1`). The bearer token is the runtime's own `proxy-token` file in its state directory (`%LOCALAPPDATA%\ai.meterless.runtime`), or `NIGHTSHIFT_API_KEY` / `NIGHTSHIFT_API_KEY_FILE`; it is read, never printed or logged. Provider keys (NVIDIA cloud) live encrypted inside Nightshift and are set only in its desktop app.
+- **Tiers.** S1 requests the exact id `nvidia/nemotron-3.5-lightning-30b-a3b` (**Nemotron 3.5 Lightning 30B A3B**) with reasoning off (`enable_thinking=false`, `reasoning_effort=none`); S2 requests `nvidia/nemotron-3-ultra-550b-a55b` (**Nemotron 3 Ultra 550B A55B**). Ids taken from Nightshift's `GET /v1/models` and confirmed by live `routed_model`. Routing modes (`meterless/fast`) are coerced to `meterless/auto` by the app policy and were observed routing to Nemotron 3.5 Bolt E4B, so the tiers do not use them. Override with `NIGHTSHIFT_MODEL_S1/S2` and the expected pins with `NIGHTSHIFT_PIN_S1/S2`.
+- **Startup pin check.** Before a run, one tiny request per tier checks the `routed_model` in Nightshift's `meterless` response block against the pin. A mismatch stops the run (`pin_mismatch` in the trace); `NIGHTSHIFT_PIN_ENFORCE=off` only warns, `NIGHTSHIFT_PIN_CHECK=off` skips it.
+- **Receipts.** Every call appends one line to `logs/receipts-<run_id>.jsonl` built from the `meterless` block (`request_id`, `requested_model`, `provider_model`, `routed_model`, `mode`, `scope`), plus purpose, latency, token usage and `pin_ok`. No prompt text and no secrets are stored.
+- **Bounded requests.** `max_tokens` 512 (S1) / 2048 (S2), prompts capped at `NIGHTSHIFT_MAX_PROMPT_CHARS` (24000), timeouts 180 s / 300 s (`NIGHTSHIFT_TIMEOUT_S1_S/S2_S`).
+- **Fallback, flagged.** Off by default. With `LLM_FALLBACK=nvidia`, a connection error, timeout, 429 or 5xx from Nightshift retries that call on the NVIDIA endpoint; the receipt records `fallback=true`, the provider and the reason, and `pin_ok` is null. A pin mismatch is never "fallen back" from.
+- Check from the command line: `python -m app.nightshift` (pin check plus one receipt). Offline tests: `tests/test_nightshift.py`.
 
-## Evaluation
-See [`eval/README.md`](eval/README.md). Three sets:
-- **dev** (22 questions, clean + noisy + harder cases): used for tuning. Sample provider, no model on either side: agent 21/22, plain-RAG baseline 6/22. Live NVIDIA Nemotron (22 Oct 2026, dev only): agent 14/22 (Wilson 0.43–0.80), plain-RAG baseline with the same model 11/22 (0.31–0.69). The live agent is **worse than the sample-mode rules**: the model verdicts/plans lost seasonality, promotion_effect and negative-control cases. Details and failure analysis: `eval/RESULTS_dev_nvidia.md`.
-- **test v1** (18): **contaminated** (run twice, the second time after seeing failures); kept only as history in [`eval/RESULTS_HISTORY.md`](eval/RESULTS_HISTORY.md).
-- **test v2** (18, noisy generator, new seeds): **held out and never run**. Reserved for the final Nemotron eval; frozen by `eval/SPLITS_test_v2.sha256`.
-Metric: exact match of `top_cause_label`, k/n with a Wilson 95% interval; segment and secondary-cause detection where defined. Data is synthetic and written by the same author as the agent.
+Other providers: `LLM_PROVIDER=nvidia` (NVIDIA API, `NVIDIA_API_KEY` from the environment only) and `sample` (no model; forced by `SAMPLE_MODE=true`). Embeddings: `nvidia/nemotron-3-embed-1b` when `NVIDIA_API_KEY` is set, else a deterministic hash embedder. Model outputs are validated JSON; any failure falls back to the deterministic path and is logged. Numbers always come from SQL.
 
-## Nightshift-compatible local SIMULATOR (not Meterless Nightshift)
+## Where each engine runs
+| Component | Engine / model | Where it runs |
+|---|---|---|
+| S1: retriever tool loop, relevance filter, Evidence Evaluator | Nemotron 3.5 Lightning 30B A3B (reasoning off), exact id via Nightshift | Nightshift runtime on the user's PC (:8088) routing to the NVIDIA cloud endpoint |
+| S2: Planner, Cause Analyst, Writer | Nemotron 3 Ultra 550B A55B, exact id via Nightshift | Nightshift on the PC, routed to NVIDIA cloud |
+| Embeddings | nemotron-3-embed-1b, or hash embedder | NVIDIA endpoint, or in-process |
+| Evidence graph, investigation rounds | Meterless H-MEM, Markovian (vendored reference engines) | Local `node` bridge (`meterless_bridge/`) |
+| Data | Zetaris Lightning views, or DuckDB snapshot (SAMPLE_MODE) | Zetaris platform (Docker, local), or in-process |
+| Claim Gate, confidence formula, V9_full confidence | Deterministic code / frozen logistic model | In-process Python |
+| Benchmarks (`bench/`) | Nemotron 3.5 Lightning, Nemotron 3 Super | Nebius Token Factory (spend-capped) and NVIDIA free endpoint |
+
+## Nightshift-compatible local SIMULATOR (not Meterless Nightshift; testing only)
 `app/nightshift_sim.py` is a **simulator** we wrote so the `nightshift` provider path can be exercised. It is not Meterless Nightshift and does no Meterless metering or routing. It serves an OpenAI-compatible API on `http://127.0.0.1:8088/v1` (loopback only) with a bearer token read from `NIGHTSHIFT_SIM_TOKEN_FILE` (default `~/.veriagent/nightshift-sim.token`, created with mode 0600 if missing, never printed) and forwards each chat completion to:
 - `SIM_UPSTREAM=nvidia` (default): the NVIDIA build free endpoint, paced to ≤ 40 requests/minute (`SIM_RPM`);
 - `SIM_UPSTREAM=nebius`: Nebius Token Factory through the hard, file-locked spend guard in `bench/nebius.py` (`NEBIUS_BUDGET_USD`); a refused call returns HTTP 402 and is not retried elsewhere.
@@ -98,6 +110,18 @@ Live check before the model eval: `make smoke-nvidia` (skips cleanly if `NVIDIA_
 
 Public benchmarks (InsightBench, TAT-QA) are on the `feat/benchmarks` branch (PR #4), documented in `docs/BENCHMARKS.md` there.
 
+## Final system: V7 answers + V9_full confidence
+On the TAT-QA-style financial QA benchmarks the shipped system is **V7** (the agent that produces the answer) plus **V9_full** (a confidence score that never changes the answer). V9_full is a logistic model over the lexical confidence, answer token log-probabilities, P(true), semantic entropy and V8 agreement features, fitted once on 600 design rows. Decision rule: answer if p ≥ λ = 0.683 (conformal risk control, alpha 0.10, calibrated on design rows), otherwise abstain.
+- In the app: `app/v9conf.py`, behind `V9_CONFIDENCE=on` (default; `off` disables). The frozen model is `app/v9_full_model.json`, exported by `python -m bench.export_v9_full` (it refits exactly as `bench.v9_final` and checks the hold-out AUROC). Each scored answer writes a `v9_confidence` receipt. Tests: `tests/test_v9conf.py` (scores match the benchmark model on real hold-out rows).
+
+Results (all pre-registered, one run each):
+- **test500** (TAT-QA, n=500): V7 (`agent_mk`) EM **0.658** vs plain RAG 0.528, +0.130 (95% CI +0.086 to +0.174); cross-provider caveat and worst-case 0.642 in [`docs/TEST500_RESULTS.md`](docs/TEST500_RESULTS.md).
+- **V9 hold-out** (oodsec, 368 questions from SEC 10-Ks filed Jun–Oct 2026): V7 EM 99.2%; V9_full AUROC 0.816 (lex frozen 0.633); under CRC λ 0.683 risk 0.003 at 74.5% coverage. Easy set (0.8% error), so risk control is trivially met. [`docs/V9_HOLDOUT_RESULTS.md`](docs/V9_HOLDOUT_RESULTS.md).
+- **V9.1 generalization** (secq / jfinqa / finqa, ~300 each): V7 semantic accuracy 74.7 / 71.8 / 69.9% vs RAG 48.3 / 64.6 / 41.6%; V9_full AUROC 0.750 / 0.746 / 0.735, the only arm marked GENERALIZES with a small drop. [`docs/V9_GENERALIZATION_RESULTS.md`](docs/V9_GENERALIZATION_RESULTS.md).
+- **V10 hard sets** (MultiHiertt, DocFinQA): pre-registered in [`docs/V10_PREREG.md`](docs/V10_PREREG.md); not run yet, no results claimed.
+
+Bench data is downloaded on demand and never committed: `make setup` installs `bench/requirements-bench.txt`, then `python -m bench.download all` writes `data/bench/<bench>/` with a sha256 manifest (no login). See [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md).
+
 ## Confidence (deterministic)
 `conf = round(100 × (0.45·C + 0.35·A + 0.20·(1−R)))`, where C = share of all proposed claims that passed the Claim Gate, A = share of views with relevant rows that agree with the top cause (A = 0 and cap 50 if none), R = refuting ÷ (supporting + refuting) edges for the top cause. Partial runs are capped at 40. See `app/confidence.py`.
 
@@ -107,9 +131,10 @@ How the code was written:
 - Cursor was not used to write this code. Per the organisers' announcement on 22 Oct 2026, Cursor is optional for this hackathon.
 
 Models used by the product at runtime:
-- NVIDIA Nemotron via the provider switch: `nvidia/nemotron-3.5-super-vl-120b-a12b` (S2: Planner, Cause Analyst, Writer) and `nvidia/nemotron-3.5-lightning-30b-a3b` (S1: Agentic Retriever tool loop, relevance filter, Evidence Evaluator), on the NVIDIA free endpoint. Live on the dev split, see `eval/RESULTS_dev_nvidia.md`.
+- Through Meterless Nightshift (primary): Nemotron 3.5 Lightning 30B, reasoning off (S1: Agentic Retriever tool loop, relevance filter, Evidence Evaluator) and Nemotron 3 Ultra (S2: Planner, Cause Analyst, Writer), pinned and receipted per call.
+- Earlier live dev-split run (22 Oct 2026, direct NVIDIA endpoint, before Nightshift): `nvidia/nemotron-3.5-super-vl-120b-a12b` (S2) and `nvidia/nemotron-3.5-lightning-30b-a3b` (S1); see `eval/RESULTS_dev_nvidia.md`.
 - Embeddings: `nvidia/nemotron-3-embed-1b` (2048 dims) for hybrid BM25 + dense retrieval (RRF fusion) and for H-MEM records; offline, a deterministic hash embedder. The originally planned `llama-3.2-nv-embedqa-1b-v2` / `nv-embedqa-e5-v5` returned 410 Gone on that endpoint.
-- Meterless Nightshift: not available; a labelled local simulator is provided (above).
+- Meterless Nightshift 1.2.7 is the primary runtime provider (S1 Lightning 30B, S2 Ultra; see "Meterless Nightshift"). Live receipts pending the cloud key in the Nightshift app. The older `app/nightshift_sim.py` is a labelled simulator, not Nightshift.
 - Benchmarks (PR #4) also use `nvidia/Nemotron-3_5-Lightning` on Nebius Token Factory under a hard spend guard.
 - SAMPLE_MODE uses no model at all.
 - Model output never supplies numbers or confidence: numbers come from SQL, confidence from a formula, and the Claim Gate checks every number in model-written text. Any model failure (empty reply, HTTP error, invalid JSON or label) falls back to the deterministic path and is logged.
@@ -119,7 +144,7 @@ Agent framework: none; own Python orchestrator (`app/pipeline.py`) and own agent
 
 Sponsor technology:
 - Zetaris: default data layer (`app/adapters/zetaris.py`, JDBC via JayDeBeApi, federating a Postgres datasource and REST tables into a SchemaStore container).
-- Meterless: H-MEM (evidence graph + trust ledger) and Markovian (investigation rounds), open-source reference engines vendored and run through `meterless_bridge/`.
+- Meterless: Nightshift (primary model provider, receipts per call), H-MEM (evidence graph + trust ledger) and Markovian (investigation rounds); the H-MEM and Markovian reference engines are vendored and run through `meterless_bridge/`.
 - NVIDIA: the Nemotron models above.
 
 ## Dependencies and attribution

@@ -1,7 +1,7 @@
 PY ?= .venv/bin/python
 .PHONY: setup data run api ui test eval-dev eval-test scan clean-check bridge docker smoke-nvidia nightshift-sim
 setup:            ## venv + deps
-	python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+	python3 -m venv .venv && .venv/bin/pip install -r requirements.txt -r bench/requirements-bench.txt
 data:             ## demo snapshot + eval datasets (synthetic, seeded)
 	$(PY) scripts/make_data.py && $(PY) eval/build_datasets.py
 run:              ## one demo run (SAMPLE_MODE)
