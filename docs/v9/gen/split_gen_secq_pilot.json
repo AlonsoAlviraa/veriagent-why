@@ -1,0 +1,23 @@
+{
+"name": "v9gen_gen_secq_pilot",
+"tatqa_split": "gen_secq",
+"dataset_sha256": "4747891623c3fdc49d1c4981ead824ee6dd9649ea0c8f3b3f1656c162a3a16e8",
+"ids": [
+"gensecq-f051313237e9e643",
+"gensecq-9a66a2220e2d29aa",
+"gensecq-f89c8f4f0997e063",
+"gensecq-48b6bb16b4afcef6",
+"gensecq-da039a5e178f029e",
+"gensecq-d3c6623fb5774efc",
+"gensecq-dc3dce5f20fda926",
+"gensecq-a09dff650ca5df2e",
+"gensecq-0949ab37e7b8ea64",
+"gensecq-b7b599b645426bf9",
+"gensecq-b6528629435a137c",
+"gensecq-2ef8aa28d9d2d9ec",
+"gensecq-feb2181faf2fef9d",
+"gensecq-771e6fbacd137a62",
+"gensecq-6a3298bf371af088",
+"gensecq-bdd75acbd6a700ec"
+]
+}
