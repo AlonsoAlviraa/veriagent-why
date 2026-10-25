@@ -1,0 +1,578 @@
+{
+  "llm_calls": {
+    "ok": 570,
+    "failed_fell_back_to_rules": 18
+  },
+  "baseline_errors": 3,
+  "secondary_metrics": {
+    "segment_match": "12/13",
+    "secondary_detected": "1/3",
+    "secondary_false_positives": "0/19"
+  },
+  "split": "dev",
+  "provider": "nvidia",
+  "n": 22,
+  "agent_k": 14,
+  "agent_wilson95": [
+    0.4295134934371804,
+    0.802670272273921
+  ],
+  "baseline_k": 11,
+  "baseline_wilson95": [
+    0.3072180469247956,
+    0.6927819530752044
+  ],
+  "rows": [
+    {
+      "qid": "q01",
+      "kind": "carrier_breach",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 85,
+      "agent_segment": {
+        "carrier": "CarrierA",
+        "region": "East"
+      },
+      "expected_segment": {
+        "carrier": "CarrierA",
+        "region": "East"
+      },
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 611,
+      "agent_s2_context_tokens": 612,
+      "log": "logs/trace-eval-q01.jsonl",
+      "secs": 44.43,
+      "llm_calls_ok": 29,
+      "llm_calls_failed": 0
+    },
+    {
+      "qid": "q02",
+      "kind": "carrier_breach",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 85,
+      "agent_segment": {
+        "carrier": "CarrierC",
+        "region": "West"
+      },
+      "expected_segment": {
+        "carrier": "CarrierC",
+        "region": "West"
+      },
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 690,
+      "agent_s2_context_tokens": 700,
+      "log": "logs/trace-eval-q02.jsonl",
+      "secs": 153.93,
+      "llm_calls_ok": 28,
+      "llm_calls_failed": 1
+    },
+    {
+      "qid": "q03",
+      "kind": "carrier_breach",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 100,
+      "agent_segment": {
+        "carrier": "CarrierB",
+        "region": "South"
+      },
+      "expected_segment": {
+        "carrier": "CarrierB",
+        "region": "South"
+      },
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 672,
+      "agent_s2_context_tokens": 680,
+      "log": "logs/trace-eval-q03.jsonl",
+      "secs": 115.69,
+      "llm_calls_ok": 27,
+      "llm_calls_failed": 1
+    },
+    {
+      "qid": "q04",
+      "kind": "breach_with_date_promo_trap",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 100,
+      "agent_segment": {
+        "carrier": "CarrierA",
+        "region": "West"
+      },
+      "expected_segment": {
+        "carrier": "CarrierA",
+        "region": "West"
+      },
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 715,
+      "agent_s2_context_tokens": 718,
+      "log": "logs/trace-eval-q04.jsonl",
+      "secs": 202.57,
+      "llm_calls_ok": 29,
+      "llm_calls_failed": 2
+    },
+    {
+      "qid": "q05",
+      "kind": "negative_control",
+      "expected": "none",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 73,
+      "agent_segment": {
+        "carrier": "CarrierB",
+        "region": "South"
+      },
+      "expected_segment": null,
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 667,
+      "agent_s2_context_tokens": 670,
+      "log": "logs/trace-eval-q05.jsonl",
+      "secs": 20.42,
+      "llm_calls_ok": 29,
+      "llm_calls_failed": 0
+    },
+    {
+      "qid": "q06",
+      "kind": "carrier_breach",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 73,
+      "agent_segment": {
+        "carrier": "CarrierC",
+        "region": "North"
+      },
+      "expected_segment": {
+        "carrier": "CarrierC",
+        "region": "North"
+      },
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 645,
+      "agent_s2_context_tokens": 652,
+      "log": "logs/trace-eval-q06.jsonl",
+      "secs": 90.47,
+      "llm_calls_ok": 15,
+      "llm_calls_failed": 1
+    },
+    {
+      "qid": "q25",
+      "kind": "seasonality",
+      "expected": "seasonality",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 73,
+      "agent_segment": {
+        "carrier": "CarrierA",
+        "region": "South"
+      },
+      "expected_segment": null,
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 726,
+      "agent_s2_context_tokens": 730,
+      "log": "logs/trace-eval-q25.jsonl",
+      "secs": 159.65,
+      "llm_calls_ok": 27,
+      "llm_calls_failed": 1
+    },
+    {
+      "qid": "q26",
+      "kind": "seasonality",
+      "expected": "seasonality",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 85,
+      "agent_segment": {
+        "carrier": "CarrierB",
+        "region": "South"
+      },
+      "expected_segment": null,
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "error",
+      "baseline_context_tokens": 703,
+      "agent_s2_context_tokens": 704,
+      "log": "logs/trace-eval-q26.jsonl",
+      "secs": 251.14,
+      "llm_calls_ok": 27,
+      "llm_calls_failed": 1
+    },
+    {
+      "qid": "q27",
+      "kind": "promotion_effect",
+      "expected": "promotion_effect",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 91,
+      "agent_segment": {
+        "carrier": "CarrierC",
+        "region": "South"
+      },
+      "expected_segment": null,
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 599,
+      "agent_s2_context_tokens": 604,
+      "log": "logs/trace-eval-q27.jsonl",
+      "secs": 124.9,
+      "llm_calls_ok": 28,
+      "llm_calls_failed": 1
+    },
+    {
+      "qid": "q28",
+      "kind": "promotion_effect",
+      "expected": "promotion_effect",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 68,
+      "agent_segment": {
+        "carrier": "CarrierA",
+        "region": "West"
+      },
+      "expected_segment": null,
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 400,
+      "agent_s2_context_tokens": 407,
+      "log": "logs/trace-eval-q28.jsonl",
+      "secs": 44.19,
+      "llm_calls_ok": 28,
+      "llm_calls_failed": 0
+    },
+    {
+      "qid": "q29",
+      "kind": "noisy_breach",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 73,
+      "agent_segment": {
+        "carrier": "CarrierA",
+        "region": "South"
+      },
+      "expected_segment": {
+        "carrier": "CarrierA",
+        "region": "South"
+      },
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 628,
+      "agent_s2_context_tokens": 634,
+      "log": "logs/trace-eval-q29.jsonl",
+      "secs": 152.75,
+      "llm_calls_ok": 28,
+      "llm_calls_failed": 1
+    },
+    {
+      "qid": "q30",
+      "kind": "noisy_breach",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 73,
+      "agent_segment": {
+        "carrier": "CarrierC",
+        "region": "North"
+      },
+      "expected_segment": {
+        "carrier": "CarrierC",
+        "region": "North"
+      },
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 631,
+      "agent_s2_context_tokens": 636,
+      "log": "logs/trace-eval-q30.jsonl",
+      "secs": 101.46,
+      "llm_calls_ok": 29,
+      "llm_calls_failed": 0
+    },
+    {
+      "qid": "q31",
+      "kind": "multi_cause",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 100,
+      "agent_segment": {
+        "carrier": "CarrierB",
+        "region": "East"
+      },
+      "expected_segment": {
+        "carrier": "CarrierB",
+        "region": "East"
+      },
+      "agent_secondary": {
+        "carrier": "CarrierA",
+        "region": "West"
+      },
+      "expected_secondary": {
+        "carrier": "CarrierA",
+        "region": "West"
+      },
+      "resolution": "resolved",
+      "baseline": "error",
+      "baseline_context_tokens": 625,
+      "agent_s2_context_tokens": 628,
+      "log": "logs/trace-eval-q31.jsonl",
+      "secs": 282.95,
+      "llm_calls_ok": 25,
+      "llm_calls_failed": 2
+    },
+    {
+      "qid": "q32",
+      "kind": "multi_cause",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 85,
+      "agent_segment": {
+        "carrier": "CarrierA",
+        "region": "North"
+      },
+      "expected_segment": {
+        "carrier": "CarrierA",
+        "region": "North"
+      },
+      "agent_secondary": null,
+      "expected_secondary": {
+        "carrier": "CarrierC",
+        "region": "South"
+      },
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 724,
+      "agent_s2_context_tokens": 734,
+      "log": "logs/trace-eval-q32.jsonl",
+      "secs": 202.5,
+      "llm_calls_ok": 29,
+      "llm_calls_failed": 2
+    },
+    {
+      "qid": "q33",
+      "kind": "noisy_breach_with_date_promo_trap",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 73,
+      "agent_segment": {
+        "carrier": "CarrierC",
+        "region": "East"
+      },
+      "expected_segment": {
+        "carrier": "CarrierC",
+        "region": "East"
+      },
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 662,
+      "agent_s2_context_tokens": 668,
+      "log": "logs/trace-eval-q33.jsonl",
+      "secs": 81.99,
+      "llm_calls_ok": 28,
+      "llm_calls_failed": 0
+    },
+    {
+      "qid": "q34",
+      "kind": "noisy_negative_distractor",
+      "expected": "none",
+      "agent": "seasonality",
+      "agent_status": "success",
+      "agent_confidence": 62,
+      "agent_segment": {},
+      "expected_segment": null,
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 262,
+      "agent_s2_context_tokens": 271,
+      "log": "logs/trace-eval-q34.jsonl",
+      "secs": 213.72,
+      "llm_calls_ok": 15,
+      "llm_calls_failed": 2
+    },
+    {
+      "qid": "q35",
+      "kind": "noisy_seasonality",
+      "expected": "seasonality",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 73,
+      "agent_segment": {
+        "carrier": "CarrierB",
+        "region": "North"
+      },
+      "expected_segment": null,
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 708,
+      "agent_s2_context_tokens": 708,
+      "log": "logs/trace-eval-q35.jsonl",
+      "secs": 55.48,
+      "llm_calls_ok": 29,
+      "llm_calls_failed": 0
+    },
+    {
+      "qid": "q36",
+      "kind": "noisy_promotion_effect",
+      "expected": "promotion_effect",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 68,
+      "agent_segment": {
+        "carrier": "CarrierB",
+        "region": "North"
+      },
+      "expected_segment": null,
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 688,
+      "agent_s2_context_tokens": 698,
+      "log": "logs/trace-eval-q36.jsonl",
+      "secs": 63.66,
+      "llm_calls_ok": 30,
+      "llm_calls_failed": 0
+    },
+    {
+      "qid": "q37",
+      "kind": "weak_noisy_breach",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 73,
+      "agent_segment": {
+        "carrier": "CarrierB",
+        "region": "West"
+      },
+      "expected_segment": {
+        "carrier": "CarrierB",
+        "region": "West"
+      },
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "error",
+      "baseline_context_tokens": 506,
+      "agent_s2_context_tokens": 516,
+      "log": "logs/trace-eval-q37.jsonl",
+      "secs": 239.17,
+      "llm_calls_ok": 29,
+      "llm_calls_failed": 0
+    },
+    {
+      "qid": "q38",
+      "kind": "close_multi_cause",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 100,
+      "agent_segment": {
+        "carrier": "CarrierA",
+        "region": "South"
+      },
+      "expected_segment": {
+        "carrier": "CarrierC",
+        "region": "East"
+      },
+      "agent_secondary": null,
+      "expected_secondary": {
+        "carrier": "CarrierA",
+        "region": "South"
+      },
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 635,
+      "agent_s2_context_tokens": 644,
+      "log": "logs/trace-eval-q38.jsonl",
+      "secs": 149.74,
+      "llm_calls_ok": 26,
+      "llm_calls_failed": 1
+    },
+    {
+      "qid": "q39",
+      "kind": "breach_inside_broad_rise",
+      "expected": "carrier_sla_breach",
+      "agent": "carrier_sla_breach",
+      "agent_status": "success",
+      "agent_confidence": 85,
+      "agent_segment": {
+        "carrier": "CarrierA",
+        "region": "West"
+      },
+      "expected_segment": {
+        "carrier": "CarrierA",
+        "region": "West"
+      },
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "resolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 588,
+      "agent_s2_context_tokens": 592,
+      "log": "logs/trace-eval-q39.jsonl",
+      "secs": 115.24,
+      "llm_calls_ok": 30,
+      "llm_calls_failed": 1
+    },
+    {
+      "qid": "q40",
+      "kind": "noisy_negative_heavy_missing",
+      "expected": "none",
+      "agent": "none",
+      "agent_status": "partial",
+      "agent_confidence": 40,
+      "agent_segment": null,
+      "expected_segment": null,
+      "agent_secondary": null,
+      "expected_secondary": null,
+      "resolution": "unresolved",
+      "baseline": "carrier_sla_breach",
+      "baseline_context_tokens": 104,
+      "agent_s2_context_tokens": 115,
+      "log": "logs/trace-eval-q40.jsonl",
+      "secs": 61.52,
+      "llm_calls_ok": 5,
+      "llm_calls_failed": 1
+    }
+  ]
+}

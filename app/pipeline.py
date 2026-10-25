@@ -12,6 +12,8 @@ from .agents.core import LLMCtx
 from .agents import llm_steps
 from .checks.claims import check_narrative
 from .trace import Tracer
+from .retrieval.agentic import AgenticRetriever
+from . import embeddings
 from .memo import render_memo
 
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
@@ -90,8 +92,11 @@ def run(inp: dict, run_id: str | None = None) -> dict:
 
 
 def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
+    for k in embeddings.STATS:
+        embeddings.STATS[k] = 0
     mem = HMem(bridge)
     planner, retr, s1 = Planner(), Retriever(db), S1Filter()
+    agentic = AgenticRetriever(db, retr, log=lambda ev_, **d: tr.log(retr.name, ev_, **d))
     ev, analyst, writer, gate = EvidenceEvaluator(db, retr), CauseAnalyst(db, q), Writer(db), ClaimGate(db)
     st = {"feedback": None, "verdicts": [], "rounds": [], "done": False}
 
@@ -100,8 +105,8 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
         n0 = len(ctx.calls)
         hyps = planner.plan(q, mem, st["feedback"], ctx, carryover or mem.recall(q["query"]))
         tr.log(planner.name, "hypotheses", round=rnd, hypotheses=[h["id"] for h in hyps], revised=bool(st["feedback"]))
-        chunks = retr.retrieve(hyps, q)
-        tr.log(retr.name, "retrieved", round=rnd, chunks=len(chunks))
+        chunks = agentic.retrieve(hyps, q, mem, ctx, st["feedback"], rnd)
+        tr.log(retr.name, "retrieved", round=rnd, chunks=len(chunks), agentic=dict(agentic.stats))
         kept, proj, act = s1.run(chunks, mem, ctx=ctx, question=q["query"])
         st["rounds"].append({"round": rnd, "s1_projected_tokens": proj, "s1_actual_tokens": act})
         tr.log(s1.name, "filtered", round=rnd, kept=len(kept), dropped=len(chunks) - len(kept), projected_tokens=proj, actual_tokens=act)
@@ -112,6 +117,7 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
         for c in ctx.calls[n0:]:
             tr.log(c["agent"], "model_call", round=rnd, call=c)
         st["feedback"] = res["feedback"]
+        mem.flush()
         summary = "; ".join(f"{v['hyp']}={v['verdict']}" for v in res["verdicts"])
         if not st["feedback"] or time.time() - t0 > TIMEOUTS["run_s"]:
             st["done"] = not st["feedback"]
@@ -195,6 +201,9 @@ def _run(inp, q, db, bridge, tr, ctx, t0, run_id) -> dict:
            "model_calls": ctx.calls, "resolution": "resolved" if status == "success" else "unresolved",
            "unresolved_reasons": reasons if status != "success" else [], "open_hypotheses": open_h,
            "refuted_hypotheses": sorted({v["hyp"] for v in st["verdicts"] if v["verdict"] == "refutes"}),
+           "retrieval": {"mode": "agentic", "stats": agentic.stats, "embed_model": embeddings.model_name(),
+                         "embed_backend": embeddings.backend(), "embed_stats": dict(embeddings.STATS),
+                         "hmem_embedder": mem.embedder, "hmem_embed_stats": mem.embed_stats},
            "evidence_graph": {"backend": mem.backend, "nodes": len(mem.nodes), "edges": len(mem.edges),
                               "graph": {"nodes": list(mem.nodes.values()), "edges": mem.edges},
                               "hmem_ledger_entries": len(ledger["entries"]), "hmem_ledger_file": f"logs/{lpath.name}"}}
