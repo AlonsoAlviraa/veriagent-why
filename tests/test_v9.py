@@ -69,6 +69,10 @@ def test_crc_controls_risk_offline():
 
 def test_gfolds_table_disjoint():
     import json
+    import pytest
+    from pathlib import Path
+    if not Path("data/bench/tatqa/tatqa_dataset_train.json").exists():
+        pytest.skip("TAT-QA train not downloaded (data/bench is gitignored)")
     from bench.v9_report import gfolds, table_of
     ids = json.load(open("docs/v9/design.json"))["ids"][:120]
     t = table_of(); fo = gfolds(ids)

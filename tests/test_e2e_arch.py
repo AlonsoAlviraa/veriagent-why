@@ -72,7 +72,8 @@ def test_deadline_makes_model_calls_fail_fast(monkeypatch):
 
 def test_app_run_writes_audit_json_next_to_memo():
     res = pipeline.run(INP, "e2e-audit")
-    d = ROOT / "logs" / "e2e-audit"
+    from app.config import log_dir
+    d = log_dir() / "e2e-audit"
     a = json.loads((d / "audit.json").read_text())
     assert (d / "memo.md").exists()
     for k in ("planner", "sql", "evidence", "requery", "cause_analyst", "writer", "claim_gate"):

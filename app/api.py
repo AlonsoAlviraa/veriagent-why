@@ -127,4 +127,4 @@ def verify_ep(req: dict):
             db = get_backend(dataset)
     except Exception as e:
         raise HTTPException(503, f"backend unavailable: {type(e).__name__}")
-    return verify_claims(db, claims, run_id=rid, log_dir=LOGS)
+    return verify_claims(db, claims, run_id=rid, log_dir=log_dir())

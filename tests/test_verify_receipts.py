@@ -2,7 +2,8 @@
 import json, shutil, subprocess, sys
 from pathlib import Path
 from fastapi.testclient import TestClient
-from app.api import app, LOGS
+from app.api import app
+from app.config import log_dir
 from app.adapters.zetaris import SnapshotBackend, VIEWS, badge, schema, SampleBackend
 
 ROOT = Path(__file__).parents[1]
@@ -29,11 +30,11 @@ def test_verify_endpoint_reexecutes_and_logs(tmp_path):
     assert len(v["receipts"]) == len(r["claims"])
     for rc in v["receipts"]:
         assert rc["sql"].startswith("SELECT") and rc["db_value"] is not None and rc["executed_at"]
-    ev = [json.loads(l) for l in (LOGS / f"trace-{rid}.jsonl").read_text().splitlines()]
+    ev = [json.loads(l) for l in (log_dir() / f"trace-{rid}.jsonl").read_text().splitlines()]
     ver = [e for e in ev if e["event"] == "verify"]
     assert len(ver) == len(r["claims"]) and all(e["agent"] == "verifier" for e in ver)
     v2 = C.post("/verify", json={"run_id": rid}).json()  # each call re-executes and logs again
-    assert sum(1 for l in (LOGS / f"trace-{rid}.jsonl").read_text().splitlines() if '"verify"' in l) == 2 * len(r["claims"])
+    assert sum(1 for l in (log_dir() / f"trace-{rid}.jsonl").read_text().splitlines() if '"verify"' in l) == 2 * len(r["claims"])
     assert v2["receipts"][0]["executed_at"] >= v["receipts"][0]["executed_at"]
 
 
