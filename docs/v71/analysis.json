@@ -1,0 +1,787 @@
+{
+ "n_paired": 400,
+ "agent_mk": {
+  "em": 0.6875,
+  "f1": 0.7826,
+  "sem": 0.795,
+  "coverage": 0.995,
+  "selective_em": 0.691
+ },
+ "agent_mk71": {
+  "em": 0.5875,
+  "f1": 0.6789,
+  "sem": 0.765,
+  "coverage": 0.9925,
+  "selective_em": 0.5919
+ },
+ "mcnemar_em": {
+  "fixed": 24,
+  "regressed": 64,
+  "exact_p": 0.0,
+  "delta": -0.1,
+  "ci95": [
+   -0.145,
+   -0.055
+  ]
+ },
+ "mcnemar_sem": {
+  "fixed": 32,
+  "regressed": 44,
+  "exact_p": 0.2067,
+  "delta": -0.03,
+  "ci95": [
+   -0.0725,
+   0.0125
+  ]
+ },
+ "v7_error_categories(n,fixed_by_v71)": {
+  "span": [
+   46,
+   11
+  ],
+  "format_only(sem ok)": [
+   17,
+   1
+  ],
+  "arithmetic/other": [
+   14,
+   2
+  ],
+  "scale": [
+   42,
+   6
+  ],
+  "sign": [
+   4,
+   3
+  ],
+  "empty": [
+   2,
+   1
+  ]
+ },
+ "regressions": [
+  [
+   "e5073c13-40b",
+   "58.2",
+   "2",
+   "million",
+   [
+    "$58.2 million"
+   ],
+   ""
+  ],
+  [
+   "abfc722d-623",
+   "2019",
+   "3.1",
+   "",
+   [
+    "2019"
+   ],
+   ""
+  ],
+  [
+   "cade62e4-ed6",
+   "JOSHUA T. DUCKWORTH",
+   "JOSHUA T. DUCKWORTH, Vice President of Treasury, Corporate Finance and Inventor Relations since October 2017",
+   "",
+   [
+    "Joshua T. Duckworth"
+   ],
+   ""
+  ],
+  [
+   "01c49bda-042",
+   "8.0 million",
+   "In December 2019, the Company made a minority investment in a privately-held company, Talespin, Inc., for $8.0 million, representing approximately 13% equity ownership.",
+   "million",
+   [
+    "$8.0 million"
+   ],
+   ""
+  ],
+  [
+   "7d4f566c-eef",
+   "social networks, Internet platform, technology and other Internet-related business",
+   "new investments and additional investments with an aggregate amount of approximately RMB38,810 million in listed and unlisted entities mainly operating in the United States, the PRC and other Asian countries. These companies are principally engaged in social networks, Internet platform, technology and other Internet-related business.",
+   "",
+   [
+    "social networks, Internet platform, technology and other Internet-related business"
+   ],
+   ""
+  ],
+  [
+   "266458b4-d4f",
+   "40695",
+   "40695",
+   "percent",
+   40695,
+   "thousand"
+  ],
+  [
+   "7e26c3ac-012",
+   [
+    "$2.3 million",
+    "$2.1 million",
+    "$1.9 million"
+   ],
+   [
+    "$2.3 million",
+    "$2.1 million",
+    "$1.9 million"
+   ],
+   "percent",
+   [
+    "$2.3 million",
+    "$2.1 million",
+    "$1.9 million"
+   ],
+   ""
+  ],
+  [
+   "c0d6605c-50c",
+   "-21",
+   "-21",
+   "percent",
+   -21,
+   "million"
+  ],
+  [
+   "ebbf3324-49c",
+   "2018",
+   "8078870",
+   "",
+   [
+    "2018"
+   ],
+   ""
+  ],
+  [
+   "4be47a3f-799",
+   "legally binding lease payments for leases signed but not yet commenced of $361 million",
+   "Total lease liabilities as of January 31, 2020 excluded legally binding lease payments for leases signed but not yet commenced of $361 million.",
+   "",
+   [
+    "legally binding lease payments for leases signed but not yet commenced of $361 million."
+   ],
+   ""
+  ],
+  [
+   "51a74718-17b",
+   "those attributable to good leavers as defined by the scheme rules",
+   "Shares released prior to the vesting date relate to those attributable to good leavers as defined by the scheme rules.",
+   "",
+   [
+    "those attributable to good leavers as defined by the scheme rules"
+   ],
+   ""
+  ],
+  [
+   "76d92a43-d9c",
+   "2017",
+   "980",
+   "thousand",
+   [
+    "2017"
+   ],
+   ""
+  ],
+  [
+   "1046abe8-e59",
+   "4697",
+   "-4697",
+   "",
+   [
+    "4,697"
+   ],
+   ""
+  ],
+  [
+   "98bd5d62-dd9",
+   "2018",
+   "283710",
+   "thousand",
+   [
+    "2018"
+   ],
+   ""
+  ],
+  [
+   "2e2fd6d3-bd8",
+   "1.8 million",
+   "1779",
+   "thousand",
+   [
+    "$1.8 million"
+   ],
+   ""
+  ],
+  [
+   "4ea525e9-17e",
+   "\u00a33.5 million",
+   "\u00a33.5 million (2018: \u00a33.5 million)",
+   "million",
+   [
+    "\u00a33.5 million"
+   ],
+   ""
+  ],
+  [
+   "e5417b8b-e0f",
+   [
+    "35121",
+    "30973"
+   ],
+   "35,121 and 30,973",
+   "",
+   [
+    "35,121",
+    "30,973"
+   ],
+   "thousand"
+  ],
+  [
+   "5c7d8918-608",
+   [
+    "19911",
+    "15916"
+   ],
+   "3995",
+   "thousand",
+   [
+    "19,911",
+    "15,916"
+   ],
+   "thousand"
+  ],
+  [
+   "fe7894b9-6cb",
+   "510",
+   "Depreciation expense was $510 million, $487 million, and $442 million in fiscal 2019, 2018, and 2017, respectively.",
+   "million",
+   [
+    "$510 million"
+   ],
+   ""
+  ],
+  [
+   "f4ef6a32-075",
+   "2019",
+   "592",
+   "thousand",
+   [
+    "2019"
+   ],
+   ""
+  ],
+  [
+   "ea2aaee8-ab1",
+   [
+    "2019",
+    "2018"
+   ],
+   [
+    "302",
+    "148"
+   ],
+   "million",
+   [
+    "2019",
+    "2018"
+   ],
+   ""
+  ],
+  [
+   "7ded8eab-e26",
+   "148.6 million",
+   "$148.6 million",
+   "million",
+   [
+    "$148.6 million"
+   ],
+   ""
+  ],
+  [
+   "cdd25c08-9a9",
+   "2019",
+   "17",
+   "million",
+   [
+    "2019"
+   ],
+   ""
+  ],
+  [
+   "8ff86c1c-f76",
+   [
+    "2019",
+    "2018"
+   ],
+   [
+    "8840",
+    "8217"
+   ],
+   "thousand",
+   [
+    "2018",
+    "2019"
+   ],
+   ""
+  ],
+  [
+   "ec360d0b-1c1",
+   "2018",
+   "86.8",
+   "",
+   [
+    "2018"
+   ],
+   ""
+  ],
+  [
+   "f4142349-eb7",
+   "2019",
+   "2019",
+   "million",
+   [
+    "2019"
+   ],
+   ""
+  ],
+  [
+   "2f016f6c-b7c",
+   [
+    "2018",
+    "2019"
+   ],
+   [
+    "2017",
+    "2018",
+    "2019"
+   ],
+   "thousand",
+   [
+    "2018",
+    "2019"
+   ],
+   ""
+  ],
+  [
+   "d1dbf58b-a4b",
+   "The excess of the purchase consideration over the fair value of net tangible and identifiable intangible assets acquired",
+   "The excess of the purchase consideration over the fair value of net tangible and identifiable intangible assets acquired was recorded as goodwill.",
+   "",
+   [
+    "The excess of the purchase consideration over the fair value of net tangible and identifiable intangible assets acquired"
+   ],
+   ""
+  ],
+  [
+   "234336c9-fc8",
+   "533",
+   "Free Cash Flow was positive $497 million in 2019",
+   "",
+   [
+    "$533 million"
+   ],
+   ""
+  ],
+  [
+   "d441a136-016",
+   "equity-settled share-based payments granted to the employees of subsidiary companies",
+   "The additions in the year and prior year relate to equity-settled share-based payments granted to the employees of subsidiary companies.",
+   "",
+   [
+    "equity-settled share-based payments granted to the employees of subsidiary companies."
+   ],
+   ""
+  ],
+  [
+   "eb726f13-31b",
+   [
+    "34",
+    "11"
+   ],
+   "23",
+   "percent",
+   [
+    "34%",
+    "11%"
+   ],
+   ""
+  ],
+  [
+   "234fa3d2-2a7",
+   "if underlying assumptions were to change such that our estimated profit rate at completion for all fixed-price contracts accounted for under the cost-to-cost percentage-of-completion method was higher or lower by one percentage point",
+   "our estimated profit rate at completion for all fixed-price contracts accounted for under the cost-to-cost percentage-of-completion method was higher or lower by one percentage point",
+   "",
+   [
+    "if underlying assumptions were to change such that our estimated profit rate at completion for all fixed-price contracts accounted for under the cost-to-cost percentage-of-completion method was higher or lower by one percentage point"
+   ],
+   ""
+  ],
+  [
+   "9691ce1e-eaa",
+   [
+    "32",
+    "13"
+   ],
+   "45",
+   "percent",
+   [
+    "32%",
+    "13%"
+   ],
+   ""
+  ],
+  [
+   "a9d3a57e-89a",
+   "12",
+   "1",
+   "percent",
+   12,
+   "percent"
+  ],
+  [
+   "224ca72c-105",
+   "572",
+   "874",
+   "million",
+   [
+    "$572"
+   ],
+   "million"
+  ],
+  [
+   "edc88710-38a",
+   "41837",
+   "Derivative financial instruments, non-current liability",
+   "",
+   [
+    "41,837"
+   ],
+   "thousand"
+  ],
+  [
+   "347d0777-a0d",
+   [
+    "2019",
+    "2018",
+    "2017"
+   ],
+   [
+    "2019",
+    "2018",
+    "2017"
+   ],
+   "thousand",
+   [
+    "2017",
+    "2018",
+    "2019"
+   ],
+   ""
+  ],
+  [
+   "fb827df9-c81",
+   "tax adjustments for acquisitions in 2019 and 2018",
+   "Reclassifications and other during the year ended December 31, 2019 were due primarily to tax adjustments for acquisitions in 2019 and 2018.",
+   "",
+   [
+    "tax adjustments for acquisitions in 2019 and 2018"
+   ],
+   ""
+  ],
+  [
+   "f2953826-279",
+   "2018",
+   [
+    "510762",
+    "601256"
+   ],
+   "thousand",
+   [
+    "2018"
+   ],
+   ""
+  ],
+  [
+   "de34ea96-2a3",
+   "by comparison against country specific AA corporate indices, adjusted for duration of the obligation",
+   "international discount rates were determined by comparison against country specific AA corporate indices, adjusted for duration of the obligation.",
+   "",
+   [
+    "By comparison against country specific AA corporate indices, adjusted for duration of the obligation."
+   ],
+   ""
+  ],
+  [
+   "3c07907a-cbd",
+   "to reduce concentration risk",
+   "to the extent possible and practical, interest rate swaps are entered into with different counterparties to reduce concentration risk",
+   "",
+   [
+    "to reduce concentration risk."
+   ],
+   ""
+  ],
+  [
+   "6aeb0681-de0",
+   [
+    "2019",
+    "2018"
+   ],
+   [
+    "$19.5 million in 2019 and $20.8 million in 2018"
+   ],
+   "",
+   [
+    "2019",
+    "2018"
+   ],
+   ""
+  ],
+  [
+   "9fadeec1-5d5",
+   "1 million",
+   "Potential shares from outstanding employee equity awards totaling 1 million, 1 million and 6 million for fiscal 2019, 2018 and 2017, respectively, were excluded from the diluted net income per share calculations as their inclusion would have been anti-dilutive.",
+   "",
+   [
+    "1"
+   ],
+   "million"
+  ],
+  [
+   "e08bf359-5dc",
+   "38.24",
+   "",
+   "",
+   38.24,
+   "percent"
+  ],
+  [
+   "29924dd8-364",
+   "\u00a313.0 million",
+   "\u00a313.0 million",
+   "million",
+   [
+    "\u00a313.0 million"
+   ],
+   ""
+  ],
+  [
+   "3109048c-86f",
+   "Apple",
+   "the Company\u2019s largest customer, Apple represented 17.6%, 13.1% and 10.5% of consolidated net revenues, respectively, reported in the ADG, AMS and MDG segments.",
+   "",
+   [
+    "Apple"
+   ],
+   ""
+  ],
+  [
+   "81816121-8ac",
+   "2018",
+   "In 2018, IMFT discontinued production of NAND and subsequent to that time manufactured 3D XPoint memory.",
+   "",
+   [
+    "2018"
+   ],
+   ""
+  ],
+  [
+   "17fa34ee-af9",
+   "269",
+   "Provision for losses on accounts receivable",
+   "",
+   [
+    "269"
+   ],
+   "thousand"
+  ],
+  [
+   "6cd013f3-306",
+   [
+    "3800",
+    "6690"
+   ],
+   "$3,800 and $6,690",
+   "",
+   [
+    "$3,800",
+    "$6,690"
+   ],
+   ""
+  ],
+  [
+   "62813488-b5b",
+   "2.5 million",
+   "$2.5 million",
+   "percent",
+   [
+    "$2.5 million"
+   ],
+   ""
+  ],
+  [
+   "94d96afd-4f9",
+   "commitments from customers to purchase goods and/or services that will ultimately result in recognised revenue",
+   "Order intake represents commitments from customers to purchase goods and/or services that will ultimately result in recognised revenue.",
+   "",
+   [
+    "commitments from customers to purchase goods and/or services that will ultimately result in recognised revenue."
+   ],
+   ""
+  ],
+  [
+   "07ec204e-392",
+   "-22.26",
+   "",
+   "",
+   -22.26,
+   "percent"
+  ],
+  [
+   "38d1e9f8-52c",
+   "the sum of the current and deferred taxes",
+   "Income tax expense represents the sum of the current and deferred taxes.",
+   "",
+   [
+    "sum of the current and deferred taxes."
+   ],
+   ""
+  ],
+  [
+   "ec2b4644-832",
+   "where future recoverability is uncertain",
+   "Corporation tax losses are not recognised where future recoverability is uncertain.",
+   "",
+   [
+    "where future recoverability is uncertain."
+   ],
+   ""
+  ],
+  [
+   "4641b00e-c26",
+   "taxable revenue bonds due to the State of Alabama Industrial Development Authority",
+   "Total debt outstanding consisted of taxable revenue bonds due to the State of Alabama Industrial Development Authority.",
+   "",
+   [
+    "taxable revenue bonds due to the State of Alabama Industrial Development Authority."
+   ],
+   ""
+  ],
+  [
+   "37e6a57d-412",
+   [
+    "2019",
+    "2018",
+    "2017"
+   ],
+   [
+    "2019",
+    "2018",
+    "2017"
+   ],
+   "thousand",
+   [
+    "2019",
+    "2018",
+    "2017"
+   ],
+   ""
+  ],
+  [
+   "d0ed80ce-7ce",
+   "2018",
+   [
+    "2019",
+    "2018"
+   ],
+   "thousand",
+   [
+    "2018"
+   ],
+   ""
+  ],
+  [
+   "0c1736a6-bc4",
+   "36.5 million",
+   "Federal and state income taxes of $36.5 million, $2.1 million, and $3.7 million were paid in fiscal years 2019, 2018, and 2017, respectively.",
+   "million",
+   [
+    "$36.5 million"
+   ],
+   ""
+  ],
+  [
+   "b1b68555-048",
+   [
+    "2019",
+    "2018"
+   ],
+   [
+    "2019",
+    "2018"
+   ],
+   "million",
+   [
+    "2019",
+    "2018"
+   ],
+   ""
+  ],
+  [
+   "1ed5102e-125",
+   "2018",
+   "268",
+   "thousand",
+   [
+    "2018"
+   ],
+   ""
+  ],
+  [
+   "b8a698d2-152",
+   "January 1, 2018",
+   "The Company adopted ASC 606 effective January 1, 2018 using the modified retrospective method.",
+   "",
+   [
+    "January 1, 2018"
+   ],
+   ""
+  ],
+  [
+   "823e5a6b-39c",
+   "2019",
+   "56",
+   "million",
+   [
+    "2019"
+   ],
+   ""
+  ],
+  [
+   "d3be0784-57f",
+   "2019",
+   "8551",
+   "thousand",
+   [
+    "2019"
+   ],
+   ""
+  ],
+  [
+   "81753c29-317",
+   "2019",
+   "0.9",
+   "",
+   [
+    "2019"
+   ],
+   ""
+  ]
+ ],
+ "v71_blocked": 3
+}

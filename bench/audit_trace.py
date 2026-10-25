@@ -538,6 +538,8 @@ def write_item_trace(row: dict, results_path: Path, data: Path, root: Path, min_
     d.mkdir(parents=True, exist_ok=True)
     safe = re.sub(r"[^A-Za-z0-9_.-]", "_", str(row["id"]))
     t = build(row, Path(results_path), data, {})
+    if isinstance(row.get("output"), dict) and row["output"].get("v71"):  # V7.1: every gate decision with its reason
+        t["v71"] = row["output"]["v71"]
     p = d / f"{safe}.audit.json"
     p.write_text(json.dumps(t, indent=1, ensure_ascii=False, default=str))
     gz = None

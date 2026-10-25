@@ -185,6 +185,9 @@ def main(argv=None):
                     rec["scores"]["em"], rec["scores"]["f1"] = TQ.item_em(d, t, res)
                     rec["scores"]["em_raw"], rec["scores"]["f1_raw"] = TQ.item_em(d, t, res["raw"])
                 rec["explain"] = EX.tat_metrics(res, ctx)
+                from .semantic import semantic_correct  # secondary metric, declared; never replaces EM
+                ok, why = semantic_correct(res.get("answer"), res.get("scale"), t["q"]["answer"], t["q"]["scale"], t["q"]["answer_type"])
+                rec["scores"]["sem"], rec["scores"]["sem_rule"] = float(ok), why
                 rec["gold"] = {"answer": t["q"]["answer"], "scale": t["q"]["scale"], "answer_type": t["q"]["answer_type"], "answer_from": t["q"]["answer_from"]}
             rec["output"], rec["meter"] = res, sys_meter
             # fix (audit #4): "model" is the configured default; models_used is what was actually called (Super on routed items)
