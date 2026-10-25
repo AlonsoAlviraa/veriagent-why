@@ -1,0 +1,39 @@
+﻿{
+  "run_id": "example-001",
+  "status": "success",
+  "output": {
+    "summary": "Top cause: **carrier_sla_breach** in carrier=CarrierB, region=North (estimated share of the excess late shipments vs the baseline rate: 104%; above 100% means other segments improved).",
+    "artifacts": [
+      "logs\\memo-example-001.md",
+      "logs\\hmem-ledger-example-001.jsonl",
+      "logs\\report-example-001.json",
+      "logs\\memo-example-001.pdf"
+    ]
+  },
+  "agents": [
+    {
+      "name": "planner"
+    },
+    {
+      "name": "retriever"
+    },
+    {
+      "name": "s1_filter"
+    },
+    {
+      "name": "evidence_evaluator"
+    },
+    {
+      "name": "cause_analyst"
+    },
+    {
+      "name": "writer"
+    },
+    {
+      "name": "claim_gate"
+    }
+  ],
+  "trace_id": "a4828585df094fab",
+  "log_file": "logs\\trace-example-001.jsonl",
+  "execution_time_seconds": 74.909
+}

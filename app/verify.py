@@ -7,9 +7,10 @@ There is no cached or hardcoded verdict. Each call:
 4. appends one `verify` event per claim to logs/trace-<run_id>.jsonl, and
 5. returns a receipt with status green | red | unverifiable and the backend badge.
 
-A receipt is green only if the fresh value is within the Claim Gate tolerance AND every cited row
+A receipt is green only if the fresh value is within the Traceability Check tolerance AND every cited row
 still exists and matches. Anything else is red. Claims without a metric (e.g. narrative) are
-`unverifiable`, never green.
+`unverifiable`, never green. Green = reproducible from the data (traceability), NOT an independent check that the
+causal claim is true.
 """
 from __future__ import annotations
 import hashlib, json, time
@@ -67,4 +68,5 @@ def verify_claims(db, claims: list[dict], run_id: str | None = None, log_dir: Pa
     st = [r["status"] for r in receipts]
     return {"run_id": run_id, "backend": badge(db), "receipts": receipts,
             "summary": {"green": st.count("green"), "red": st.count("red"), "unverifiable": st.count("unverifiable")},
-            "all_green": bool(st) and all(s == "green" for s in st)}
+            "all_green": bool(st) and all(s == "green" for s in st),
+            "meaning": "green = the claim's SQL re-executed now and reproduced the printed number and cited rows (traceability/reproducibility, not correctness)"}

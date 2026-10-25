@@ -161,7 +161,7 @@ def run(it: dict, m, flags: set) -> dict:
         if not ctl.gate_retry(reasons, g, TQ.traceable(str(ans["answer"]), ctx)):
             break
         msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
-                       {"role": "user", "content": "Claim gate rejected: " + "; ".join(reasons) + ". Fix and answer again. " + fmt + TQ.QUOTE_RULE}]
+                       {"role": "user", "content": "Traceability check rejected: " + "; ".join(reasons) + ". Fix and answer again. " + fmt + TQ.QUOTE_RULE}]
     blocked = "g5b" in flags and any(d["verdict"] == "BLOCK" for d in D)
     p = TQ._pred(legacy, it)  # V7 deterministic scale/format post-step + V7 span rules, unchanged
     a = p["answer"]

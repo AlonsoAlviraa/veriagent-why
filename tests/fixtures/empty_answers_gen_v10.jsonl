@@ -1,0 +1,91 @@
+{"source": "gen_finqa_0.jsonl:147", "id": "genfinqa-738f425cf0297929", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_finqa_1.jsonl:77", "id": "genfinqa-4f9d76096b91c4f3", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_finqa_2.jsonl:63", "id": "genfinqa-ff3bedd2c5716268", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_finqa_2.jsonl:87", "id": "genfinqa-87904a837736d66c", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_finqa_3.jsonl:115", "id": "genfinqa-af7447aacbc0ec43", "answer": "", "expression": "301 - 665 - 448 + 84", "evidence": ["$ 665", "$ 84", "$ -448 ( 448 )", "$ 301"], "logged_gate_passed": true}
+{"source": "gen_finqa_3.jsonl:161", "id": "genfinqa-655d9566079aecda", "answer": "", "expression": "(217.56-78.53)/78.53*100", "evidence": ["discb | $ 78.53 | $ 162.82 | $ 225.95 | $ 217.56 |", "the graph assumes $ 100 originally invested on september 18 , 2008 , the date upon which our common stock began trading , in each of our series a common stock , series b common stock and series c common stock , the s&p 500 index , and the stock of our peer group companies , including reinvestment of dividends , for the period september 18 , 2008 through december 31 , 2008 and the years ended december 31 , 2009 , 2010 and 2011 ."], "logged_gate_passed": true}
+{"source": "gen_jfinqa_3.jsonl:19", "id": "genjfinqa-f22722512b697169", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_0.jsonl:5", "id": "gensecq-c56ee3ea4cc79e19", "answer": "", "expression": "", "evidence": ["(In thousands) | Three months ended 2026-06-30 | Three months ended 2025-06-30 | 6 months ended 2026-06-30 | 6 months ended 2025-06-30 |", "| Operating income (loss) | (43,838) | (61,217) | (103,351) | (126,457) |", "| Revenue | 45,689 | 20,923 | 71,907 | 29,905 |", ""], "logged_gate_passed": true}
+{"source": "gen_secq_0.jsonl:193", "id": "gensecq-aea4e9f3dc9dba09", "answer": "", "expression": "", "evidence": ["(In thousands) | Three months ended 2026-06-30 | Three months ended 2025-06-30 | 6 months ended 2026-06-30 | 6 months ended 2025-06-30 |", "| Operating income (loss) | (96,232) | 13,910 | (99,065) | 25,889 |", "| Revenue | 167,318 | 113,499 | 301,669 | 224,523 |"], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:5", "id": "gensecq-11bafe00ba3dbcac", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:19", "id": "gensecq-6cd647948d04823c", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:21", "id": "gensecq-6032f77a40e29879", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:29", "id": "gensecq-cfa73caec7e28372", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:31", "id": "gensecq-2205f072347e2536", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:33", "id": "gensecq-aee802d74e93b505", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:35", "id": "gensecq-9d27e62a27c7c601", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:41", "id": "gensecq-7fc3f0ff49e49a7e", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:47", "id": "gensecq-3864666ec4f23b2b", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:51", "id": "gensecq-b1b017efffa75b31", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:53", "id": "gensecq-6ed739eb9bfb59be", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:57", "id": "gensecq-f19b6d439cc30740", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:59", "id": "gensecq-b20f223cf5bd9b5e", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:61", "id": "gensecq-882a7768bcdb856d", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:69", "id": "gensecq-670282d9a625033f", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:77", "id": "gensecq-b5c2dd155b50214c", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:79", "id": "gensecq-fcc49288f6f570e8", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:81", "id": "gensecq-8a1ffa907330ea56", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:83", "id": "gensecq-7a75b0618246a7f2", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:87", "id": "gensecq-433864e9059c16b9", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:93", "id": "gensecq-fca8029bf027a512", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:103", "id": "gensecq-6a6bc813158d7c30", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:107", "id": "gensecq-41ab31c569fa0718", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:113", "id": "gensecq-293480678d8a7551", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:115", "id": "gensecq-1ea6c30e01e853c1", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:117", "id": "gensecq-9c355a1994fea028", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:123", "id": "gensecq-845713060ec989fd", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:131", "id": "gensecq-49ffa9b858ad72d2", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:135", "id": "gensecq-b69879d3b1b01e9f", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:139", "id": "gensecq-93af36148cc593e5", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:145", "id": "gensecq-dc3cb61f8a59266f", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:147", "id": "gensecq-8fc00da4b3e8a53a", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:149", "id": "gensecq-1c83fe9a548a3173", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:151", "id": "gensecq-7728e8e738404f11", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:157", "id": "gensecq-9d2ce16acf7396fc", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:159", "id": "gensecq-5647efadd39f777b", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:161", "id": "gensecq-d3abc0a804715214", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:167", "id": "gensecq-31f5d9797543c6cf", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:171", "id": "gensecq-fe3f21db434ebafd", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:177", "id": "gensecq-f738f68d004135e1", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:181", "id": "gensecq-afa20ef2e6d52012", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:183", "id": "gensecq-c287c4823d231423", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:187", "id": "gensecq-67ade7f13fe2b5e0", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:189", "id": "gensecq-bd286dd8676a6e6a", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:193", "id": "gensecq-20e3a65660afb99d", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_1.jsonl:199", "id": "gensecq-b630f6d4126cf40c", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_2.jsonl:75", "id": "gensecq-a589bf4869555035", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_2.jsonl:181", "id": "gensecq-0e737772f289e4c2", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_2.jsonl:191", "id": "gensecq-8dca4056e984750c", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_3.jsonl:13", "id": "gensecq-56ac8a03a4bad402", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_3.jsonl:39", "id": "gensecq-565d80e0d3967e0a", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_3.jsonl:67", "id": "gensecq-fffb24e343580933", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_3.jsonl:69", "id": "gensecq-a47f54ff5154e1df", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_3.jsonl:71", "id": "gensecq-a4a7f83ac5e65c7c", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_3.jsonl:83", "id": "gensecq-afe2f869d76252fe", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_3.jsonl:93", "id": "gensecq-748a8f960072df62", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_3.jsonl:97", "id": "gensecq-c98898d99f645b60", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_3.jsonl:107", "id": "gensecq-0be9f51f43af9005", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_3.jsonl:121", "id": "gensecq-69501e8ee9996874", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_3.jsonl:187", "id": "gensecq-79b08340bf5f12a6", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "gen_secq_3.jsonl:197", "id": "gensecq-a57eaa434e944bb4", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "hard_docfinqa_0.jsonl:35", "id": "harddf-8c4bfbba465b4e97", "answer": "", "expression": "198.27/100 - 1", "evidence": ["| Applied\\tMaterials | 100.00 | 121.04 | 96.67 | 171.69 | 343.16 | 198.27 |", "| S&P\\t500\\tIndex | 100.00 | 117.27 | 123.37 | 128.93 | 159.40 | 171.11 |", "| RDG\\tSemiconductor\\tComposite\\tIndex | 100.00 | 128.42 | 126.26 | 154.41 | 232.29 | 221.61 |"], "logged_gate_passed": true}
+{"source": "hard_docfinqa_1.jsonl:73", "id": "harddf-f2aedbd4abd849a1", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "hard_docfinqa_1.jsonl:89", "id": "harddf-03a6d8281413fcf4", "answer": "", "expression": "", "evidence": ["|  | December 31, 2018 | December 31, 2018 | December 31, 2017 |", "| :--- | :--- | :--- | :--- |", "|  | Target | Actual | Actual |", "|  | Asset Allocation | Asset Allocation | Asset Allocation |", "| Debt securities | 82% | 83% | 70% |", "| Equity securities | 18 | 17 | 30 |", "| Total | 100% | 100% | 100% |"], "logged_gate_passed": false}
+{"source": "hard_docfinqa_2.jsonl:43", "id": "harddf-473654335532ab5e", "answer": "", "expression": "", "evidence": ["Long-term | $3,137,946 | $3,131,116 | $67,349 | $(28,251) | $(32,268) | $3,137,946", "2012 | $155", "2013 | 155", "2014 | 148", "2015 | 119", "2016 | 83"], "logged_gate_passed": false}
+{"source": "hard_docfinqa_2.jsonl:111", "id": "harddf-498131a8c25deb27", "answer": "", "expression": "", "evidence": ["[P3] | Year | (a) | Entergy | | :--- | :--- | :--- | | 2018 | $30,458 | $30,458 | | 2019 | 31,159 | 31,159 | | 2020 | 31,876 | 31,876 | | 2021 | 32,609 | 32,609 | | 2022 | 10,180 | 10,180 | | Years thereafter | \u2014 | \u2014 | | Minimum lease payments | $136,282 | $136,282"], "logged_gate_passed": false}
+{"source": "hard_docfinqa_2.jsonl:119", "id": "harddf-c8b431cb5b1526e1", "answer": "", "expression": "", "evidence": ["[P7] |  | 2017 | 2016 |", "Average borrowings | $779 | $850 |", "Average borrowings decreased from $850 million in 2016 to $779 million in 2017, a decrease of $71 million, or 8.35%.", "13.52"], "logged_gate_passed": false}
+{"source": "hard_docfinqa_3.jsonl:3", "id": "harddf-d943b715772d207b", "answer": "", "expression": "325.1/1668.1*100", "evidence": ["As of December 31, 2006, $325.1 million principal amount of ATI 7.25% Notes remained outstanding.", "As of December 31, 2005, the outstanding debt under the ATI 12.25% Notes was $227.7 million face amount ($160.3 million accreted value, net of $7.2 million fair value allocated to warrants), respectively.", "As of December 31, 2006, $107.9 million principal amount of 3.25% Notes remained outstanding.", "As of December 31, 2005, the Company had $152.9 million outstanding under the 3.25% Notes, respectively.", "As of December 31, 2006, $252.2 million principal amount of 5.0% Notes remained outstanding.", "As of December 31, 2005, the outstanding debt under the ATI 12.25% Notes was $227.7 million face amount ($160.3 million accreted value, net of $7.2 million fair value allocated to warrants), respectively."], "logged_gate_passed": false}
+{"source": "hard_docfinqa_3.jsonl:9", "id": "harddf-434a9cc05a80ccf8", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "hard_docfinqa_3.jsonl:31", "id": "harddf-bc511e354bd64391", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "hard_docfinqa_3.jsonl:39", "id": "harddf-a2054e7bfb2f6bbd", "answer": "", "expression": "", "evidence": ["Unvested\tat\tDecember\t31,\t2017 | 1,226 | 78.29"], "logged_gate_passed": false}
+{"source": "hard_docfinqa_3.jsonl:75", "id": "harddf-7de6b66c161ef456", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "hard_docfinqa_4.jsonl:83", "id": "harddf-fc8ea1f103dda3b5", "answer": "", "expression": "", "evidence": ["| September\t1,\t2019\tthrough\tSeptember\t28,\t2019 | 342,313 | $113.39 | 338,534 | $2,174,639,499 |", "| September\t29,\t2019\tthrough\tNovember\t2,\t2019 | 1,023,202 | $109.32 | 949,531 | $2,070,927,831 |"], "logged_gate_passed": false}
+{"source": "hard_mhiertt_0.jsonl:99", "id": "hardmh-e31fafec9773f9fd", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "hard_mhiertt_0.jsonl:133", "id": "hardmh-9d3a80e2e352b63b", "answer": "", "expression": "(4070-3277)/3277*100", "evidence": ["[P63] Higher net income and changes in working capital combined to increase cash provided by operating activities in 2008 compared to 2007.", "[Table 3] Millions of Dollars | 2009 | 2008 | 2007 |", "Cash provided by operating activities | $3,234 | $4,070 | $3,277"], "logged_gate_passed": true}
+{"source": "hard_mhiertt_1.jsonl:91", "id": "hardmh-976a625505881f3e", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "hard_mhiertt_3.jsonl:105", "id": "hardmh-c3ad434f34a7b64f", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "hard_mhiertt_4.jsonl:47", "id": "hardmh-5fc0d0af543423dc", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "hard_mhiertt_4.jsonl:87", "id": "hardmh-1a2024e136753bd3", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "hard_mhiertt_5.jsonl:21", "id": "hardmh-04f011cc592cbc72", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "hard_mhiertt_5.jsonl:29", "id": "hardmh-0036ccd8a58c6f86", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}
+{"source": "hard_mhiertt_5.jsonl:99", "id": "hardmh-c4f625700eb7ae9e", "answer": "", "expression": "", "evidence": [], "logged_gate_passed": true}

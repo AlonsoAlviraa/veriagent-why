@@ -1,13 +1,15 @@
-# Slide deck outline (mandatory: 8 points, submission requirements §3.2)
-Rule: no API keys, credentials or personal data on any slide.
+# Slide deck content outline (8 mandatory points, official rules l.205)
+Rule: no API keys, credentials, login files or personal data on any slide. Same track wording as README and video:
+**Track 02, "The Agent That Can Explain Why"**. One user story throughout.
 
-1. **Problem and target users**: TODO
-2. **Solution**: TODO
-3. **Agent workflow / architecture**: TODO (diagram, agent roles, loops)
-4. **Technical stack**: TODO
-5. **How Zetaris and Meterless were used**: TODO
-6. **What was unique about our use of the sponsor technologies**: TODO
-7. **Product visuals**: TODO (screens, trace snippets, outputs)
-8. **Future enhancements**: TODO
+1. **Problem and target users.** An e-commerce ops analyst sees on-time delivery drop and must explain *why* before a meeting. Today: ad-hoc SQL, the first plausible story wins, and leading questions ("was it the promotion?") get confirmed.
+2. **Solution.** VeriAgent Why tests competing causes against data federated in Zetaris and writes a decision memo where every claim cites the rows it came from, with a deterministic confidence score and stated limits. It refuses a leading question when the data refutes it (planted promotion trap).
+3. **Agent workflow / architecture.** Diagram v6.3. Planner → Agentic Retriever (Zetaris SQL templates + hybrid retrieval) → S1 relevance filter → Evidence Evaluator (re-queries; can send the Planner back, max 3) → Cause Analyst → Writer → Traceability Check (back to Cause Analyst, max 2) → memo. Trace JSONL per run.
+4. **Technical stack.** Python orchestrator (no agent framework), FastAPI + web UI, DuckDB snapshot for SAMPLE_MODE, Zetaris JDBC, Node bridge to Meterless engines, Docker compose, pytest + CI.
+5. **How Zetaris and Meterless were used.** Zetaris: default data layer, five federated views (Postgres + REST), live session on the public Olist dataset (CC BY-NC-SA 4.0). Meterless: Nightshift is the primary model provider (pinned Nemotron 3.5 Lightning 30B / Nemotron 3 Ultra 550B, receipt per call with agent name); H-MEM holds the hypothesis/evidence graph and trust ledger; Markovian drives investigation rounds.
+6. **What is unique in our use of the sponsor tech.** Receipts are reproducible: the Traceability Check re-runs the cited query through Zetaris; changing one source row turns the claim red. Wording: "traceability, not truth".
+7. **Product visuals.** UI memo screen, trace snippet with send-back loop, mutation green → red → green, receipts table agent → model. Secondary: V7/V9 confidence layer (per-answer abstain decision from a frozen model).
+8. **Future enhancements and honest limits.** Limits: live agent 14/22 vs RAG 11/22 vs trivial rule 13/22; 140/171 wrong test500 answers passed the traceability check; V9 not better than cheap signals on hard sets, CRC fails on DocFinQA; narrative check over-flags 43%. Next: sign/scale/range checks, Markovian control in the app, a non-author evaluation set, more KPI families.
 
-Optional: NVIDIA and Cursor usage; results from the 3 sample runs; limitations.
+Optional slide: AI usage (Grok Bot coding agents; Cursor optional per the 22 Oct 2026 announcement) and pre-existing work (docs/PRE_EXISTING_WORK.md).
+Platform: to be chosen by Alonso (Google Slides or PowerPoint).

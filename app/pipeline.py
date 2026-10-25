@@ -1,5 +1,5 @@
 """Orchestrator: Planner -> Retriever -> S1 Filter -> Evidence Evaluator (loop to Planner, max 3)
--> Cause Analyst -> Writer -> Claim Gate (loop to Cause Analyst, max 2) -> memo + confidence."""
+-> Cause Analyst -> Writer -> Traceability Check (loop to Cause Analyst, max 2) -> memo + confidence."""
 from __future__ import annotations
 import os
 import re, sys, time, uuid
@@ -102,7 +102,14 @@ def run(inp: dict, run_id: str | None = None) -> dict:
         print(f"NOTE: SAMPLE MODE ({why}): no Zetaris; data is the SYNTHETIC DuckDB snapshot (same view names and SQL).", file=sys.stderr)
     tr.log("orchestrator", "backend", data=db.name, meterless="bridge" if bridge else "local-fallback")
     tr.backends = ({"data": db.name, "meterless": "meterless-bridge (vendored engines via node)" if bridge else "local-fallback (NOT Meterless)", "llm_provider": prov})
-    from . import llm
+    from . import llm, nightshift as NS
+    NS.set_run(run_id, tr.path.parent)
+    if prov == "nightshift" and os.environ.get("NIGHTSHIFT_PIN_CHECK", "on").lower() != "off":
+        try:  # startup pin check: fail loudly if Nightshift routes anything other than the pinned models
+            tr.log("orchestrator", "pin_check", result=NS.check_pins(), receipts=NS.receipts_path().name)
+        except NS.PinMismatch as e:
+            tr.log("orchestrator", "pin_mismatch", error=str(e), receipts=NS.receipts_path().name)
+            raise
     llm.set_deadline(t0 + TIMEOUTS["run_s"])  # model calls past the 8-min cap fail fast -> deterministic fallback
     try:
         return _run(inp, q, db, bridge, tr, ctx, t0, run_id)

@@ -1,7 +1,7 @@
 """Deterministic confidence (the LLM never produces it).
 
 conf = round(100 * (0.45*C + 0.35*A + 0.20*(1-R)))
-C: share of ALL proposed claims (incl. blocked) with >=1 supporting row that passed the Claim Gate.
+C: share of ALL proposed claims (incl. blocked) with >=1 supporting row that passed the Traceability Check.
 A: share of views with relevant rows whose direction agrees with the top cause; A=0 and cap 50 if none.
 R: refuting / (supporting + refuting) edges for the top cause.
 Partial/unresolved runs are capped at 40.

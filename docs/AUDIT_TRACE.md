@@ -1,7 +1,7 @@
 # Audit trace (`audit.json`, schema `audit-trace/1`)
 
 One JSON document per benchmark case that shows the whole flow: what each step received, what the model or
-the controller decided and why, which evidence and claims survived the Claim Gate, how the final answer was
+the controller decided and why, which evidence and claims survived the Traceability Check, how the final answer was
 composed (including deterministic post-format transformations) and how it was scored.
 
 - Schema: [`docs/audit_trace.schema.json`](audit_trace.schema.json) (JSON Schema 2020-12).

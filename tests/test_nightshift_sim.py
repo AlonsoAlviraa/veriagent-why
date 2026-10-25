@@ -83,6 +83,7 @@ def test_app_client_talks_to_simulator(stack, monkeypatch):
     monkeypatch.setenv("NIGHTSHIFT_BASE_URL", base + "/v1")
     monkeypatch.delenv("NIGHTSHIFT_API_KEY", raising=False)
     monkeypatch.setenv("NIGHTSHIFT_API_KEY_FILE", str(tf))
+    monkeypatch.setenv("NIGHTSHIFT_PIN_CHECK", "off"); monkeypatch.setenv("NIGHTSHIFT_PIN_ENFORCE", "off")  # simulator is not Nightshift
     r = llm.complete([{"role": "user", "content": "ping"}], "s2", 5)
     assert r["content"] == "pong"
 

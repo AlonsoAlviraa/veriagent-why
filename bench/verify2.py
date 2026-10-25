@@ -7,7 +7,7 @@ So every config below keeps agent_mk unchanged (including its claim-gate re-ask)
   *_pot  (a) Program-of-Thought re-execution (PoT/PAL + CRITIC tool idea). An INDEPENDENT call writes named operands
          copied from the context and a Python arithmetic expression; we execute it (safe_eval) and check every operand
          against the context. Agreement with the agent answer -> high confidence; disagreement -> ONE re-ask with
-         both results, then the claim gate again. No LLM judge. Deterministic confidence.
+         both results, then the traceability check again. No LLM judge. Deterministic confidence.
   *_sc   (b) Self-consistency (Wang et al. 2023): agent_mk at T=0 + 2 samples at T=0.7; majority vote over the
          normalised (answer, scale); confidence = vote share (x gate). Only when all 3 disagree, ONE adjudication
          call picks a candidate (CRITIC-style, sees the tool results), never a free-form score.
@@ -59,7 +59,7 @@ def _key(a) -> str:
 
 # ============================================================ TAT-QA
 def _revise(it, m, prev: dict, feedback: str) -> tuple[dict, list[dict]]:
-    """One revision with feedback, then the SAME claim gate with its own re-ask (max 2 gate rounds, as agent)."""
+    """One revision with feedback, then the SAME traceability check with its own re-ask (max 2 gate rounds, as agent)."""
     from .tatqa import ANS, QUOTE_RULE, context, gate
     ctx = context(it["doc"])
     msgs = [{"role": "system", "content": "You are VeriAgent Why's evidence step. Answer only from the context; quote your evidence. " + ANS + QUOTE_RULE},
@@ -74,7 +74,7 @@ def _revise(it, m, prev: dict, feedback: str) -> tuple[dict, list[dict]]:
         if not reasons:
             break
         msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
-                       {"role": "user", "content": "Claim gate rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS + QUOTE_RULE}]
+                       {"role": "user", "content": "Traceability check rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS + QUOTE_RULE}]
     return out, log
 
 
@@ -284,7 +284,7 @@ def _ib_gate(out, view):
 
 
 def ib_pv(task, con, tables, m):
-    """(a) for InsightBench: the deterministic claim gate is the verifier; ALWAYS re-ask while claims fail
+    """(a) for InsightBench: the deterministic traceability check is the verifier; ALWAYS re-ask while claims fail
     (agent_vr's retried cases improved), max GATE_ROUNDS, no LLM score."""
     from .insightbench import agent_markov
     from .markov import Controller

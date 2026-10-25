@@ -37,6 +37,7 @@ def live(monkeypatch):
         for k in ("NO_PROXY", "no_proxy"):
             monkeypatch.setenv(k, "127.0.0.1,localhost")
         monkeypatch.setenv("SAMPLE_MODE", "false"); monkeypatch.setenv("LLM_PROVIDER", "nightshift")
+        monkeypatch.setenv("NIGHTSHIFT_PIN_CHECK", "off"); monkeypatch.setenv("NIGHTSHIFT_PIN_ENFORCE", "off")  # mock has no meterless block
         monkeypatch.setenv("NIGHTSHIFT_BASE_URL", f"http://127.0.0.1:{s.server_port}/v1")
         return s
     return setup

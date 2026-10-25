@@ -58,7 +58,7 @@ def insight_metrics(out: dict) -> dict:
 
 
 def _n(s: str) -> str:
-    """Quote normaliser shared by the Claim Gate and the citation scorer. Fix B3: thousands commas are removed
+    """Quote normaliser shared by the Traceability Check and the citation scorer. Fix B3: thousands commas are removed
     (was: replaced by a space, so a quote '4351' never matched context '4,351') and table '|' separators are
     ignored (a row quoted without pipes never matched the '| a | b |' table rendering)."""
     s = re.sub(r"(?<=\d),(?=\d{3}\b)", "", str(s).lower()).replace("|", " ")

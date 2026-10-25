@@ -6,7 +6,7 @@ Changes over agent_mk (same router, calculator steps, model, T=0, deterministic 
     "quote", "expression", "evidence", "confidence"} following TAT-QA's official answer format.
  2) Extractive spans: for span/multi-span the model returns the literal quote(s); the code cuts them from the source
     (table cell or paragraph) with fuzzy matching. Not found -> fall back to the model's value, logged in the trace.
- 5) Expanded claim gate (checks below), every decision with its reason in output["v71"]["gate"] -> audit.json.
+ 5) Expanded traceability check (checks below), every decision with its reason in output["v71"]["gate"] -> audit.json.
 Gold is never read here.
 """
 from __future__ import annotations
@@ -147,7 +147,7 @@ def _evidence_unit(evidence: list, doc: dict) -> str:
 
 
 def gate71(ans: dict, question: str, doc: dict, log_extract: list[dict]) -> list[dict]:
-    """Expanded claim gate. Each check -> {"check", "verdict": PASS|FAIL|BLOCK|SKIP, "reason"}. BLOCK = the answer
+    """Expanded traceability check. Each check -> {"check", "verdict": PASS|FAIL|BLOCK|SKIP, "reason"}. BLOCK = the answer
     must not be emitted as supported (empty answer / no evidence; fix for item c3ef3efb4a4e)."""
     a, at, sc = ans["answer"], ans.get("answer_type"), ans.get("scale") or ""
     ev = [str(e) for e in (ans.get("evidence") or []) if str(e).strip()]
@@ -284,7 +284,7 @@ def agent_mk71(it: dict, m) -> dict:
         if not retry:
             break
         msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
-                       {"role": "user", "content": "Claim gate rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS71 + TQ.QUOTE_RULE}]
+                       {"role": "user", "content": "Traceability check rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS71 + TQ.QUOTE_RULE}]
     blocked = any(d["verdict"] == "BLOCK" for d in D)
     ev = [str(e) for e in (flatten(ans["evidence"]) if isinstance(ans["evidence"], (list, dict)) else [ans["evidence"]])]
     a_final = flatten(ans["answer"]) if not blocked else ""

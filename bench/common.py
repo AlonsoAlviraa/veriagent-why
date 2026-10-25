@@ -1,4 +1,4 @@
-"""Shared helpers: deterministic numeric claim gate, BM25 re-use, Wilson CI, SQL guard."""
+"""Shared helpers: deterministic numeric traceability check, BM25 re-use, Wilson CI, SQL guard."""
 from __future__ import annotations
 import math, re
 
@@ -30,7 +30,7 @@ def supported(value: float, allowed: list[float], free_small_ints: bool = True) 
 
 
 def gate_text(text: str, sources: list[str]) -> list[float]:
-    """Deterministic claim gate: returns the numbers in `text` not traceable to `sources`."""
+    """Deterministic traceability check: returns the numbers in `text` not traceable to `sources`."""
     allowed = [x for s in sources for x in nums(s)]
     return [v for v in nums(text) if not supported(v, allowed)]
 
@@ -85,7 +85,7 @@ def derived_ok(value: float, pool: list[float]) -> bool:
 
 
 def gate_claim(text: str, sources: list[str], derived: bool = True) -> tuple[list[float], list[dict]]:
-    """Claim gate with derived numbers. Returns (unsupported numbers, per-number log with reason)."""
+    """Traceability check with derived numbers. Returns (unsupported numbers, per-number log with reason)."""
     allowed = [x for s in sources for x in nums(s)]
     pool = derived_pool(allowed) if derived else None
     bad, log = [], []
