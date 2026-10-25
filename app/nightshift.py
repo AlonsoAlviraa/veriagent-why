@@ -87,6 +87,10 @@ def body(tier: str, messages: list[dict], max_tokens: int) -> dict:
     if tier == "s1":  # reasoning off for Lightning: otherwise the budget goes to reasoning_content and content is empty
         b["chat_template_kwargs"] = {"enable_thinking": False}
         b["reasoning_effort"] = "none"
+    elif env("NIGHTSHIFT_S2_THINKING", "off").lower() in ("off", "0", "false"):
+        # Ultra with thinking on spent the whole 60/300-token budget on reasoning (finish_reason=length) in the
+        # first live Nightshift run; with enable_thinking=false it answers directly (finish_reason=stop).
+        b["chat_template_kwargs"] = {"enable_thinking": False}
     return b
 
 

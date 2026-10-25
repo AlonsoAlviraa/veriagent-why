@@ -29,7 +29,7 @@ def mock(route, seen, status=200):
 
 
 def good_route(b):
-    return LIGHT if b.get("chat_template_kwargs") else ULTRA
+    return LIGHT if b.get("reasoning_effort") == "none" else ULTRA  # only S1 sends reasoning_effort
 
 
 @pytest.fixture
@@ -126,3 +126,10 @@ def test_clean_content_drops_orphan_think_close():
     from app.llm import clean_content
     assert clean_content('The user wants "OK".</think>OK') == "OK"
     assert clean_content("<think>x</think> hi") == "hi"
+
+
+def test_s2_body_thinking_off_by_default(monkeypatch):
+    from app import nightshift as ns
+    monkeypatch.delenv("NIGHTSHIFT_S2_THINKING", raising=False)
+    b = ns.body("s2", [{"role": "user", "content": "x"}], 300)
+    assert b["model"] == ULTRA and b["chat_template_kwargs"] == {"enable_thinking": False} and "reasoning_effort" not in b
