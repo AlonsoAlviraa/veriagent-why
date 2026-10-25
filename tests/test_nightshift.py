@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 INP = json.loads((Path(__file__).parents[1] / "input_examples" / "example_1.json").read_text())["input"]
-LIGHT, ULTRA = "nvidia/nemotron-3.5-lightning-30b-a3b", "nvidia/nemotron-3-ultra-550b-a50b"
+LIGHT, ULTRA = "nvidia/nemotron-3.5-lightning-30b-a3b", "nvidia/nemotron-3-ultra-550b-a55b"
 
 
 def mock(route, seen, status=200):
@@ -62,7 +62,7 @@ def test_receipt_and_pins(ns):
     assert b["chat_template_kwargs"] == {"enable_thinking": False} and b["max_tokens"] == 512  # reasoning off, bounded
     assert seen[0]["headers"]["meterless-app"] == "veriagent-why" and seen[0]["headers"]["meterless-scope"] == "user"
     rec = receipts(d)[0]
-    assert rec["pin_ok"] and rec["routed_model"] == LIGHT and rec["requested_model"] == "meterless/fast" and not rec["fallback"]
+    assert rec["pin_ok"] and rec["routed_model"] == LIGHT and rec["requested_model"] == LIGHT and not rec["fallback"]
     assert "test-token-not-real" not in (d / "receipts-t-ns.jsonl").read_text()
 
 
@@ -120,3 +120,9 @@ def test_no_fallback_by_default(ns, monkeypatch):
     from app import llm
     with pytest.raises(Exception):
         llm.complete([{"role": "user", "content": "x"}], tier="s1")
+
+
+def test_clean_content_drops_orphan_think_close():
+    from app.llm import clean_content
+    assert clean_content('The user wants "OK".</think>OK') == "OK"
+    assert clean_content("<think>x</think> hi") == "hi"

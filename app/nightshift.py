@@ -15,9 +15,10 @@ from pathlib import Path
 from .config import ROOT, env, log_dir
 
 # Substring patterns (case/punctuation-insensitive) the routed model id must contain.
-DEFAULT_PINS = {"s1": "nemotron-3.5-lightning-30b", "s2": "nemotron-3-ultra"}
-# Requested model per tier. Exact ids once Nightshift exposes exact model selection; routing modes until then.
-DEFAULT_REQUEST = {"s1": "meterless/fast", "s2": "meterless/deep"}
+DEFAULT_PINS = {"s1": "nemotron-3.5-lightning-30b-a3b", "s2": "nemotron-3-ultra-550b-a55b"}
+# Requested model per tier: exact ids from GET /v1/models (Nightshift 1.2.7). Routing modes such as meterless/fast
+# are coerced to meterless/auto by the app policy and were observed routing to Nemotron 3.5 Bolt E4B, so tiers pin exact ids.
+DEFAULT_REQUEST = {"s1": "nvidia/nemotron-3.5-lightning-30b-a3b", "s2": "nvidia/nemotron-3-ultra-550b-a55b"}
 MAX_TOKENS = {"s1": 512, "s2": 2048}            # hard caps per call
 TIMEOUT_S = {"s1": 180, "s2": 300}             # generous: 1.2.1 on Windows timed out full Planner/Critic calls
 MAX_PROMPT_CHARS = 24000                        # bound the request body

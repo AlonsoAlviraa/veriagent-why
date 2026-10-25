@@ -144,4 +144,7 @@ def clean_content(text):
     if not text:
         return text
     import re
-    return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.S)
+    if "</think>" in text:  # Nemotron 3 Ultra via Nightshift emits reasoning with only the closing tag
+        text = text.rsplit("</think>", 1)[1]
+    return text.strip()

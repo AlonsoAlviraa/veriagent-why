@@ -68,7 +68,7 @@ The open-source Meterless reference engines (github.com/Meterless/Meterless, Apa
 
 ## Meterless Nightshift (primary model provider)
 `LLM_PROVIDER=nightshift` (the default outside SAMPLE_MODE) sends every model call to the local Meterless Nightshift runtime (OpenAI-compatible, `NIGHTSHIFT_BASE_URL`, default `http://127.0.0.1:8088/v1`). The bearer token is the runtime's own `proxy-token` file in its state directory (`%LOCALAPPDATA%\ai.meterless.runtime`), or `NIGHTSHIFT_API_KEY` / `NIGHTSHIFT_API_KEY_FILE`; it is read, never printed or logged. Provider keys (NVIDIA cloud) live encrypted inside Nightshift and are set only in its desktop app.
-- **Tiers.** S1 requests `meterless/fast` and must be routed to **Nemotron 3.5 Lightning 30B** with reasoning off (`enable_thinking=false`, `reasoning_effort=none`); S2 requests `meterless/deep` and must be routed to **Nemotron 3 Ultra**. Override with `NIGHTSHIFT_MODEL_S1/S2` and the expected pins with `NIGHTSHIFT_PIN_S1/S2`.
+- **Tiers.** S1 requests the exact id `nvidia/nemotron-3.5-lightning-30b-a3b` (**Nemotron 3.5 Lightning 30B A3B**) with reasoning off (`enable_thinking=false`, `reasoning_effort=none`); S2 requests `nvidia/nemotron-3-ultra-550b-a55b` (**Nemotron 3 Ultra 550B A55B**). Ids taken from Nightshift's `GET /v1/models` and confirmed by live `routed_model`. Routing modes (`meterless/fast`) are coerced to `meterless/auto` by the app policy and were observed routing to Nemotron 3.5 Bolt E4B, so the tiers do not use them. Override with `NIGHTSHIFT_MODEL_S1/S2` and the expected pins with `NIGHTSHIFT_PIN_S1/S2`.
 - **Startup pin check.** Before a run, one tiny request per tier checks the `routed_model` in Nightshift's `meterless` response block against the pin. A mismatch stops the run (`pin_mismatch` in the trace); `NIGHTSHIFT_PIN_ENFORCE=off` only warns, `NIGHTSHIFT_PIN_CHECK=off` skips it.
 - **Receipts.** Every call appends one line to `logs/receipts-<run_id>.jsonl` built from the `meterless` block (`request_id`, `requested_model`, `provider_model`, `routed_model`, `mode`, `scope`), plus purpose, latency, token usage and `pin_ok`. No prompt text and no secrets are stored.
 - **Bounded requests.** `max_tokens` 512 (S1) / 2048 (S2), prompts capped at `NIGHTSHIFT_MAX_PROMPT_CHARS` (24000), timeouts 180 s / 300 s (`NIGHTSHIFT_TIMEOUT_S1_S/S2_S`).
@@ -80,8 +80,8 @@ Other providers: `LLM_PROVIDER=nvidia` (NVIDIA API, `NVIDIA_API_KEY` from the en
 ## Where each engine runs
 | Component | Engine / model | Where it runs |
 |---|---|---|
-| S1: retriever tool loop, relevance filter, Evidence Evaluator | Nemotron 3.5 Lightning 30B (reasoning off) via Nightshift `meterless/fast` | Nightshift runtime on the user's PC (:8088) routing to the NVIDIA cloud endpoint |
-| S2: Planner, Cause Analyst, Writer | Nemotron 3 Ultra via Nightshift `meterless/deep` | Nightshift on the PC, routed to NVIDIA cloud |
+| S1: retriever tool loop, relevance filter, Evidence Evaluator | Nemotron 3.5 Lightning 30B A3B (reasoning off), exact id via Nightshift | Nightshift runtime on the user's PC (:8088) routing to the NVIDIA cloud endpoint |
+| S2: Planner, Cause Analyst, Writer | Nemotron 3 Ultra 550B A55B, exact id via Nightshift | Nightshift on the PC, routed to NVIDIA cloud |
 | Embeddings | nemotron-3-embed-1b, or hash embedder | NVIDIA endpoint, or in-process |
 | Evidence graph, investigation rounds | Meterless H-MEM, Markovian (vendored reference engines) | Local `node` bridge (`meterless_bridge/`) |
 | Data | Zetaris Lightning views, or DuckDB snapshot (SAMPLE_MODE) | Zetaris platform (Docker, local), or in-process |
