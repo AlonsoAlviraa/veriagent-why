@@ -1,7 +1,7 @@
 """Nightshift-compatible LOCAL SIMULATOR. This is NOT Meterless Nightshift.
 
-Meterless Nightshift (the real product) was not available to us during the build window, so this
-module stands in for it with the same client-facing contract the app already uses
+The product runs on real Meterless Nightshift 1.2.7 (see eval/nightshift_live/). This module is kept
+for tests and offline development only; it serves the same client-facing contract the app uses
 (`LLM_PROVIDER=nightshift`): an OpenAI-compatible server on http://127.0.0.1:8088/v1 with a bearer
 token. It does no Meterless metering or routing of its own: it forwards each chat completion to
 

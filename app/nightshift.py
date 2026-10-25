@@ -88,8 +88,8 @@ def body(tier: str, messages: list[dict], max_tokens: int) -> dict:
         b["chat_template_kwargs"] = {"enable_thinking": False}
         b["reasoning_effort"] = "none"
     elif env("NIGHTSHIFT_S2_THINKING", "off").lower() in ("off", "0", "false"):
-        # Ultra with thinking on spent the whole 60/300-token budget on reasoning (finish_reason=length) in the
-        # first live Nightshift run; with enable_thinking=false it answers directly (finish_reason=stop).
+        # Ultra with thinking on spends the whole token budget on reasoning (finish_reason=length);
+        # with enable_thinking=false it answers directly (finish_reason=stop).
         b["chat_template_kwargs"] = {"enable_thinking": False}
     return b
 

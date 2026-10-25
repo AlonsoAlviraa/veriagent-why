@@ -2,7 +2,7 @@
 
 Retrieval: every row of the 5 views inside the baseline+period windows is serialised as text
 ("<view> <col> <val> ...", with row id); BM25 against the question; top rows up to TOKEN_BUDGET
-whitespace tokens. No planning, no filtering, no verification loop, no claim gate.
+whitespace tokens. No planning, no filtering, no verification loop, no traceability check.
 Reader: live mode -> the model picks top_cause_label from the fixed taxonomy citing row ids.
 Sample mode (no model) -> a fixed, documented reader rule: if >=50% of the retrieved late
 logistics rows share one carrier+region -> carrier_sla_breach; elif a promotion row was

@@ -1,6 +1,6 @@
-# Diagram v6.3 → code traceability
+# Final architecture diagram → code traceability
 
-Each box and arrow of `docs/diagrams/veriagent_why_arch_v6.3.png` (v6.2 plus the Agentic Retriever loop, NVIDIA embeddings and hybrid fusion) maps to the code that implements it, the trace event that proves it ran, and the test that checks it.
+Each box and arrow of `docs/diagrams/veriagent_why_arch_FINAL.png` (v6.2 plus the Agentic Retriever loop, NVIDIA embeddings and hybrid fusion) maps to the code that implements it, the trace event that proves it ran, and the test that checks it.
 The single end-to-end proof is `python scripts/e2e_live.py`. It goes User → UI → API → … → memo over real HTTP and exits non-zero if any box below emits no trace event.
 
 | Diagram element | Code (file → function) | Trace event (`logs/trace-<run_id>.jsonl`) | Test |

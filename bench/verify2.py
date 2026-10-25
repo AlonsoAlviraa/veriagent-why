@@ -1,8 +1,8 @@
 """verify-v2: three verification strategies on top of the Markov controller (agent_mk), after verify-retry (agent_vr)
 lost 27 TAT-QA items. Diagnosis (docs/VERIFY_V2.md): the Super verifier was over-confident (57 perfect scores, some on
-wrong arithmetic) and agent_vr bypassed the claim-gate re-ask. Literature (Huang et al. 2023; Stechly et al. 2024)
+wrong arithmetic) and agent_vr bypassed the traceability-check re-ask. Literature (Huang et al. 2023; Stechly et al. 2024)
 says intrinsic LLM self-verification is unreliable; gains come from EXTERNAL signals (tools, execution, agreement).
-So every config below keeps agent_mk unchanged (including its claim-gate re-ask) and only adds a signal on top:
+So every config below keeps agent_mk unchanged (including its traceability-check re-ask) and only adds a signal on top:
 
   *_pot  (a) Program-of-Thought re-execution (PoT/PAL + CRITIC tool idea). An INDEPENDENT call writes named operands
          copied from the context and a Python arithmetic expression; we execute it (safe_eval) and check every operand
@@ -181,7 +181,7 @@ def tat_sc(it, m) -> dict:
         from .tatqa import context
         T = [tools(it, c) for c in cands]
         o = m.call_json([{"role": "system", "content": "Three candidate answers to the same question disagree. Using the context and the tool results "
-                          "(recomputed expressions, claim-gate reasons), pick the candidate that is exactly right. Reply with JSON only: {\"pick\": 0|1|2, \"why\": str}."},
+                          "(recomputed expressions, traceability-check reasons), pick the candidate that is exactly right. Reply with JSON only: {\"pick\": 0|1|2, \"why\": str}."},
                          {"role": "user", "content": context(it["doc"]) + "\nQUESTION: " + it["q"]["question"] + "\nCANDIDATES: "
                           + json.dumps([{"i": i, "answer": c["answer"], "scale": c.get("scale"), "tools": T[i]} for i, c in enumerate(cands)], default=str)[:5000]}],
                         "v2_adjudicate", "s2", 300)
@@ -199,7 +199,7 @@ def tat_sc(it, m) -> dict:
 
 CRIT_SYS = ("You are a critic with tool access results. Check the candidate answer against the context: right rows/columns and "
             "year, right formula and sign, right scale; for text answers the COMPLETE span exactly as worded in the context (never ask to shorten or trim a correct span; do not change the scale of a value the context states with a scale). Use the TOOL RESULTS (recomputed "
-            "expression value, claim-gate reasons, operands missing from the cited evidence). Reply with JSON only: "
+            "expression value, traceability-check reasons, operands missing from the cited evidence). Reply with JSON only: "
             "{\"p_correct\": probability 0-1 that the answer is exactly right, \"critique\": \"concrete problem to fix, or empty\"}.")
 
 
