@@ -1,0 +1,22 @@
+{
+"name": "v9gen_hard_docfinqa_pilot",
+"tatqa_split": "hard_docfinqa",
+"dataset_sha256": "2c6e010d83a5f4dc14cbeed31207ed7aeec89e3ee66ddc65ecc44a43587e4a58",
+"ids": [
+"harddf-1cd1cd2d9a7ae47e",
+"harddf-3e616ed09ca4c38d",
+"harddf-6bb76fad6416f1aa",
+"harddf-1b074a2ece29cf53",
+"harddf-67741d0a3b2d258b",
+"harddf-3b1e768b79c95631",
+"harddf-51b97fbdeb4fe878",
+"harddf-6e8f6a5aa9768798",
+"harddf-989502c73baf56e4",
+"harddf-9e18977e987c0dcf",
+"harddf-8b1d884e8443596d",
+"harddf-6cb050dfb65f5fd7",
+"harddf-ac5026f2541f9cc3",
+"harddf-b6d86769c2f1d323",
+"harddf-1b9440cbe81abb95"
+]
+}
