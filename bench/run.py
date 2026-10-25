@@ -11,7 +11,7 @@ Live mode uses LLM_PROVIDER (default nvidia here) with NVIDIA_API_KEY from env/.
 from __future__ import annotations
 import argparse, json, os, random, time, traceback
 from pathlib import Path
-from . import insightbench as IB, tatqa as TQ
+from . import explain as EX, insightbench as IB, tatqa as TQ
 from .llmio import BudgetExceeded, Meter, NebiusHardStop
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -61,6 +61,7 @@ def main(argv=None):
     ap.add_argument("--rpm", type=float, default=30.0)
     ap.add_argument("--no-judge", action="store_true")
     ap.add_argument("--judge-insights", action="store_true", help="InsightBench o2m insight judge (|gt|x|pred| calls)")
+    ap.add_argument("--faith-sample", type=int, default=30, help="InsightBench: LLM-judge faithfulness on the first N tasks per system (0=off)")
     ap.add_argument("--offline", action="store_true", help="scripted fake model, no network (CI)")
     ap.add_argument("--fixtures", action="store_true", help="use bench/fixtures instead of data/bench")
     ap.add_argument("--dry-run", action="store_true", help="list what would run, no model calls")
@@ -85,8 +86,10 @@ def main(argv=None):
         if os.environ["LLM_PROVIDER"] == "nvidia" and not os.environ.get("NVIDIA_API_KEY"):
             raise SystemExit("NVIDIA_API_KEY not set (env or .env)")
         os.environ["MODEL_MIN_INTERVAL_S"] = str(60.0 / a.rpm)
+        os.environ.setdefault("MODEL_TIMEOUT_S", "90")
     out.parent.mkdir(parents=True, exist_ok=True)
     total = 0
+    order = {t["id"]: i for i, t in enumerate(tasks)}
     for s, t in todo:
         if total >= a.max_calls:
             print(f"run budget reached ({a.max_calls} calls); stopping, rerun to resume")
@@ -104,6 +107,12 @@ def main(argv=None):
                 sys_meter = m.snapshot()
                 jm = None if a.no_judge else Meter(10 if not a.judge_insights else 200, a.offline)
                 rec["scores"] = IB.score(t, res, jm, a.judge_insights)
+                if not (t.get("insights") or []):
+                    rec["scores"]["excluded"] = "empty ground-truth insights in the dataset"
+                rec["explain"] = EX.insight_metrics(res)
+                if jm and a.faith_sample and order[t["id"]] < a.faith_sample:
+                    jm.max_calls += 1
+                    rec["explain"]["faithfulness"] = EX.faithfulness(jm, res)
                 rec["judge_meter"] = jm.snapshot() if jm else None
             else:
                 res = TQ.SYSTEMS[s](t, m)
@@ -114,6 +123,8 @@ def main(argv=None):
                                  "numeric_answer": bool(TQ.nums(str(res.get("answer"))))}
                 if (d / "tatqa_metric.py").exists():
                     rec["scores"]["em"], rec["scores"]["f1"] = TQ.item_em(d, t, res)
+                    rec["scores"]["em_raw"], rec["scores"]["f1_raw"] = TQ.item_em(d, t, res["raw"])
+                rec["explain"] = EX.tat_metrics(res, ctx)
                 rec["gold"] = {"answer": t["q"]["answer"], "scale": t["q"]["scale"], "answer_type": t["q"]["answer_type"], "answer_from": t["q"]["answer_from"]}
             rec["output"], rec["meter"] = res, sys_meter
         except NebiusHardStop as e:

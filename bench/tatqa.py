@@ -15,6 +15,8 @@ from pathlib import Path
 from app.bm25 import bm25
 from .common import nums, supported
 from .llmio import Meter, parse_json
+from .tat_post import flatten, postprocess
+from .common import conf01
 
 SCALES = ["", "thousand", "million", "billion", "percent"]
 
@@ -38,8 +40,13 @@ def context(doc: dict, paras: list[dict] | None = None) -> str:
 
 ANS = ('Reply with JSON only: {"answer": a string, or a list of strings for multi-span answers, or a number, '
        '"scale": one of ' + json.dumps(SCALES) + ', "expression": arithmetic expression over context numbers if computed else "", '
-       '"evidence": [verbatim table cells or sentence fragments you used]}. For percentages give the number and scale "percent". '
-       'Scale is the unit the context states for that figure (e.g. a table "in thousands" -> "thousand"); "" only if none.')
+       '"evidence": [verbatim table cells or sentence fragments you used], "confidence": your probability 0-1 that the answer is exactly right}. '
+       'RULES (TAT-QA conventions): 1) "scale": if the figure (or the figures it is computed from) comes from a table or sentence '
+       'stated "in thousands"/"in millions"/"$ million" etc, use that scale, also for differences, sums and averages of such figures; '
+       'percentages, percentage changes and ratios -> "percent"; counts, years and plain text -> "". Do not repeat the scale word inside "answer". '
+       '2) Round computed answers to 2 decimal places. Keep the sign (decreases are negative). Write numbers without $ or commas. '
+       '3) For text/span answers copy the SHORTEST exact span from the context that answers the question, not the whole sentence; '
+       'for "respective"/multiple values return a list of strings.')
 
 _OPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.Div: operator.truediv, ast.USub: operator.neg, ast.UAdd: operator.pos}
 
@@ -114,7 +121,12 @@ def agent(it: dict, m: Meter) -> dict:
             break
         msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:2000]},
                        {"role": "user", "content": "Claim gate rejected: " + "; ".join(reasons) + ". Fix and answer again. " + ANS}]
-    return {**_pred(out), "gate_passed": not reasons, "gate": log}
+    p = _pred(out, it)
+    # deterministic confidence (declared in docs/BENCHMARKS.md): gate outcome x traceability, no model input
+    det = (0.8 if len(log) == 1 else 0.55) if not reasons else 0.2
+    if not traceable(str(p["answer"]), ctx):
+        det = min(det, 0.1)
+    return {**p, "gate_passed": not reasons, "gate": log, "confidence_det": det}
 
 
 def rag(it: dict, m: Meter, k: int = 3) -> dict:
@@ -124,7 +136,7 @@ def rag(it: dict, m: Meter, k: int = 3) -> dict:
     top = [ps[i] for i in sorted(range(len(ps)), key=lambda i: -sc[i])[:k]]
     out = parse_json(m.call([{"role": "system", "content": "Answer from the context. " + ANS},
                              {"role": "user", "content": context(doc, top) + "\nQUESTION: " + q["question"]}], "tat_rag", "s2", 600)) or {}
-    return _pred(out)
+    return _pred(out, it)
 
 
 def react(it: dict, m: Meter, max_steps: int = 4) -> dict:
@@ -143,15 +155,19 @@ def react(it: dict, m: Meter, max_steps: int = 4) -> dict:
         hist += f"\nACTION {s + 1}: calc({a.get('input')})\nOBSERVATION {s + 1}: {obs}"
     out = parse_json(m.call([{"role": "system", "content": "Give the final answer. " + ANS},
                              {"role": "user", "content": ctx + hist}], "tat_react_final", "s2", 600)) or {}
-    return _pred(out)
+    return _pred(out, it)
 
 
-def _pred(out: dict) -> dict:
-    a = out.get("answer", "")
-    if isinstance(a, (int, float)):
-        a = str(a)
+def _pred(out: dict, it: dict | None = None) -> dict:
+    """Raw model answer (flattened: fixes list-of-dicts TypeError) + deterministic scale/format post-step,
+    applied identically to every system. Gold is never read here."""
+    a = flatten(out.get("answer", ""))
     sc = out.get("scale") if out.get("scale") in SCALES else ""
-    return {"answer": a, "scale": sc, "expression": out.get("expression", "")}
+    ev = out.get("evidence") or []
+    ev = [str(e) for e in (flatten(ev) if isinstance(ev, (list, dict)) else [ev])]
+    raw = {"answer": a, "scale": sc, "expression": str(out.get("expression", "") or "")}
+    post = postprocess(raw, it["q"]["question"], it["doc"]) if it else raw
+    return {**post, "raw": raw, "evidence": ev, "confidence": conf01(out.get("confidence"))}
 
 
 SYSTEMS = {"agent": agent, "rag": rag, "react": react}

@@ -72,7 +72,17 @@ def _live(messages, tier, max_tokens):
     if os.environ.get("LLM_PROVIDER") == "nebius":
         from . import nebius
         try:
-            return nebius.complete(messages, None, max_tokens, float(os.environ.get("MODEL_TIMEOUT_S") or 180))
+            to = float(os.environ.get("MODEL_TIMEOUT_S") or 90)  # per-request timeout
+            for attempt in range(3):  # transient errors (timeout, 429, 5xx): bounded retry with backoff
+                try:
+                    return nebius.complete(messages, None, max_tokens, to)
+                except nebius.NebiusBudgetExceeded:
+                    raise
+                except Exception as e:
+                    code = getattr(e, "code", None)
+                    if attempt == 2 or (code is not None and code not in (408, 429) and code < 500):
+                        raise
+                    time.sleep(5 * (attempt + 1))
         except nebius.NebiusBudgetExceeded as e:
             if os.environ.get("NEBIUS_STRICT") == "1":  # hard stop: never fall back, never overspend
                 raise NebiusHardStop(str(e)) from e
@@ -117,6 +127,10 @@ def fake(messages: list[dict], tag: str) -> str:
         if "OBSERVATION" in u:
             return json.dumps({"action": "final"})
         return json.dumps({"action": "sql", "sql": f"SELECT COUNT(*) AS n FROM {tables[0]}"})
+    if tag == "sqlfix":
+        return json.dumps({"sql": f"SELECT COUNT(*) AS n FROM {tables[0]}"})
+    if tag == "faith":
+        return "<rating>8</rating>"
     if tag == "judge":
         return "<rating>5</rating>"
     if tag.startswith("tat"):
