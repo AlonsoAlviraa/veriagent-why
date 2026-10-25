@@ -1,6 +1,6 @@
 """LLM-backed steps (provider nightshift|nvidia). Every output is parsed and validated against a fixed
 schema; on failure the agent falls back to its deterministic path and the trace says so.
-Numbers are never taken from the model: they come from SQL and pass the Claim Gate."""
+Numbers are never taken from the model: they come from SQL and pass the Traceability Check."""
 from __future__ import annotations
 import json, re
 from concurrent.futures import ThreadPoolExecutor

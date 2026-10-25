@@ -11,12 +11,12 @@ No model call is made here; all decisions are pure functions of the state -> det
 Decisions:
   route         TAT-QA: NUMERIC (calculator steps, react-style) vs EVIDENCE (single quoted-evidence answer);
                 optional DEEP flag (final answer on a bigger model) from the NVIDIA classifier features.
-  gate_retry    retry the Claim Gate only when expected gain >= GAIN_MIN (per-reason gain table), else stop.
+  gate_retry    retry the Traceability Check only when expected gain >= GAIN_MIN (per-reason gain table), else stop.
   sql_repair    repair a failed SQL only for repairable error classes and never twice on the same error.
   requery       skip the Evidence Evaluator call when the evidence is already sufficient, or stop when the
                 last round added nothing.
   rewrite       InsightBench gate: drop few unsupported insights instead of paying a rewrite call.
-Both paths always keep the agent's evidence quotes, Claim Gate and citations.
+Both paths always keep the agent's evidence quotes, Traceability Check and citations.
 """
 from __future__ import annotations
 import json, re

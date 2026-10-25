@@ -64,7 +64,7 @@ async function show(){
   const cl=r.claims.map(c=>`<li>${esc(c.text)}<br>rows: ${c.row_ids.map(i=>`<a class="row" onclick="row('${i}')">${i}</a>`).join(" ")}</li>`).join("");
   const disc=r.analysis.discarded.map(d=>`<li>Promotion ${esc(d.promo_id)}: dates overlap, ${Math.round(100*d.share_of_excess_late)}% of excess late shipments → refuted</li>`).join("")||"<li>none</li>";
   $("memo").innerHTML=`<p><b>${esc(r.analysis.top_cause_label)}</b> · resolution: ${esc(r.resolution)} · <a href="api/memo/${RID}.pdf">PDF</a> · <a href="api/memo/${RID}.md">Markdown</a></p>`+
-    (r.narrative?`<p>${esc(r.narrative)}</p>`:"")+`<h3>Findings (Claim Gate approved)</h3><ul>${cl||"<li>none</li>"}</ul><h3>Discarded alternatives</h3><ul>${disc}</ul>`+
+    (r.narrative?`<p>${esc(r.narrative)}</p>`:"")+`<h3>Findings (traceability check passed)</h3><ul>${cl||"<li>none</li>"}</ul><h3>Discarded alternatives</h3><ul>${disc}</ul>`+
     (r.blocked_claims.length?`<h3>Blocked claims</h3><ul>${r.blocked_claims.map(b=>`<li>${esc(b)}</li>`).join("")}</ul>`:"");
   const c=r.confidence, views=Object.entries(c.views||{}).map(([k,v])=>`<tr><td>${k}</td><td>${esc(typeof v==="string"?v:JSON.stringify(v))}</td></tr>`).join("");
   $("conf").innerHTML=`<p style="font-size:28px;margin:0">${c.confidence}/100</p><p><code>${esc(c.formula)}</code></p>

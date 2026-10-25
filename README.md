@@ -13,10 +13,10 @@ VeriAgent Why is a multi-agent system for e-commerce ops/finance analysts. It in
 ## Architecture
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/diagrams/veriagent_why_arch_v6.3.png`](docs/diagrams/veriagent_why_arch_v6.3.png) and the diagram-to-code map [`docs/TRACEABILITY.md`](docs/TRACEABILITY.md).
 
-Main flow: Planner → Agentic Retriever (Zetaris SQL templates + hybrid BM25/dense retrieval) → S1 Relevance Filter → Evidence Evaluator (requery loop to the Planner, max 3) → Cause Analyst → Writer → deterministic Claim Gate (loop to the Cause Analyst, max 2) → decision memo. Meterless H-MEM holds the hypothesis/evidence graph; Meterless Markovian drives the investigation rounds.
+Main flow: Planner → Agentic Retriever (Zetaris SQL templates + hybrid BM25/dense retrieval) → S1 Relevance Filter → Evidence Evaluator (requery loop to the Planner, max 3) → Cause Analyst → Writer → deterministic Traceability Check (loop to the Cause Analyst, max 2) → decision memo. Meterless H-MEM holds the hypothesis/evidence graph; Meterless Markovian drives the investigation rounds.
 
 ## Data path: Zetaris by default, SAMPLE_MODE as the explicit fallback
-- **Zetaris (default when configured).** Set `ZETARIS_BACKEND=zetaris` (or `ZETARIS_JDBC_URL`) plus `ZETARIS_USER`, `ZETARIS_PASSWORD`, `ZETARIS_JDBC_JAR`. The Retriever, Evidence Evaluator and Claim Gate then query the five views (`v_orders`, `v_returns`, `v_tickets`, `v_logistics`, `v_promotions`) through Zetaris Lightning over JDBC. Load the synthetic data into Zetaris with `scripts/zetaris_load.py` and check it with `scripts/zetaris_check.py`; the full local procedure (Docker platform, Postgres + REST sources) is in [`docs/RUN_WINDOWS.md`](docs/RUN_WINDOWS.md).
+- **Zetaris (default when configured).** Set `ZETARIS_BACKEND=zetaris` (or `ZETARIS_JDBC_URL`) plus `ZETARIS_USER`, `ZETARIS_PASSWORD`, `ZETARIS_JDBC_JAR`. The Retriever, Evidence Evaluator and Traceability Check then query the five views (`v_orders`, `v_returns`, `v_tickets`, `v_logistics`, `v_promotions`) through Zetaris Lightning over JDBC. Load the synthetic data into Zetaris with `scripts/zetaris_load.py` and check it with `scripts/zetaris_check.py`; the full local procedure (Docker platform, Postgres + REST sources) is in [`docs/RUN_WINDOWS.md`](docs/RUN_WINDOWS.md).
 - **SAMPLE_MODE (explicit fallback, required by the rules' fallback/sample-mode clause).** When Zetaris is not configured, or `SAMPLE_MODE=true`, the same SQL runs on a local DuckDB snapshot with the same view names. The run says so on stderr, in the trace (`data_fallback`) and in the memo (`SAMPLE MODE: no Zetaris`). SAMPLE_MODE also uses no model: the agents follow deterministic rules (see Limitations).
 - Live Zetaris requires the local Zetaris hackathon platform; a judge cannot reproduce it from a clean clone without that platform. See Limitations.
 
@@ -47,7 +47,7 @@ Outputs: [`output_examples/`](output_examples/); traces, memos and H-MEM ledgers
 
 ## Status (23 Oct 2026)
 Verified:
-- SAMPLE_MODE end to end: KPIs `on_time_rate` and `return_rate`; carrier/region segment hypotheses with drill-down, promotion, seasonality; cross-view check; materiality guard; Claim Gate; deterministic confidence; Meterless H-MEM + Markovian; agentic retriever; API, UI, PDF; eval harness; CI.
+- SAMPLE_MODE end to end: KPIs `on_time_rate` and `return_rate`; carrier/region segment hypotheses with drill-down, promotion, seasonality; cross-view check; materiality guard; Traceability Check; deterministic confidence; Meterless H-MEM + Markovian; agentic retriever; API, UI, PDF; eval harness; CI.
 - Live NVIDIA Nemotron on the free endpoint (dev split, see Evaluation).
 - Zetaris JDBC backend and loader against a fake JDBC connection over the DuckDB snapshot (`tests/`); live Zetaris procedure in `docs/RUN_WINDOWS.md`.
 
@@ -85,7 +85,7 @@ Other providers: `LLM_PROVIDER=nvidia` (NVIDIA API, `NVIDIA_API_KEY` from the en
 | Embeddings | nemotron-3-embed-1b, or hash embedder | NVIDIA endpoint, or in-process |
 | Evidence graph, investigation rounds | Meterless H-MEM, Markovian (vendored reference engines) | Local `node` bridge (`meterless_bridge/`) |
 | Data | Zetaris Lightning views, or DuckDB snapshot (SAMPLE_MODE) | Zetaris platform (Docker, local), or in-process |
-| Claim Gate, confidence formula, V9_full confidence | Deterministic code / frozen logistic model | In-process Python |
+| Traceability Check, confidence formula, V9_full confidence | Deterministic code / frozen logistic model | In-process Python |
 | Benchmarks (`bench/`) | Nemotron 3.5 Lightning, Nemotron 3 Super | Nebius Token Factory (spend-capped) and NVIDIA free endpoint |
 
 ## Nightshift-compatible local SIMULATOR (not Meterless Nightshift; testing only)
@@ -123,7 +123,7 @@ Results (all pre-registered, one run each):
 Bench data is downloaded on demand and never committed: `make setup` installs `bench/requirements-bench.txt`, then `python -m bench.download all` writes `data/bench/<bench>/` with a sha256 manifest (no login). See [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md).
 
 ## Confidence (deterministic)
-`conf = round(100 × (0.45·C + 0.35·A + 0.20·(1−R)))`, where C = share of all proposed claims that passed the Claim Gate, A = share of views with relevant rows that agree with the top cause (A = 0 and cap 50 if none), R = refuting ÷ (supporting + refuting) edges for the top cause. Partial runs are capped at 40. See `app/confidence.py`.
+`conf = round(100 × (0.45·C + 0.35·A + 0.20·(1−R)))`, where C = share of all proposed claims that passed the Traceability Check, A = share of views with relevant rows that agree with the top cause (A = 0 and cap 50 if none), R = refuting ÷ (supporting + refuting) edges for the top cause. Partial runs are capped at 40. See `app/confidence.py`.
 
 ## AI and Model Usage
 How the code was written:
@@ -137,7 +137,7 @@ Models used by the product at runtime:
 - Meterless Nightshift 1.2.7 is the primary runtime provider (S1 Lightning 30B, S2 Ultra; see "Meterless Nightshift"). Live receipts pending the cloud key in the Nightshift app. The older `app/nightshift_sim.py` is a labelled simulator, not Nightshift.
 - Benchmarks (PR #4) also use `nvidia/Nemotron-3_5-Lightning` on Nebius Token Factory under a hard spend guard.
 - SAMPLE_MODE uses no model at all.
-- Model output never supplies numbers or confidence: numbers come from SQL, confidence from a formula, and the Claim Gate checks every number in model-written text. Any model failure (empty reply, HTTP error, invalid JSON or label) falls back to the deterministic path and is logged.
+- Model output never supplies numbers or confidence: numbers come from SQL, confidence from a formula, and the Traceability Check checks every number in model-written text. Any model failure (empty reply, HTTP error, invalid JSON or label) falls back to the deterministic path and is logged.
 - Benchmarks only: Nebius `nvidia/Nemotron-3_5-Lightning` and `nvidia/nemotron-3-super-120b-a12b` (paid, small spend); NVIDIA `prompt-task-and-complexity-classifier` (open weights, CPU) and `llama-nemotron-rerank-vl-1b-v2` (free API endpoint) as inputs to the Markov controller.
 
 Agent framework: none; own Python orchestrator (`app/pipeline.py`) and own agentic retriever (`app/retrieval/agentic.py`).

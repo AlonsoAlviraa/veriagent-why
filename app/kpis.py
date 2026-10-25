@@ -1,6 +1,6 @@
 """KPI registry. Agents are written against a 'good outcome' table shaped like v_logistics
 (shipment_id, order_id, carrier, region, ship_date, on_time). A KPI lens rewrites v_logistics into
-a derived table for the chosen KPI, so the same SQL, checks and Claim Gate apply to every KPI.
+a derived table for the chosen KPI, so the same SQL, checks and Traceability Check apply to every KPI.
   on_time_rate: good = delivered on time (date = ship date)
   return_rate:  good = order not returned (date = order date); reported as the return rate"""
 from __future__ import annotations

@@ -29,20 +29,20 @@ Doc abbreviations as in `ARCH_COMPLIANCE_AUDIT.md`: OR, SR, DQ, AUP, SSE (strong
 | Evidence Evaluator | `nemotron-3.5-lightning-30b-a3b`, thinking off (S1 verifier) | Marks each piece of evidence as supports / refutes / gap. **Runs its own Zetaris query** to confirm every number (SSE §5 "What was unique"). Sends work back to the Planner |
 | **Cause Analyst** | `nemotron-3.5-super-vl-120b-a12b` (S2) | Connects findings across views, ranks causes, estimates each cause's contribution with a deterministic decomposition, and picks `top_cause_label` from the fixed taxonomy |
 | Writer | `nemotron-3.5-super-vl-120b-a12b` (S2) | Writes the memo using only Evaluator-approved claims, each with row IDs |
-| **Claim Gate** | deterministic code (no LLM) | Runs after the Writer and **reuses the eval checker** (`app/checks/claims.py`). For each claim: the cited row IDs exist; the numbers match the DB within tolerance (±0.5 pp for rates, ±1% for amounts); entity and period match. On failure it sends the claim back to the Cause Analyst (max 2). It decides what leaves the system |
+| **Traceability Check** | deterministic code (no LLM) | Runs after the Writer and **reuses the eval checker** (`app/checks/claims.py`). For each claim: the cited row IDs exist; the numbers match the DB within tolerance (±0.5 pp for rates, ±1% for amounts); entity and period match. On failure it sends the claim back to the Cause Analyst (max 2). It decides what leaves the system |
 
 **Why this isn't "one agent with many labels" (OR §7.3, AUP §1).** Only two model families are used, but each agent differs in:
 - **inputs**: the Planner sees the question and the H-MEM summary; the S1 filter sees single chunks; the Evaluator sees evidence plus its own fresh Zetaris rows.
-- **tools**: only the Retriever and the Evaluator query Zetaris; only the Claim Gate reads the DB checker.
+- **tools**: only the Retriever and the Evaluator query Zetaris; only the Traceability Check reads the DB checker.
 - **output schemas** (hypotheses, relevance scores, verdicts, ranked causes, memo).
-- **authority**: the Evaluator can send the Planner back, and the Claim Gate can reject the Writer's output.
+- **authority**: the Evaluator can send the Planner back, and the Traceability Check can reject the Writer's output.
 - **trace events**, which show these handoffs and rejections.
 
 Models are a cost/latency choice per role (System 1 = a small model with thinking off, System 2 = the large reasoning model), not the definition of the agents. `nemotron-3-super-120b-a12b` reached end of life on 19 Oct 2026 (per `nvidia_models.md` / CHECKLIST), so it isn't used.
 
 **Loops and caps (bounded):**
 - Evaluator → Planner: "trap refuted / gap: revise plan + requery", max 3 rounds.
-- Claim Gate → Cause Analyst: "unsupported claim blocked → rewrite", max 2.
+- Traceability Check → Cause Analyst: "unsupported claim blocked → rewrite", max 2.
 - Retriever self-retry: max 2.
 - Timeouts: model calls 60 s, Zetaris 20 s, whole run 8 min.
 
@@ -54,7 +54,7 @@ Models are a cost/latency choice per role (System 1 = a small model with thinkin
 
 **Confidence (deterministic, documented in README; the LLM never produces it):**
 `conf = round(100 × (0.45·C + 0.35·A + 0.20·(1−R)))`
-- **C** (coverage) = share of **all proposed claims** (including claims later blocked) that have ≥1 supporting row which passed the Claim Gate.
+- **C** (coverage) = share of **all proposed claims** (including claims later blocked) that have ≥1 supporting row which passed the Traceability Check.
 - **A** (cross-source agreement) = share of the 5 views whose direction agrees with the top cause, among views with relevant rows. **If no view has relevant rows, A = 0 and confidence is capped at 50.**
 - **R** (refutation pressure) = refuting edges ÷ (supporting + refuting edges) for the top cause.
 - Partial/unresolved runs are capped at 40.
@@ -91,7 +91,7 @@ Models are a cost/latency choice per role (System 1 = a small model with thinkin
 ### 2.2 v6 → v6.1
 | Priority | Change |
 |---|---|
-| P0 | **Claim Gate** (deterministic; reuses the eval checker) after the Writer; loops to the Cause Analyst, max 2 |
+| P0 | **Traceability Check** (deterministic; reuses the eval checker) after the Writer; loops to the Cause Analyst, max 2 |
 | P0 | **Partial memo** "unresolved", confidence cap 40, `status: partial` when caps or the timeout are hit |
 | P0 | Demo trap **excluded from the test split**. ≥2 test-only trap types (promotion, seasonality) + **negative controls** (the promotion is the real cause). Seed and test set frozen before tuning |
 | P0 | Baseline gets the **same output schema with row-ID citations**, plus the same model, data, questions and token limit. Its uncited share is reported separately |
@@ -121,11 +121,11 @@ Models are a cost/latency choice per role (System 1 = a small model with thinkin
 
 **Systems compared:**
 - (a) **VeriAgent Why v6.1**.
-- (b) **Plain-RAG baseline** with the same model (`nemotron-3.5-super-vl-120b-a12b`), the same provider, the same data (rows serialized as text with row IDs), the same questions, the **same max-token limit** and the **same output JSON schema** (including `top_cause_label`, claims and `row_ids`). It does top-k retrieval + one generation call, with no loops, no Evaluator, no S1 filter and no Claim Gate.
+- (b) **Plain-RAG baseline** with the same model (`nemotron-3.5-super-vl-120b-a12b`), the same provider, the same data (rows serialized as text with row IDs), the same questions, the **same max-token limit** and the **same output JSON schema** (including `top_cause_label`, claims and `row_ids`). It does top-k retrieval + one generation call, with no loops, no Evaluator, no S1 filter and no Traceability Check.
 
 **Metrics:**
 - **Cause accuracy:** top-1 exact-match on `top_cause_label`, reported as **k/18 with a Wilson 95% interval**. Top-2 is also reported.
-- **Unsupported-claim rate:** share of the claims whose row IDs don't exist or whose numbers, entity or period don't match. It uses **the same checker as the Claim Gate** (`app/checks/claims.py`), run independently by `scripts/eval.py`. The baseline's **uncited share** (claims with no row IDs) is reported **separately** and also counted as unsupported in the main figure.
+- **Unsupported-claim rate:** share of the claims whose row IDs don't exist or whose numbers, entity or period don't match. It uses **the same checker as the Traceability Check** (`app/checks/claims.py`), run independently by `scripts/eval.py`. The baseline's **uncited share** (claims with no row IDs) is reported **separately** and also counted as unsupported in the main figure.
 - **Trap-avoidance rate**, split by trap type, and **negative-control accuracy**, both as k/n with a Wilson interval.
 - **Partial rate:** share of runs that ended "unresolved".
 - **Time per answer** (median, p90) and **tokens per answer**.
@@ -145,7 +145,7 @@ Models are a cost/latency choice per role (System 1 = a small model with thinkin
 | 0:00–0:15 | Problem | The analyst: "Gross margin fell in region N last month. Why?" The track (02), and a note that the data is synthetic and labelled |
 | 0:15–0:45 | Question + growing graph | A real run. Hypotheses appear in the H-MEM graph, the Retriever hits 5 Zetaris views (the SQL is visible), the S1 filter drops chunks |
 | 0:45–1:25 | **Highlight: the trap** | The Planner favours the promotion (its dates match). The Evaluator runs its own Zetaris query, the promoted SKUs/regions don't overlap with the loss, it **refutes it with row IDs** → Planner revises → requery → carrier-SLA evidence |
-| 1:25–1:55 | Decision memo (the Claim Gate passes it) | Ranked causes, the discarded promotion alternative with its row, the confidence breakdown, a click from a claim to its Zetaris row, the what-if ESTIMATE badge. Export to PDF |
+| 1:25–1:55 | Decision memo (the Traceability Check passes it) | Ranked causes, the discarded promotion alternative with its row, the confidence breakdown, a click from a claim to its Zetaris row, the what-if ESTIMATE badge. Export to PDF |
 | 1:55–2:25 | Eval table | `eval/RESULTS.md` (test split, demo scenario excluded): v6.1 vs plain RAG with the same schema, k/18 with Wilson CI, unsupported-claim rate, trap avoidance, negative controls, time. Measured only, losses included |
 | 2:25–2:50 | Trace lines + sponsors | 4–5 JSONL lines (`needs_revision`, `query_zetaris`, `retry_count:1`). Meterless: the H-MEM ledger + the Markovian projected-vs-actual tokens (S1 savings). Nemotron Super = S2, small Nemotron = S1, called on the NVIDIA endpoint (Nightshift was not available; a labelled local simulator exists) |
 | 2:50–3:00 | Close | "Every claim has a row behind it." Repo URL |
@@ -157,7 +157,7 @@ Models are a cost/latency choice per role (System 1 = a small model with thinkin
 | Criterion | Pts | Gap vs B → what closes it (doc) | v5B | v6 if fully delivered | v6 at cut-line 2 |
 |---|---:|---|---:|---:|---:|
 | Impact | 30 | SSE §1: "name a real user, a real problem and the track"; SSE §16: "output is something the user could act on". v6 names the user and KPI, and the memo is actionable. Held back by synthetic data and no real customer | 25 | 27 | 26 |
-| Technical | 20 | SSE §1: "distinct roles, real interdependence and traceable behaviour. Failures are handled". WSE §2. v6.1 adds the deterministic Claim Gate, partial/unresolved handling, a fair baseline and a frozen test split. Risk: complexity versus reliability within 34 h | 16 | 18 | 17 |
+| Technical | 20 | SSE §1: "distinct roles, real interdependence and traceable behaviour. Failures are handled". WSE §2. v6.1 adds the deterministic Traceability Check, partial/unresolved handling, a fair baseline and a frozen test split. Risk: complexity versus reliability within 34 h | 16 | 18 | 17 |
 | Innovation | 15 | SSE §1: "a thoughtful agent pattern, not a familiar chain". S1/S2 filter + a self-verifying Evaluator + the trap-refutation loop + a measured eval are uncommon. The hypothesis graph itself resembles ChurnWhy (SSE §2), which caps the score | 11 | 13 | 12 |
 | Demo | 15 | DVG §2/SSE §8: real run, collaboration moment, output and why it matters. The trap refutation is a clear "collaboration moment", and the eval table shows value. Depends on Alonso's recording | 13 | 14 | 13 |
 | Product & UX | 10 | SSE §1: "output the user could act on". PDF memo + claim → row click-through. A light UI, not a polished product | 8 | 9 | 8 |
@@ -176,9 +176,9 @@ Registration closes **Fri 23 Oct 01:45 Madrid** (22 Oct 23:45 UTC). Alonso is al
 |---|---:|---|---|
 | Thu 22 (02:00 kickoff only + 17–23) | 0.5 + 5.5 | Public repo, first commit = declared skeleton. **Ask in Discord (and HackOS Help Meterless) about Nightshift routing.** Adapters (Zetaris, LLM switch), seeded generator + **frozen seed, ground truth and splits**, DuckDB snapshot, `run.py`/FastAPI, JSONL logger | `POST /run` returns JSON in SAMPLE_MODE; splits hash committed |
 | Fri 23 (Mercor pilot) | 4 | Zetaris views on AWS/box. Planner + Retriever + Writer (the v5A pipeline), H-MEM ledger. **Eval harness skeleton + baseline RAG** (same schema) + shared claim checker | **Milestone A** end to end; `eval.py` runs both systems on dev |
-| Sat 24 (lighter) | 7 | S1 filter + consolidation, Evaluator with Zetaris re-query, loops/caps, **Claim Gate** (reusing the checker), partial/unresolved path, confidence formula, Markovian + token report | Trap refuted in a real run; Claim Gate blocks a bad claim in the trace |
+| Sat 24 (lighter) | 7 | S1 filter + consolidation, Evaluator with Zetaris re-query, loops/caps, **Traceability Check** (reusing the checker), partial/unresolved path, confidence formula, Markovian + token report | Trap refuted in a real run; Traceability Check blocks a bad claim in the trace |
 | Sun 25 (DST: Madrid becomes UTC+1) | 7 | Tune on dev only → run the test split once, memo MD/PDF, UI (separate port) graph + click-through, what-if ESTIMATE | `eval/RESULTS.md` measured; memo exported |
-| Mon 26 (Meta hackathon at 18:00) | 2 + 2 at night | Before 18:00: tests (H-MEM, Markovian, Claim Gate), clean-clone check (DQ §14 incl. empty `.env`, `.env.example` placeholders, secrets scan), README/limitations. **Night:** record the 3:00 video | Fresh clone passes; video recorded |
+| Mon 26 (Meta hackathon at 18:00) | 2 + 2 at night | Before 18:00: tests (H-MEM, Markovian, Traceability Check), clean-clone check (DQ §14 incl. empty `.env`, `.env.example` placeholders, secrets scan), README/limitations. **Night:** record the 3:00 video | Fresh clone passes; video recorded |
 | Tue 27 | ~3 buffer + 1.5 | Deck (8 points), fixes, final clean-clone re-check, submit by **20:00 Madrid** (deadline 00:45 Madrid on 28 Oct) | Submitted with hours to spare |
 | **Total** | **~34** | | |
 
@@ -189,7 +189,7 @@ Registration closes **Fri 23 Oct 01:45 Madrid** (22 Oct 23:45 UTC). Alonso is al
 3. Replace the UI graph with a tree/list view (−1 Product/UX).
 4. Reduce the eval to 20 questions (keep ≥2 trap types + negative controls in test) and a single run per system (but **never** drop the baseline, the frozen split or invent numbers).
 5. S1 filter via the deterministic lexical scorer in live mode too (−1 Innovation; token report still measured).
-6. Last resort: ship Milestone A + Evaluator re-query + trap (≈85). Never cut: the Claim Gate, the partial/unresolved path, SAMPLE_MODE, traces, secrets hygiene, pre-existing declaration, Zetaris + Meterless load-bearing, the 4 required components.
+6. Last resort: ship Milestone A + Evaluator re-query + trap (≈85). Never cut: the Traceability Check, the partial/unresolved path, SAMPLE_MODE, traces, secrets hygiene, pre-existing declaration, Zetaris + Meterless load-bearing, the 4 required components.
 
 ## 8. Pre-existing work to add to the declaration (form + README)
 
@@ -212,7 +212,7 @@ Add to `PRE_EXISTING_WORK.md`:
 | H9 | NVIDIA where it contributes | OR §8.1 | meets (design) | Super = S2 reasoning, small Nemotron = S1 filter, Lightning = verifier |
 | H11 | Pre-existing declared | OR §8.2, SR §5 | partial → meets once §8 is pasted | §8 list added |
 | H13 | No hardcoded outputs / fabricated traces | AUP §4.1–4.2, DQ §8–9 | meets (design) | Seeded data + real computation in sample mode. Ground truth is read only by `eval.py`. Demo scenario not in test. Eval results come from logged runs |
-| H14 | Not a fixed chain / not one agent with labels | OR §7.3, AUP §1, WSE §5 | meets (design) | Evaluator → Planner (max 3) and Claim Gate → Cause Analyst (max 2). Distinct inputs, tools, schemas and authority per agent (§1) |
+| H14 | Not a fixed chain / not one agent with labels | OR §7.3, AUP §1, WSE §5 | meets (design) | Evaluator → Planner (max 3) and Traceability Check → Cause Analyst (max 2). Distinct inputs, tools, schemas and authority per agent (§1) |
 | H15 | No misrepresentation | AUP §4.4, DQ §13 | meets (design) | Synthetic data labelled. What-if labelled ESTIMATE. Deterministic confidence documented. Eval losses and limitations reported. Diagram figures are never shown as results |
 | H16 | Data licensed / synthetic labelled | OR §11.1 | meets (design) | Own seeded synthetic data, MIT-licensed with the repo |
 | R6 | Offline SAMPLE_MODE, real logic | TER §5, DQ §7 | meets (design) | DuckDB snapshot, same SQL, rule planner, lexical S1 |
@@ -221,4 +221,4 @@ Add to `PRE_EXISTING_WORK.md`:
 | R5 | Bounded + controlled failure | TER §2/§5 | meets (design) | caps 3/2/2, timeouts 60/20 s, 8 min run → partial memo "unresolved", conf ≤40, `status: partial` |
 | R2b | UI does not block the API | TER §2, DQ §5 | meets (design) | UI on a separate port, API JSON on :8000 |
 | H12 | No secrets | OR §11.2, DQ §11 | meets (design) | Clean-clone check verifies `.env.example` has placeholders only and runs the DQ §11 secrets scan (repo + git history) |
-| H15b | Accurate claims | AUP §4.4, DQ §13 | meets (design) | Claim Gate verifies every memo number against Zetaris. Wilson CIs, no "significant". Scores kept internal |
+| H15b | Accurate claims | AUP §4.4, DQ §13 | meets (design) | Traceability check re-finds every memo number in Zetaris (traceability, not correctness). Wilson CIs, no "significant". Scores kept internal |

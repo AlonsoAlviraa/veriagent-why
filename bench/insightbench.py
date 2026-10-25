@@ -3,7 +3,7 @@
 
 Systems, all on the SAME model through bench.llmio:
 - agent: VeriAgent Why stages (Planner -> SQL retrieval -> Evidence Evaluator requery loop (max 3)
-  -> Writer -> deterministic Claim Gate (max 2 rewrite rounds, then unsupported insights dropped)).
+  -> Writer -> deterministic Traceability Check (max 2 rewrite rounds, then unsupported insights dropped)).
 - rag:   plain RAG. Rows serialised as text, BM25 vs goal, top rows up to a token budget, one call.
 - react: simple ReAct text-to-SQL agent (up to 6 SQL actions, then one final answer call). No gate.
 """
@@ -128,7 +128,7 @@ def agent(task, con, tables, m: Meter, vr: bool = False) -> dict:
                 break
             prev = (out, ins)
             msgs = msgs + [{"role": "assistant", "content": json.dumps(out)[:4000]},
-                           {"role": "user", "content": "Claim gate rejected these numbers as not present in the cited results: "
+                           {"role": "user", "content": "Traceability check rejected these numbers as not present in the cited results: "
                             + json.dumps([{"text": i["text"], "unsupported": i["unsupported_numbers"]} for i in bad] + ([{"summary": sum_un}] if sum_un else []))
                             + ". Rewrite. " + OUT_SPEC}]
         kept = [i for i in ins if not i["unsupported_numbers"]]
@@ -206,7 +206,7 @@ def ib_det(n_q: int, n_unusable: int, n_kept: int, n_dropped: int) -> float:
 
 
 def gate_ib_claim(claim: dict, view: dict) -> tuple[list, list, list]:
-    """InsightBench claim gate (trace-fixes 2+3). Sources = the cited results that are usable; if the claim cites only
+    """InsightBench traceability check (trace-fixes 2+3). Sources = the cited results that are usable; if the claim cites only
     empty/failed results, its numbers have no source (unsupported); with no citation at all the usable results are the
     pool (as before). Comparatives/superlatives are checked against the cited tables (deterministic argmax/argmin)."""
     ev = [e for e in claim.get("evidence") or [] if e in view]
@@ -294,7 +294,7 @@ def repair_prompt(ctx: str, tables: list[str], question: str, sql: str, err: str
 def agent_markov(task, con, tables, m: Meter, use_nv: bool = False, use_rerank: bool = False, ctl=None) -> dict:
     """agent + Markovian control (bench/markov.py): SQL repair only for repairable error classes, evaluator
     skipped when evidence is sufficient or the last round added nothing, gate rewrite only when expected to pay,
-    optional deeper run (3 rounds + bigger Writer) for items the NVIDIA classifier rates hard. Same Claim Gate."""
+    optional deeper run (3 rounds + bigger Writer) for items the NVIDIA classifier rates hard. Same Traceability Check."""
     from .markov import Controller, load_features
     ctl = ctl or Controller(use_nv, load_features("insightbench") if use_nv else None, "insightbench")  # verify-v2 passes a policy subclass
     max_rounds, writer_model = ctl.insight_rounds(task["id"])
@@ -364,7 +364,7 @@ def agent_markov(task, con, tables, m: Meter, use_nv: bool = False, use_rerank: 
             break
         prev, prev_bad = (out, ins), len(bad) + len(uncited)
         msgs = msgs + [{"role": "assistant", "content": draft},
-                       {"role": "user", "content": "Claim gate rejected these insights (numbers not present in the cited results, or a comparison/superlative "
+                       {"role": "user", "content": "Traceability check rejected these insights (numbers not present in the cited results, or a comparison/superlative "
                         "contradicted by the cited table): "
                         + json.dumps([{"text": i["text"], "unsupported": i["unsupported_numbers"], "contradicted_by_table": i.get("contradictions") or []} for i in bad] + ([{"summary": sum_un}] if sum_un else []))
                         + (". These insights cite no valid result id; cite the ids (e.g. [\"q2\"]) they come from: " + json.dumps([i["text"] for i in uncited]) if uncited else "")
