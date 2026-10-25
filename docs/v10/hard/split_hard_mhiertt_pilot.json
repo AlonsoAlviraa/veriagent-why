@@ -1,0 +1,22 @@
+{
+"name": "v9gen_hard_mhiertt_pilot",
+"tatqa_split": "hard_mhiertt",
+"dataset_sha256": "12a6320c1a40c5e3524a75bff558da5bee0c6af0b6d0a3203f187e3f588610fd",
+"ids": [
+"hardmh-8cecfac6b690d197",
+"hardmh-cb849f5b82a7e7e6",
+"hardmh-2d366820e5a4927e",
+"hardmh-018089008cbbf1c1",
+"hardmh-c871fcbc86eb8611",
+"hardmh-53c8814b8f830dbc",
+"hardmh-8d020e0182036753",
+"hardmh-f7b62d27104a4479",
+"hardmh-025274bd3d74603c",
+"hardmh-24b752e865394594",
+"hardmh-fd7a6d9045918ac6",
+"hardmh-47d2cb801a729c32",
+"hardmh-7ad38c8e2c1a61f3",
+"hardmh-49a18124ba91a038",
+"hardmh-b1443667f934cb79"
+]
+}
