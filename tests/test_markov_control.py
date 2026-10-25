@@ -54,7 +54,11 @@ def test_determinism():
     a, b = MK.Controller(), MK.Controller()
     for c in (a, b):
         c.route("What is the total change?"); c.gate_retry(["expression number 7 not in context"], 0, False)
-    assert json.dumps(a.log) == json.dumps(b.log)
+    # Each entry carries a wall-clock "t" (audit ordering); it may differ by 1 ms
+    # between the two controllers, so compare everything except that field.
+    assert a.log and all("t" in d for d in a.log + b.log)
+    strip = lambda log: [{k: v for k, v in d.items() if k != "t"} for d in log]
+    assert json.dumps(strip(a.log), sort_keys=True) == json.dumps(strip(b.log), sort_keys=True)
 
 
 def test_offline_systems_log_decisions(tmp_path):
