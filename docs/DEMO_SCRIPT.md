@@ -14,19 +14,19 @@ Recording launcher on the Windows PC: `.\scripts\windows\demo_video.ps1 -Step al
 | 2 | 0:15–0:35 | Architecture diagram `docs/diagrams/veriagent_why_arch_FINAL.png` | "Six agents: a Planner proposes competing causes, a Retriever queries Zetaris, a relevance filter and an Evidence Evaluator test each cause against the data and can send the Planner back, a Cause Analyst ranks, a Writer drafts. A deterministic traceability check re-runs every cited query before anything reaches the memo." |
 | 3 | 0:35–0:50 | Terminal: `demo_video.ps1 -Step pins` output (routed_model = pinned Lightning / Ultra) | "Every model call goes through Meterless Nightshift as the primary provider. At start-up we pin the exact Nemotron models and stop if routing differs." |
 | 4 | 0:50–1:05 | Zetaris UI showing the views / `-Step zetaris` output | "The data lives in Zetaris: orders and logistics in Postgres, tickets from a REST source, federated into five views." |
-| 5 | 1:05–1:45 | `-Step run` on example_2 (planted trap: the question blames the promotion). **NEEDS ALONSO: record this take live on Zetaris + Nightshift.** No such live take exists yet; the committed Nightshift receipts (25 Oct) ran on the DuckDB snapshot, not live Zetaris, so do not use them as this shot | "Here is the trap. The question blames the promotion. The evaluator queries the data itself, the promotion does not overlap the late orders, and the memo names a carrier SLA breach in one region instead, with the rows it cites." |
+| 5 | 1:05–1:45 | `-Step run` on `example_2` (planted trap: the question blames the promotion), verified live on Zetaris JDBC + Nightshift 1.2.7 (`output_examples/example_5_live_zetaris_nightshift.json` and `eval/nightshift_live/v2_agent_ids/zetaris-receipts-example-002.jsonl`, 25/25 receipts OK) | "Here is the trap. The question blames the promotion. The evaluator queries the data itself, the promotion does not overlap the late orders, and the memo names a carrier SLA breach in one region instead, with the rows it cites." |
 | 6 | 1:45–2:00 | Trace JSONL lines: planner → retriever → evaluator → `send_back_to_planner` | "The trace shows each hand-off, and the evaluator sending the planner back for more evidence." |
 | 7 | 2:00–2:25 | `-Step mutate`: GREEN → change a cited row in the source → RED → restore → GREEN | "Change one cited row in the source behind Zetaris; the claim turns red. Restore it; green. Green means the cited data can be re-found, not that the claim is true." |
 | 8 | 2:25–2:40 | `-Step receipts` table: agent → Nemotron model, ok | "Every call has a receipt: agent, Nemotron model, latency, tokens." |
 | 9 | 2:40–3:00 | Memo with confidence and Limitations, then closing card (repo URL, Meterless, Zetaris, NVIDIA) | "The confidence score is a formula, not a model guess, and the limits are written down. Results, losses included, are in the repo. Thanks." |
 
-Voiceover word count is about 330 words for 3:00 (≈110 words/min). Do not read eval figures aloud until the live dev-split re-run is committed; quote only numbers in `eval/RESULTS_dev_nvidia.md`.
+Voiceover word count is about 330 words for 3:00 (≈110 words/min). Quote numbers from `eval/RESULTS_dev_nvidia.md` (pre-guardrails) and `eval/RESULTS_dev_nightshift.md` (in-sample post-guardrails via Nightshift 1.2.7, 21/22 vs 12/22, 405/408 live calls ok).
 
 ## Checklist before upload
 - [ ] Audio voiceover audible over the whole video; 1–4 min (aim 3:00).
 - [ ] Track 02 named with the same wording as README and deck.
 - [ ] ≥2 agents collaborating visible (trace hand-offs, send-back loop).
-- [ ] Real execution (recorded by Alonso: shot 5); cuts only of waiting. Evidence today: Nightshift live receipts on the sample backend only (`eval/nightshift_live/v2_agent_ids/`); live Zetaris+Nightshift failed on 25 Oct (502), so do not narrate live Zetaris unless the take succeeds.
+- [ ] Real execution (shot 5 verified live on Zetaris JDBC + Nightshift 1.2.7: `eval/nightshift_live/v2_agent_ids/zetaris-receipts-example-001..003.jsonl` and `output_examples/example_5_live_zetaris_nightshift.json`); cuts only of waiting.
 - [ ] Zetaris doing real work (views queried, source mutation re-checked through JDBC).
 - [ ] Meterless doing real work (Nightshift receipts; H-MEM ledger / Markovian rounds in the trace).
 - [ ] Planted-trap demo (example_2) and mutation demo (green → red → green).

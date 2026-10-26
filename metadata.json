@@ -16,14 +16,14 @@
   "slide_deck_url": "",
   "colab_links": [],
   "sponsor_technology": {
-    "zetaris": "Default data layer: five views (v_orders, v_returns, v_tickets, v_logistics, v_promotions) queried over JDBC (Zetaris Lightning) by the Retriever and re-queried by the Evidence Evaluator and Traceability Check. When Zetaris is not configured the same SQL runs on a local DuckDB snapshot (SAMPLE_MODE, the explicit fallback), which is logged and shown in the memo. Live Zetaris session (JDBC, public Olist data, 2026-10-24): logs/olist_zetaris_session_20261024_1041/.",
+    "zetaris": "Default data layer: five views (v_orders, v_returns, v_tickets, v_logistics, v_promotions) federated across PostgreSQL (veriagent_pg) and REST (veriagent_rest) into SchemaStore container veriagent and queried over JDBC (Zetaris Lightning) by the Retriever, Evidence Evaluator and Traceability Check. When Zetaris is not configured the same SQL runs on a local DuckDB snapshot (SAMPLE_MODE, the explicit fallback), which is logged and shown in the memo. Live Zetaris + Nightshift 1.2.7 runs (2026-10-26): output_examples/example_5_live_zetaris_nightshift.json and eval/nightshift_live/v2_agent_ids/zetaris-receipts-example-001..003.jsonl. Live Zetaris Olist session (2026-10-24 & re-verified 2026-10-26): logs/olist_zetaris_session_20261024_1041/.",
     "meterless": {
       "engines_used": [
         "Nightshift",
         "H-MEM",
         "Markovian"
       ],
-      "where": "Nightshift 1.2.7 is the primary model provider: S1 requests and is pinned to nvidia/nemotron-3.5-lightning-30b-a3b (reasoning off), S2 to nvidia/nemotron-3-ultra-550b-a55b; startup pin check and logs/receipts-<run_id>.jsonl from the meterless response block; NVIDIA fallback off by default and flagged in receipts. H-MEM stores hypotheses, retrieval calls, evidence and support/refute edges (trust ledger per run); Markovian drives the Evaluator->Planner rounds (vendored Apache-2.0 reference engines via a node bridge). Live Nightshift receipts for the three demo scenarios (2026-10-25): every successful call routed to the pinned Lightning/Ultra ids, no fallback; see eval/nightshift_live/. Receipts name the calling agent and carry a client request id (X-Request-Id) from commit ef6a2da on. Live receipts used synthetic DuckDB data, not live Zetaris. Markovian control (bench/markov.py) is benchmark-only."
+      "where": "Nightshift 1.2.7 is the primary model provider: S1 requests and is pinned to nvidia/nemotron-3.5-lightning-30b-a3b (reasoning off), S2 to nvidia/nemotron-3-ultra-550b-a55b; startup pin check and logs/receipts-<run_id>.jsonl from the meterless response block; NVIDIA fallback off by default and flagged in receipts. H-MEM stores hypotheses, retrieval calls, evidence and support/refute edges (trust ledger per run); Markovian drives the Evaluator->Planner rounds (vendored Apache-2.0 reference engines via a node bridge). Live Zetaris JDBC + Live Nightshift 1.2.7 receipts for all three demo scenarios (2026-10-26): 72/72 receipts OK (0 failed), every call routed to the pinned Lightning/Ultra ids with agent attribution and client_request_id (X-Request-Id); see eval/nightshift_live/v2_agent_ids/. Markovian control (bench/markov.py) is benchmark-only."
     },
     "nvidia": "Via Meterless Nightshift routing to NVIDIA cloud: Nemotron 3.5 Lightning 30B A3B, reasoning off (S1: retriever, s1_filter, evidence_evaluator) and Nemotron 3 Ultra 550B A55B (S2: planner, cause_analyst, writer); nemotron-3-embed-1b embeddings. Live dev-split results: 22 Oct pre-guardrails (direct NVIDIA, Super VL: 14/22 vs 11/22) in eval/RESULTS_dev_nvidia.md; 26 Oct post-guardrails in-sample re-run via Nightshift 1.2.7 (21/22 vs 12/22, 405/408 live calls ok = 99.3%) in eval/RESULTS_dev_nightshift.md.",
     "unique": "The Evidence Evaluator re-queries the data itself and can send the Planner back; a deterministic check blocks claims whose cited rows or numbers cannot be re-found in the queried data (traceability, not truth)."
@@ -35,13 +35,14 @@
   ],
   "pre_existing_components": "Environment setup, design material and the empty repo skeleton existed before 22 Oct 2026; Olist is a pre-existing public dataset (its preparation code was written in the window). Details: docs/PRE_EXISTING_WORK.md.",
   "sample_mode": "fallback when Zetaris is not configured (SAMPLE_MODE=true forces it)",
-  "data": "Demo data is synthetic (scripts/make_data.py, seeded). The Zetaris session uses the public Olist Brazilian E-Commerce dataset (Kaggle olistbr/brazilian-ecommerce, CC BY-NC-SA 4.0), downloaded on demand, not committed. No private customer data.",
+  "data": "Demo data is synthetic (scripts/make_data.py, seeded). The Zetaris session also federates the public Olist Brazilian E-Commerce dataset (Kaggle olistbr/brazilian-ecommerce, CC BY-NC-SA 4.0), downloaded on demand, not committed. No private customer data.",
   "ai_usage": "Code written during the build window by AI coding agents (Grok Bot) under the author's direction; Cursor not used (made optional by the organisers' 22 Oct 2026 announcement). See README 'AI and Model Usage'.",
   "final_system": "V7 answers + V9_full confidence (app/v9conf.py, V9_CONFIDENCE=on by default); per-row abstention decision from the frozen V9_full signal. Results: docs/TEST500_RESULTS.md, docs/V9_GENERALIZATION_RESULTS.md, docs/V10_RESULTS.md (PARTIAL), docs/V11_RESULTS.md (TableBench n=361, WORKS: V7 48.2% vs RAG 32.7%, V9_full AUROC 0.834, selective acc 77.3%, realized risk 8.3% <= 10%).",
   "sample_io": [
     "input_examples/example_1.json -> output_examples/example_1.json",
     "input_examples/example_2.json -> output_examples/example_2.json",
-    "input_examples/example_3.json -> output_examples/example_3.json"
+    "input_examples/example_3.json -> output_examples/example_3.json",
+    "input_examples/example_2.json (live Zetaris JDBC + Nightshift 1.2.7) -> output_examples/example_5_live_zetaris_nightshift.json"
   ],
   "limitations": "Traceability Check = traceability, not truth (140/171 test500 errors passed it); live agent 14/22 vs RAG 11/22 vs trivial rule 13/22 pre-guardrails (21/22 vs 12/22 in-sample post-guardrails via Nightshift with 405/408 live calls ok); V9_full not better than cheap/raw log-prob on V10 and CRC fails on DocFinQA; narrative check flags 43% of correct controls. See README 'Status'."
 }

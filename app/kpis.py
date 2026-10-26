@@ -12,8 +12,9 @@ KPIS = {
     "return_rate": {"label": "Return rate", "bad": "returned orders", "invert": True,
                     "patterns": [r"return rate", r"returns? (went|rose|increase)", r"\breturns\b"],
                     "table": "(SELECT l.shipment_id, l.order_id, l.carrier, l.region, o.order_date AS ship_date, "
-                             "l.promised_days, l.actual_days, (rr.order_id IS NULL) AS on_time FROM v_logistics l "
-                             "JOIN v_orders o USING(order_id) LEFT JOIN (SELECT DISTINCT order_id FROM v_returns) rr USING(order_id))"},
+                             "l.promised_days, l.actual_days, (rr.order_id IS NULL) AS on_time, "
+                             "o.category, o.promo_id, rr.reason FROM v_logistics l "
+                             "JOIN v_orders o USING(order_id) LEFT JOIN (SELECT order_id, MAX(reason) AS reason FROM v_returns GROUP BY order_id) rr USING(order_id))"},
 }
 
 
@@ -32,6 +33,11 @@ class KpiLens:
     def query(self, sql: str, params: list | None = None) -> list[dict]:
         t = self.kpi["table"]
         if t:
+            if re.search(r"\bv_logistics\s+l\b", sql):
+                sql = re.sub(r"\s+JOIN\s+v_orders\s+o\s+USING\s*\(\s*order_id\s*\)", "", sql, flags=re.I)
+                sql = re.sub(r"\s+LEFT\s+JOIN\s+v_returns\s+r\s+USING\s*\(\s*order_id\s*\)", "", sql, flags=re.I)
+                sql = re.sub(r"\bo\.(category|region|promo_id)\b", r"l.\1", sql)
+                sql = re.sub(r"\br\.reason\b", "l.reason", sql)
             sql = re.sub(r"\bv_logistics(\s+l\b)?", lambda m: f"{t} l" if m.group(1) else f"{t} v_kpi", sql)
         return self.db.query(sql, params)
 
