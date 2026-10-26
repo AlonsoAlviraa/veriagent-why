@@ -143,7 +143,7 @@ def check_pins(tiers=("s1", "s2")) -> list[dict]:
 if __name__ == "__main__":  # python -m app.nightshift  -> live pin check, prints receipts (no secrets)
     from .config import load_dotenv
     load_dotenv()
-    os.environ.setdefault("SAMPLE_MODE", "false"); os.environ.setdefault("LLM_PROVIDER", "nightshift")
+    os.environ["SAMPLE_MODE"] = "false"; os.environ["LLM_PROVIDER"] = "nightshift"
     set_run("pincheck-" + time.strftime("%Y%m%d-%H%M%S"))
     try:
         print(json.dumps(check_pins(), indent=1)); print("receipts:", receipts_path())
