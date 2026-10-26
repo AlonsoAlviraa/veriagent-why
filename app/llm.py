@@ -118,28 +118,36 @@ def _complete_nvidia(messages, tier, max_tokens):
 
 
 _LAST = [0.0]
+_PACER_LOCK = __import__("threading").Lock()
 
 
 def _post(req, timeout, p):
     """POST with a client-side pacer (NVIDIA free tier is rate limited; MODEL_MIN_INTERVAL_S, default
-    1.6 s on nvidia) and up to 3 retries on 429/5xx with backoff (Retry-After honoured)."""
+    1.6 s on nvidia/nightshift) and retries on 429/5xx with backoff (Retry-After honoured)."""
     import time
     gap = float(env("MODEL_MIN_INTERVAL_S", "1.6" if p == "nvidia" else "0"))
-    max_attempts = int(env("LLM_MAX_ATTEMPTS", "4"))
+    max_attempts = int(env("LLM_MAX_ATTEMPTS", "5" if p == "nightshift" else "4"))
+    base_backoff = float(env("LLM_RETRY_BACKOFF_S", "8" if p == "nightshift" else "2"))
     for attempt in range(max_attempts):
-        wait = _LAST[0] + gap - time.time()
-        if wait > 0:
-            time.sleep(wait)
-        _LAST[0] = time.time()
+        with _PACER_LOCK:
+            wait = _LAST[0] + gap - time.time()
+            if wait > 0:
+                time.sleep(wait)
+            _LAST[0] = time.time()
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:
-                return json.load(r)
+                out = json.load(r)
+                with _PACER_LOCK:
+                    _LAST[0] = time.time()
+                return out
         except urllib.error.HTTPError as e:
+            with _PACER_LOCK:
+                _LAST[0] = time.time()
             left = remaining()
             if (e.code != 429 and e.code < 500) or attempt == max_attempts - 1 or (left is not None and left < 5):
                 raise
             ra = e.headers.get("Retry-After") if e.headers else None
-            time.sleep(float(ra) if ra and ra.replace(".", "").isdigit() else 2 * 2 ** attempt)
+            time.sleep(float(ra) if ra and ra.replace(".", "").isdigit() else (base_backoff * (attempt + 1) if p == "nightshift" else base_backoff * 2 ** attempt))
 
 
 def clean_content(text):

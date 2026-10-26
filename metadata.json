@@ -25,7 +25,7 @@
       ],
       "where": "Nightshift 1.2.7 is the primary model provider: S1 requests and is pinned to nvidia/nemotron-3.5-lightning-30b-a3b (reasoning off), S2 to nvidia/nemotron-3-ultra-550b-a55b; startup pin check and logs/receipts-<run_id>.jsonl from the meterless response block; NVIDIA fallback off by default and flagged in receipts. H-MEM stores hypotheses, retrieval calls, evidence and support/refute edges (trust ledger per run); Markovian drives the Evaluator->Planner rounds (vendored Apache-2.0 reference engines via a node bridge). Live Nightshift receipts for the three demo scenarios (2026-10-25): every successful call routed to the pinned Lightning/Ultra ids, no fallback; see eval/nightshift_live/. Receipts name the calling agent and carry a client request id (X-Request-Id) from commit ef6a2da on. Live receipts used synthetic DuckDB data, not live Zetaris. Markovian control (bench/markov.py) is benchmark-only."
     },
-    "nvidia": "Via Meterless Nightshift routing to NVIDIA cloud: Nemotron 3.5 Lightning 30B A3B, reasoning off (S1: retriever, s1_filter, evidence_evaluator) and Nemotron 3 Ultra 550B A55B (S2: planner, cause_analyst, writer); nemotron-3-embed-1b embeddings. Live dev-split results: 22 Oct pre-guardrails (direct NVIDIA, Super VL: 14/22 vs 11/22) in eval/RESULTS_dev_nvidia.md; 25 Oct post-guardrails in-sample re-run via Nightshift 1.2.7 (21/22 vs 12/22) in eval/RESULTS_dev_nightshift.md.",
+    "nvidia": "Via Meterless Nightshift routing to NVIDIA cloud: Nemotron 3.5 Lightning 30B A3B, reasoning off (S1: retriever, s1_filter, evidence_evaluator) and Nemotron 3 Ultra 550B A55B (S2: planner, cause_analyst, writer); nemotron-3-embed-1b embeddings. Live dev-split results: 22 Oct pre-guardrails (direct NVIDIA, Super VL: 14/22 vs 11/22) in eval/RESULTS_dev_nvidia.md; 26 Oct post-guardrails in-sample re-run via Nightshift 1.2.7 (21/22 vs 12/22, 405/408 live calls ok = 99.3%) in eval/RESULTS_dev_nightshift.md.",
     "unique": "The Evidence Evaluator re-queries the data itself and can send the Planner back; a deterministic check blocks claims whose cited rows or numbers cannot be re-found in the queried data (traceability, not truth)."
   },
   "models": [
@@ -43,5 +43,5 @@
     "input_examples/example_2.json -> output_examples/example_2.json",
     "input_examples/example_3.json -> output_examples/example_3.json"
   ],
-  "limitations": "Traceability Check = traceability, not truth (140/171 test500 errors passed it); live agent 14/22 vs RAG 11/22 vs trivial rule 13/22 pre-guardrails (21/22 vs 12/22 in-sample post-guardrails via Nightshift with 502 fallbacks); V9_full not better than cheap/raw log-prob on V10 and CRC fails on DocFinQA; narrative check flags 43% of correct controls. See README 'Status'."
+  "limitations": "Traceability Check = traceability, not truth (140/171 test500 errors passed it); live agent 14/22 vs RAG 11/22 vs trivial rule 13/22 pre-guardrails (21/22 vs 12/22 in-sample post-guardrails via Nightshift with 405/408 live calls ok); V9_full not better than cheap/raw log-prob on V10 and CRC fails on DocFinQA; narrative check flags 43% of correct controls. See README 'Status'."
 }
