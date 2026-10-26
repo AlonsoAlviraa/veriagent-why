@@ -1,8 +1,8 @@
 {
-  "run_id": "example-004-nightshift",
+  "run_id": "test-q02-v2",
   "status": "success",
   "output": {
-    "summary": "Top cause: **carrier_sla_breach** in carrier=CarrierB, region=North (estimated share of the excess late shipments vs the baseline rate: 104%; above 100% means other segments improved).",
+    "summary": "Top cause: **carrier_sla_breach** in carrier=CarrierC, region=West (estimated share of the excess late shipments vs the baseline rate: 65%; above 100% means other segments improved).",
     "result": {
       "question": {
         "query": "Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?",
@@ -15,137 +15,127 @@
           "2026-09-15",
           "2026-09-30"
         ],
-        "dataset": null
+        "dataset": "q02"
       },
       "analysis": {
         "causes": [
           {
             "segment": {
-              "carrier": "CarrierB",
-              "region": "North"
+              "carrier": "CarrierC",
+              "region": "West"
             },
             "hyp": "H_carrier_x_region",
-            "estimated_contribution": 1.0,
-            "raw_share_of_excess_late": 1.045,
+            "estimated_contribution": 0.653,
+            "raw_share_of_excess_late": 0.653,
             "label": "carrier_sla_breach"
           },
           {
             "segment": {
-              "region": "North"
+              "region": "West"
             },
             "hyp": "H_region",
-            "estimated_contribution": 1.0,
-            "raw_share_of_excess_late": 1.096,
+            "estimated_contribution": 0.683,
+            "raw_share_of_excess_late": 0.683,
             "label": "none"
           },
           {
             "segment": {
-              "carrier": "CarrierB"
+              "carrier": "CarrierC"
             },
             "hyp": "H_carrier",
-            "estimated_contribution": 1.0,
-            "raw_share_of_excess_late": 1.081,
+            "estimated_contribution": 0.644,
+            "raw_share_of_excess_late": 0.644,
             "label": "carrier_sla_breach"
           }
         ],
         "top_cause": {
           "segment": {
-            "carrier": "CarrierB",
-            "region": "North"
+            "carrier": "CarrierC",
+            "region": "West"
           },
           "hyp": "H_carrier_x_region",
-          "estimated_contribution": 1.0,
-          "raw_share_of_excess_late": 1.045,
+          "estimated_contribution": 0.653,
+          "raw_share_of_excess_late": 0.653,
           "label": "carrier_sla_breach"
         },
         "top_cause_label": "carrier_sla_breach",
         "cross_checks": [],
         "secondary_cause": null,
         "ambiguous": false,
-        "discarded": [
-          {
-            "hyp": "H_promo",
-            "verdict": "refutes",
-            "promo_id": "PROMO-HOME-SOUTH",
-            "dates_overlap": true,
-            "promo_segment": {
-              "category": "home",
-              "region": "South"
-            },
-            "share_of_excess_late": -0.001,
-            "promo_shipments": 49,
-            "promo_late": 3
-          }
-        ],
-        "blocked": []
+        "discarded": [],
+        "blocked": [
+          "narrative"
+        ]
       },
       "claims": [
         {
           "id": "C_ontime_period",
           "metric": "on_time_rate",
           "segment": {
-            "carrier": "CarrierB",
-            "region": "North"
+            "carrier": "CarrierC",
+            "region": "West"
           },
           "window": [
             "2026-10-01",
             "2026-10-14"
           ],
-          "value": 44.16,
+          "value": 58.06,
           "row_ids": [
-            "S000977",
-            "S000979",
-            "S001028",
-            "S001040",
-            "S001068"
+            "S000981",
+            "S001001",
+            "S001018",
+            "S001023",
+            "S001046"
           ],
-          "text": "On-time rate for carrier=CarrierB, region=North was 44.2% in the period window (2026-10-01..2026-10-14)."
+          "text": "On-time rate for carrier=CarrierC, region=West was 58.1% in the period window (2026-10-01..2026-10-14)."
         },
         {
           "id": "C_ontime_baseline",
           "metric": "on_time_rate",
           "segment": {
-            "carrier": "CarrierB",
-            "region": "North"
+            "carrier": "CarrierC",
+            "region": "West"
           },
           "window": [
             "2026-09-15",
             "2026-09-30"
           ],
-          "value": 93.02,
+          "value": 92.05,
           "row_ids": [
-            "S000014",
-            "S000021",
-            "S000024",
+            "S000017",
             "S000032",
-            "S000045"
+            "S000048",
+            "S000057",
+            "S000093"
           ],
-          "text": "On-time rate for carrier=CarrierB, region=North was 93.0% in the baseline window (2026-09-15..2026-09-30)."
+          "text": "On-time rate for carrier=CarrierC, region=West was 92.0% in the baseline window (2026-09-15..2026-09-30)."
         }
       ],
-      "narrative": "CarrierB's on-time rate in the North region collapsed from 93.0% in the baseline window (2026-09-15 to 2026-09-30) to 44.2% in the period window (2026-10-01 to 2026-10-14). A promotional hypothesis (PROMO-HOME-SOUTH) for the home category in the South region was investigated and refuted; its dates overlapped but it accounted for only 49 shipments with 3 late deliveries and a negative share of excess late. The model verdict confirms the promotion did not drive the North region carrier breach.",
-      "blocked_claims": [],
+      "narrative": null,
+      "blocked_claims": [
+        "narrative"
+      ],
       "confidence": {
-        "confidence": 100,
-        "C": 1.0,
+        "confidence": 85,
+        "C": 0.667,
         "A": 1.0,
         "R": 0.0,
         "caps": [],
         "formula": "round(100*(0.45*C + 0.35*A + 0.20*(1-R)))",
         "views": {
           "v_logistics": {
-            "baseline_rate": 0.0698,
-            "period_rate": 0.5584,
+            "baseline_rate": 0.0795,
+            "period_rate": 0.4194,
             "agrees": true
           },
           "v_tickets": {
-            "baseline_rate": 0.0233,
-            "period_rate": 0.2597,
+            "baseline_rate": 0.0341,
+            "period_rate": 0.129,
             "agrees": true
           },
           "v_returns": {
             "baseline_rate": 0.0,
-            "period_rate": 0.013,
+            "period_rate": 0.0161,
             "agrees": true
           },
           "v_promotions": "no promotion overlaps the top-cause segment",
@@ -158,18 +148,18 @@
           "rounds": [
             {
               "round": 1,
-              "s1_projected_tokens": 419,
-              "s1_actual_tokens": 315
+              "s1_projected_tokens": 651,
+              "s1_actual_tokens": 442
             },
             {
               "round": 2,
-              "s1_projected_tokens": 420,
-              "s1_actual_tokens": 276
+              "s1_projected_tokens": 465,
+              "s1_actual_tokens": 76
             }
           ],
-          "projected_total": 839,
-          "actual_total": 591,
-          "avoided_by_s1": 248
+          "projected_total": 1116,
+          "actual_total": 518,
+          "avoided_by_s1": 598
         },
         "markovian": {
           "id": "run-1",
@@ -177,16 +167,16 @@
           "chunks": [
             {
               "id": 1,
-              "tokens": 21,
+              "tokens": 20,
               "carryover_chars": 0
             },
             {
               "id": 2,
               "tokens": 10,
-              "carryover_chars": 256
+              "carryover_chars": 252
             }
           ],
-          "totalTokensUsed": 31,
+          "totalTokensUsed": 30,
           "totalTokensSaved": 0,
           "efficiencyPercent": 0,
           "tokenLabel": "estimated",
@@ -212,7 +202,7 @@
             "completion_tokens": 27,
             "total_tokens": 400
           },
-          "latency_s": 1.229,
+          "latency_s": 4.292,
           "batch": 1
         },
         {
@@ -225,10 +215,10 @@
           "fallback": false,
           "usage": {
             "prompt_tokens": 1291,
-            "completion_tokens": 86,
-            "total_tokens": 1377
+            "completion_tokens": 97,
+            "total_tokens": 1388
           },
-          "latency_s": 1.578,
+          "latency_s": 2.795,
           "batch": 1
         },
         {
@@ -241,10 +231,10 @@
           "fallback": false,
           "usage": {
             "prompt_tokens": 1400,
-            "completion_tokens": 81,
-            "total_tokens": 1481
+            "completion_tokens": 105,
+            "total_tokens": 1505
           },
-          "latency_s": 1.056,
+          "latency_s": 2.816,
           "batch": 1
         },
         {
@@ -256,11 +246,11 @@
           "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
           "fallback": false,
           "usage": {
-            "prompt_tokens": 1319,
-            "completion_tokens": 46,
-            "total_tokens": 1365
+            "prompt_tokens": 1318,
+            "completion_tokens": 88,
+            "total_tokens": 1406
           },
-          "latency_s": 0.774,
+          "latency_s": 2.921,
           "batch": 1
         },
         {
@@ -272,11 +262,11 @@
           "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
           "fallback": false,
           "usage": {
-            "prompt_tokens": 1208,
-            "completion_tokens": 82,
-            "total_tokens": 1290
+            "prompt_tokens": 1399,
+            "completion_tokens": 104,
+            "total_tokens": 1503
           },
-          "latency_s": 5.621,
+          "latency_s": 2.79,
           "batch": 1
         },
         {
@@ -288,11 +278,11 @@
           "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
           "fallback": false,
           "usage": {
-            "prompt_tokens": 1325,
-            "completion_tokens": 83,
-            "total_tokens": 1408
+            "prompt_tokens": 1170,
+            "completion_tokens": 51,
+            "total_tokens": 1221
           },
-          "latency_s": 1.647,
+          "latency_s": 2.459,
           "batch": 1
         },
         {
@@ -304,84 +294,204 @@
           "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
           "fallback": false,
           "usage": {
-            "prompt_tokens": 881,
-            "completion_tokens": 52,
-            "total_tokens": 933
+            "prompt_tokens": 1355,
+            "completion_tokens": 90,
+            "total_tokens": 1445
           },
-          "latency_s": 0.848,
-          "batch": 1
-        },
-        {
-          "agent": "retriever",
-          "provider": "nightshift",
-          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
-          "ok": true,
-          "request_id": null,
-          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
-          "fallback": false,
-          "usage": {
-            "prompt_tokens": 895,
-            "completion_tokens": 56,
-            "total_tokens": 951
-          },
-          "latency_s": 0.884,
+          "latency_s": 2.818,
           "batch": 1
         },
         {
           "agent": "s1_filter",
-          "ok": false,
-          "error": "HTTPError: HTTP Error 502: Bad Gateway",
-          "fallback": "deterministic",
-          "latency_s": 12.116
-        },
-        {
-          "agent": "evidence_evaluator",
-          "ok": false,
-          "error": "HTTPError: HTTP Error 502: Bad Gateway",
-          "fallback": "deterministic",
-          "latency_s": 5.636
-        },
-        {
-          "agent": "evidence_evaluator",
-          "ok": false,
-          "error": "HTTPError: HTTP Error 502: Bad Gateway",
-          "fallback": "deterministic",
-          "latency_s": 6.116
-        },
-        {
-          "agent": "evidence_evaluator",
-          "ok": false,
-          "error": "HTTPError: HTTP Error 502: Bad Gateway",
-          "fallback": "deterministic",
-          "latency_s": 5.635
-        },
-        {
-          "agent": "evidence_evaluator",
-          "ok": false,
-          "error": "HTTPError: HTTP Error 502: Bad Gateway",
-          "fallback": "deterministic",
-          "latency_s": 5.614
-        },
-        {
-          "agent": "retriever",
-          "ok": false,
-          "error": "HTTPError: HTTP Error 502: Bad Gateway",
-          "fallback": "deterministic",
-          "latency_s": 6.019
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 1333,
+            "completion_tokens": 55,
+            "total_tokens": 1388
+          },
+          "latency_s": 13.713,
+          "batch": 3
         },
         {
           "agent": "s1_filter",
-          "ok": false,
-          "error": "HTTPError: HTTP Error 502: Bad Gateway",
-          "fallback": "deterministic",
-          "latency_s": 12.436
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 1288,
+            "completion_tokens": 55,
+            "total_tokens": 1343
+          },
+          "latency_s": 13.713,
+          "batch": 3
+        },
+        {
+          "agent": "s1_filter",
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 1275,
+            "completion_tokens": 30,
+            "total_tokens": 1305
+          },
+          "latency_s": 13.713,
+          "batch": 3
         },
         {
           "agent": "evidence_evaluator",
-          "ok": false,
-          "error": "HTTPError: HTTP Error 502: Bad Gateway",
-          "fallback": "deterministic",
-          "latency_s": 6.008
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 646,
+            "completion_tokens": 9,
+            "total_tokens": 655
+          },
+          "latency_s": 71.125,
+          "batch": 1
+        },
+        {
+          "agent": "evidence_evaluator",
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 678,
+            "completion_tokens": 9,
+            "total_tokens": 687
+          },
+          "latency_s": 2.255,
+          "batch": 1
+        },
+        {
+          "agent": "evidence_evaluator",
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 76,
+            "completion_tokens": 9,
+            "total_tokens": 85
+          },
+          "latency_s": 3.719,
+          "batch": 1
+        },
+        {
+          "agent": "evidence_evaluator",
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 245,
+            "completion_tokens": 9,
+            "total_tokens": 254
+          },
+          "latency_s": 8.873,
+          "batch": 1
+        },
+        {
+          "agent": "retriever",
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 1361,
+            "completion_tokens": 91,
+            "total_tokens": 1452
+          },
+          "latency_s": 4.22,
+          "batch": 1
+        },
+        {
+          "agent": "retriever",
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 1436,
+            "completion_tokens": 64,
+            "total_tokens": 1500
+          },
+          "latency_s": 3.311,
+          "batch": 1
+        },
+        {
+          "agent": "s1_filter",
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 1288,
+            "completion_tokens": 55,
+            "total_tokens": 1343
+          },
+          "latency_s": 5.585,
+          "batch": 2
+        },
+        {
+          "agent": "s1_filter",
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 1103,
+            "completion_tokens": 31,
+            "total_tokens": 1134
+          },
+          "latency_s": 5.585,
+          "batch": 2
+        },
+        {
+          "agent": "evidence_evaluator",
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 689,
+            "completion_tokens": 9,
+            "total_tokens": 698
+          },
+          "latency_s": 36.022,
+          "batch": 1
         },
         {
           "agent": "cause_analyst",
@@ -392,11 +502,11 @@
           "requested_model": "nvidia/nemotron-3-ultra-550b-a55b",
           "fallback": false,
           "usage": {
-            "prompt_tokens": 392,
+            "prompt_tokens": 398,
             "completion_tokens": 13,
-            "total_tokens": 405
+            "total_tokens": 411
           },
-          "latency_s": 0.873,
+          "latency_s": 11.005,
           "batch": 1
         },
         {
@@ -408,42 +518,59 @@
           "requested_model": "nvidia/nemotron-3-ultra-550b-a55b",
           "fallback": false,
           "usage": {
-            "prompt_tokens": 823,
-            "completion_tokens": 151,
-            "total_tokens": 974
+            "prompt_tokens": 637,
+            "completion_tokens": 129,
+            "total_tokens": 766
           },
-          "latency_s": 12.668,
+          "latency_s": 45.582,
+          "batch": 1
+        },
+        {
+          "agent": "cause_analyst",
+          "provider": "nightshift",
+          "model": "nvidia/nemotron-3-ultra-550b-a55b",
+          "ok": true,
+          "request_id": null,
+          "requested_model": "nvidia/nemotron-3-ultra-550b-a55b",
+          "fallback": false,
+          "usage": {
+            "prompt_tokens": 398,
+            "completion_tokens": 13,
+            "total_tokens": 411
+          },
+          "latency_s": 3.653,
           "batch": 1
         }
       ],
       "resolution": "resolved",
       "unresolved_reasons": [],
-      "open_hypotheses": [],
+      "open_hypotheses": [
+        "H_promo"
+      ],
       "refuted_hypotheses": [
-        "H_promo",
         "H_seasonal"
       ],
       "retrieval": {
         "mode": "agentic",
         "stats": {
-          "tool_calls": 11,
-          "model_steps": 7,
-          "fallback_steps": 1,
+          "tool_calls": 14,
+          "model_steps": 8,
+          "fallback_steps": 0,
           "rejected": 0,
-          "tokens": 8805
+          "tokens": 11420
         },
-        "embed_model": "hash-fnv1a-64",
-        "embed_backend": "hash",
+        "embed_model": "nvidia/nemotron-3-embed-1b",
+        "embed_backend": "nvidia",
         "embed_stats": {
-          "calls": 0,
-          "texts": 0,
-          "cache_hits": 0,
-          "tokens": 0,
+          "calls": 6,
+          "texts": 47,
+          "cache_hits": 132,
+          "tokens": 2120,
           "errors": 0
         },
-        "hmem_embedder": "hash-fnv1a-64 (vendored H-MEM mock)",
+        "hmem_embedder": "nvidia/nemotron-3-embed-1b",
         "hmem_embed_stats": {
-          "embedded": 0,
+          "embedded": 87,
           "failed": 0
         }
       },
@@ -454,8 +581,8 @@
       },
       "evidence_graph": {
         "backend": "meterless-hmem (vendored reference, via bridge)",
-        "nodes": 28,
-        "edges": 19,
+        "nodes": 47,
+        "edges": 40,
         "graph": {
           "nodes": [
             {
@@ -488,91 +615,199 @@
               "id": "R5",
               "kind": "retrieval",
               "tool": "drill_down",
-              "text": "drill_down {'segment': {'carrier': 'CarrierB'}, 'date_from': '2026-10-01', 'date_to': '2026-10-14'} for H_carrier: 1 chunks, 1 rows"
+              "text": "drill_down {'segment': {'carrier': 'CarrierC'}, 'date_from': '2026-10-01', 'date_to': '2026-10-14'} for H_carrier: 1 chunks, 1 rows"
             },
             {
               "id": "R6",
-              "kind": "retrieval",
-              "tool": "drill_down",
-              "text": "drill_down {'segment': {'carrier': 'CarrierB', 'region': 'East'}, 'date_from': '2026-10-01', 'date_to': '2026-10-14'} for H_carrier: 1 chunks, 1 rows"
-            },
-            {
-              "id": "R7",
               "kind": "retrieval",
               "tool": "segment_stats",
               "text": "segment_stats {'dims': ['region']} for H_region: 4 chunks, 4 rows"
             },
             {
+              "id": "R7",
+              "kind": "retrieval",
+              "tool": "drill_down",
+              "text": "drill_down {'segment': {'carrier': 'CarrierC', 'region': 'West'}, 'date_from': '2026-10-01', 'date_to': '2026-10-14'} for H_region: 1 chunks, 1 rows"
+            },
+            {
               "id": "R8",
               "kind": "retrieval",
-              "tool": "promotions_overlap",
-              "text": "promotions_overlap {} for H_promo: 1 chunks, 1 rows"
+              "tool": "drill_down",
+              "text": "drill_down {'segment': {'carrier': 'CarrierC', 'region': 'East'}, 'date_from': '2026-10-01', 'date_to': '2026-10-14'} for H_region: 1 chunks, 1 rows"
             },
             {
               "id": "R9",
               "kind": "retrieval",
-              "tool": "drill_down",
-              "text": "drill_down {'segment': {'carrier': 'CarrierA', 'region': 'South'}, 'date_from': '2026-10-01', 'date_to': '2026-10-14'} for H_promo: 1 chunks, 1 rows"
+              "tool": "promotions_overlap",
+              "text": "promotions_overlap {} for H_promo: 0 chunks, 0 rows"
             },
             {
               "id": "R10",
               "kind": "retrieval",
               "tool": "segment_stats",
-              "text": "segment_stats {'dims': ['carrier', 'region']} for H_seasonal: 1 chunks, 12 rows"
+              "text": "segment_stats {'dims': ['carrier', 'region']} for H_promo: 12 chunks, 12 rows"
             },
             {
               "id": "R11",
+              "kind": "retrieval",
+              "tool": "drill_down",
+              "text": "drill_down {'segment': {'carrier': 'CarrierC', 'region': 'West'}, 'date_from': '2026-10-01', 'date_to': '2026-10-14'} for H_promo: 1 chunks, 1 rows"
+            },
+            {
+              "id": "R12",
               "kind": "retrieval",
               "tool": "segment_stats",
               "text": "segment_stats {'dims': ['carrier', 'region']} for H_seasonal: 1 chunks, 12 rows"
             },
             {
-              "id": "R12",
+              "id": "R13",
               "kind": "retrieval",
               "tool": "text_search",
               "text": "text_search {'query': 'late delayed delivery not delivered missed tracking', 'segment': {}} for H_tickets: 1 chunks, 30 rows"
             },
             {
-              "id": "E13",
-              "kind": "evidence",
-              "view": "v_logistics",
-              "text": "view v_logistics segment {'carrier': 'CarrierB'} late shipments on time delivery baseline n=306 late=19 period n=275 late=56"
-            },
-            {
               "id": "E14",
               "kind": "evidence",
               "view": "v_logistics",
-              "text": "view v_logistics drill-down segment {'carrier': 'CarrierB'} 2026-10-01..2026-10-14 late shipments on time delivery baseline n=306 late=19 period n=275 late=56"
+              "text": "view v_logistics segment {'carrier': 'CarrierA'} late shipments on time delivery baseline n=306 late=12 period n=292 late=17"
             },
             {
               "id": "E15",
               "kind": "evidence",
               "view": "v_logistics",
-              "text": "view v_logistics segment {'region': 'North'} late shipments on time delivery baseline n=256 late=13 period n=188 late=49"
+              "text": "view v_logistics segment {'carrier': 'CarrierB'} late shipments on time delivery baseline n=337 late=16 period n=255 late=18"
             },
             {
               "id": "E16",
               "kind": "evidence",
               "view": "v_logistics",
-              "text": "view v_logistics segment {'region': 'South'} late shipments on time delivery baseline n=240 late=12 period n=210 late=11"
+              "text": "view v_logistics segment {'carrier': 'CarrierC'} late shipments on time delivery baseline n=320 late=21 period n=293 late=40"
             },
             {
               "id": "E17",
               "kind": "evidence",
-              "view": "v_promotions",
-              "text": "view v_promotions promotion PROMO-HOME-SOUTH category home region South 2026-10-01..2026-10-14"
+              "view": "v_logistics",
+              "text": "view v_logistics drill-down segment {'carrier': 'CarrierC'} 2026-10-01..2026-10-14 late shipments on time delivery baseline n=320 late=21 period n=293 late=40"
             },
             {
               "id": "E18",
               "kind": "evidence",
-              "view": "v_logistics_cells",
-              "text": "view v_logistics all carrier x region segments late shipments on time delivery CarrierA/East 6/83->6/85 CarrierA/North 3/79->4/57 CarrierA/South 4/87->1/64 CarrierA/West 10/92->7/82 CarrierB/East 6/82"
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'region': 'East'} late shipments on time delivery baseline n=223 late=9 period n=196 late=16"
             },
             {
               "id": "E19",
               "kind": "evidence",
-              "view": "v_tickets",
-              "text": "view v_tickets late delivery complaints query 'late delayed delivery not delivered missed tracking' My parcel is late, tracking has not moved Courier missed the delivery window My parcel is late, trac"
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'region': 'North'} late shipments on time delivery baseline n=252 late=12 period n=233 late=16"
+            },
+            {
+              "id": "E20",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'region': 'South'} late shipments on time delivery baseline n=240 late=14 period n=217 late=10"
+            },
+            {
+              "id": "E21",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'region': 'West'} late shipments on time delivery baseline n=248 late=14 period n=194 late=33"
+            },
+            {
+              "id": "E22",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics drill-down segment {'carrier': 'CarrierC', 'region': 'West'} 2026-10-01..2026-10-14 late shipments on time delivery baseline n=88 late=7 period n=62 late=26"
+            },
+            {
+              "id": "E23",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics drill-down segment {'carrier': 'CarrierC', 'region': 'East'} 2026-10-01..2026-10-14 late shipments on time delivery baseline n=72 late=5 period n=61 late=4"
+            },
+            {
+              "id": "E24",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierA', 'region': 'East'} late shipments on time delivery baseline n=67 late=3 period n=84 late=5"
+            },
+            {
+              "id": "E25",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierA', 'region': 'North'} late shipments on time delivery baseline n=74 late=3 period n=68 late=3"
+            },
+            {
+              "id": "E26",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierA', 'region': 'South'} late shipments on time delivery baseline n=91 late=2 period n=71 late=4"
+            },
+            {
+              "id": "E27",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierA', 'region': 'West'} late shipments on time delivery baseline n=74 late=4 period n=69 late=5"
+            },
+            {
+              "id": "E28",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'East'} late shipments on time delivery baseline n=84 late=1 period n=51 late=7"
+            },
+            {
+              "id": "E29",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'North'} late shipments on time delivery baseline n=92 late=5 period n=80 late=6"
+            },
+            {
+              "id": "E30",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'South'} late shipments on time delivery baseline n=75 late=7 period n=61 late=3"
+            },
+            {
+              "id": "E31",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'West'} late shipments on time delivery baseline n=86 late=3 period n=63 late=2"
+            },
+            {
+              "id": "E32",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierC', 'region': 'East'} late shipments on time delivery baseline n=72 late=5 period n=61 late=4"
+            },
+            {
+              "id": "E33",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierC', 'region': 'North'} late shipments on time delivery baseline n=86 late=4 period n=85 late=7"
+            },
+            {
+              "id": "E34",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierC', 'region': 'South'} late shipments on time delivery baseline n=74 late=5 period n=85 late=3"
+            },
+            {
+              "id": "E35",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics segment {'carrier': 'CarrierC', 'region': 'West'} late shipments on time delivery baseline n=88 late=7 period n=62 late=26"
+            },
+            {
+              "id": "E36",
+              "kind": "evidence",
+              "view": "v_logistics",
+              "text": "view v_logistics drill-down segment {'carrier': 'CarrierC', 'region': 'West'} 2026-10-01..2026-10-14 late shipments on time delivery baseline n=88 late=7 period n=62 late=26"
+            },
+            {
+              "id": "E37",
+              "kind": "evidence",
+              "view": "v_logistics_cells",
+              "text": "view v_logistics all carrier x region segments late shipments on time delivery CarrierA/East 3/67->5/84 CarrierA/North 3/74->3/68 CarrierA/South 2/91->4/71 CarrierA/West 4/74->5/69 CarrierB/East 1/84-"
             },
             {
               "id": "H_carrier_x_region",
@@ -580,46 +815,52 @@
               "text": "Late shipments concentrated in one carrier x region segment"
             },
             {
-              "id": "R21",
+              "id": "R39",
               "kind": "retrieval",
               "tool": "segment_stats",
               "text": "segment_stats {'dims': ['carrier', 'region']} for H_carrier_x_region: 12 chunks, 12 rows"
             },
             {
-              "id": "R22",
+              "id": "R40",
+              "kind": "retrieval",
+              "tool": "drill_down",
+              "text": "drill_down {'segment': {'carrier': 'CarrierC', 'region': 'West'}, 'date_from': '2026-10-01', 'date_to': '2026-10-14'} for H_carrier_x_region: 1 chunks, 1 rows"
+            },
+            {
+              "id": "R41",
+              "kind": "retrieval",
+              "tool": "drill_down",
+              "text": "drill_down {'segment': {'carrier': 'CarrierC', 'region': 'East'}, 'date_from': '2026-10-01', 'date_to': '2026-10-14'} for H_carrier_x_region: 1 chunks, 1 rows"
+            },
+            {
+              "id": "R42",
               "kind": "retrieval",
               "tool": "text_search",
               "text": "text_search {'query': 'late delayed delivery not delivered missed tracking', 'segment': {}} for H_tickets: 1 chunks, 30 rows"
             },
             {
-              "id": "E23",
+              "id": "E43",
               "kind": "evidence",
               "view": "v_logistics",
-              "text": "view v_logistics segment {'carrier': 'CarrierA', 'region': 'North'} late shipments on time delivery baseline n=79 late=3 period n=57 late=4"
+              "text": "view v_logistics segment {'carrier': 'CarrierC', 'region': 'South'} late shipments on time delivery baseline n=74 late=5 period n=85 late=3"
             },
             {
-              "id": "E24",
+              "id": "E44",
               "kind": "evidence",
               "view": "v_logistics",
-              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'North'} late shipments on time delivery baseline n=86 late=6 period n=77 late=43"
+              "text": "view v_logistics segment {'carrier': 'CarrierC', 'region': 'West'} late shipments on time delivery baseline n=88 late=7 period n=62 late=26"
             },
             {
-              "id": "E25",
+              "id": "E45",
               "kind": "evidence",
               "view": "v_logistics",
-              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'South'} late shipments on time delivery baseline n=71 late=4 period n=62 late=6"
+              "text": "view v_logistics drill-down segment {'carrier': 'CarrierC', 'region': 'West'} 2026-10-01..2026-10-14 late shipments on time delivery baseline n=88 late=7 period n=62 late=26"
             },
             {
-              "id": "E26",
+              "id": "E46",
               "kind": "evidence",
               "view": "v_logistics",
-              "text": "view v_logistics segment {'carrier': 'CarrierB', 'region': 'West'} late shipments on time delivery baseline n=67 late=3 period n=64 late=4"
-            },
-            {
-              "id": "E27",
-              "kind": "evidence",
-              "view": "v_tickets",
-              "text": "view v_tickets late delivery complaints query 'late delayed delivery not delivered missed tracking' My parcel is late, tracking has not moved Courier missed the delivery window My parcel is late, trac"
+              "text": "view v_logistics drill-down segment {'carrier': 'CarrierC', 'region': 'East'} 2026-10-01..2026-10-14 late shipments on time delivery baseline n=72 late=5 period n=61 late=4"
             }
           ],
           "edges": [
@@ -635,7 +876,7 @@
             },
             {
               "src": "R6",
-              "dst": "H_carrier",
+              "dst": "H_region",
               "rel": "retrieved_for"
             },
             {
@@ -645,7 +886,7 @@
             },
             {
               "src": "R8",
-              "dst": "H_promo",
+              "dst": "H_region",
               "rel": "retrieved_for"
             },
             {
@@ -655,18 +896,18 @@
             },
             {
               "src": "R10",
-              "dst": "H_seasonal",
+              "dst": "H_promo",
               "rel": "retrieved_for"
             },
             {
               "src": "R11",
-              "dst": "H_seasonal",
+              "dst": "H_promo",
               "rel": "retrieved_for"
             },
             {
-              "src": "E13",
-              "dst": "H_carrier",
-              "rel": "supports"
+              "src": "R12",
+              "dst": "H_seasonal",
+              "rel": "retrieved_for"
             },
             {
               "src": "E14",
@@ -675,66 +916,171 @@
             },
             {
               "src": "E15",
-              "dst": "H_region",
+              "dst": "H_carrier",
               "rel": "supports"
             },
             {
               "src": "E16",
-              "dst": "H_region",
+              "dst": "H_carrier",
               "rel": "supports"
             },
             {
               "src": "E17",
-              "dst": "H_promo",
-              "rel": "refutes"
+              "dst": "H_carrier",
+              "rel": "supports"
             },
             {
               "src": "E18",
-              "dst": "H_seasonal",
-              "rel": "refutes"
+              "dst": "H_region",
+              "rel": "supports"
             },
             {
-              "src": "R21",
-              "dst": "H_carrier_x_region",
-              "rel": "retrieved_for"
+              "src": "E19",
+              "dst": "H_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E20",
+              "dst": "H_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E21",
+              "dst": "H_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E22",
+              "dst": "H_region",
+              "rel": "supports"
             },
             {
               "src": "E23",
-              "dst": "H_carrier_x_region",
+              "dst": "H_region",
               "rel": "supports"
             },
             {
               "src": "E24",
-              "dst": "H_carrier_x_region",
-              "rel": "supports"
+              "dst": "H_promo",
+              "rel": "gap"
             },
             {
               "src": "E25",
+              "dst": "H_promo",
+              "rel": "gap"
+            },
+            {
+              "src": "E26",
+              "dst": "H_promo",
+              "rel": "gap"
+            },
+            {
+              "src": "E27",
+              "dst": "H_promo",
+              "rel": "gap"
+            },
+            {
+              "src": "E28",
+              "dst": "H_promo",
+              "rel": "gap"
+            },
+            {
+              "src": "E29",
+              "dst": "H_promo",
+              "rel": "gap"
+            },
+            {
+              "src": "E30",
+              "dst": "H_promo",
+              "rel": "gap"
+            },
+            {
+              "src": "E31",
+              "dst": "H_promo",
+              "rel": "gap"
+            },
+            {
+              "src": "E32",
+              "dst": "H_promo",
+              "rel": "gap"
+            },
+            {
+              "src": "E33",
+              "dst": "H_promo",
+              "rel": "gap"
+            },
+            {
+              "src": "E34",
+              "dst": "H_promo",
+              "rel": "gap"
+            },
+            {
+              "src": "E35",
+              "dst": "H_promo",
+              "rel": "gap"
+            },
+            {
+              "src": "E36",
+              "dst": "H_promo",
+              "rel": "gap"
+            },
+            {
+              "src": "E37",
+              "dst": "H_seasonal",
+              "rel": "refutes"
+            },
+            {
+              "src": "R39",
+              "dst": "H_carrier_x_region",
+              "rel": "retrieved_for"
+            },
+            {
+              "src": "R40",
+              "dst": "H_carrier_x_region",
+              "rel": "retrieved_for"
+            },
+            {
+              "src": "R41",
+              "dst": "H_carrier_x_region",
+              "rel": "retrieved_for"
+            },
+            {
+              "src": "E43",
               "dst": "H_carrier_x_region",
               "rel": "supports"
             },
             {
-              "src": "E26",
+              "src": "E44",
+              "dst": "H_carrier_x_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E45",
+              "dst": "H_carrier_x_region",
+              "rel": "supports"
+            },
+            {
+              "src": "E46",
               "dst": "H_carrier_x_region",
               "rel": "supports"
             }
           ]
         },
-        "hmem_ledger_entries": 47,
-        "hmem_ledger_file": "logs/hmem-ledger-example-004-nightshift.jsonl"
+        "hmem_ledger_entries": 87,
+        "hmem_ledger_file": "logs/hmem-ledger-test-q02-v2.jsonl"
       },
       "run_report": {
         "provider": "nightshift",
-        "wall_clock_s": 90.123,
+        "wall_clock_s": 246.846,
         "deadline_hit": false,
         "model_calls": {
-          "ok": 10,
-          "failed": 8
+          "ok": 22,
+          "failed": 0
         },
         "tokens": {
-          "prompt": 9907,
-          "completion": 677,
-          "total": 10584,
+          "prompt": 21157,
+          "completion": 1143,
+          "total": 22300,
           "source": "provider usage field"
         },
         "by_agent_model": [
@@ -745,57 +1091,47 @@
             "calls_failed": 0,
             "prompt_tokens": 373,
             "completion_tokens": 27,
-            "latency_s_sum": 1.229,
+            "latency_s_sum": 4.292,
             "cost_eur": null
           },
           {
             "agent": "retriever",
             "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
-            "calls_ok": 7,
+            "calls_ok": 8,
             "calls_failed": 0,
-            "prompt_tokens": 8319,
-            "completion_tokens": 486,
-            "latency_s_sum": 12.408,
+            "prompt_tokens": 10730,
+            "completion_tokens": 690,
+            "latency_s_sum": 24.13,
             "cost_eur": null
           },
           {
             "agent": "s1_filter",
-            "model": null,
-            "calls_ok": 0,
-            "calls_failed": 2,
-            "prompt_tokens": 0,
-            "completion_tokens": 0,
-            "latency_s_sum": 24.552,
+            "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+            "calls_ok": 5,
+            "calls_failed": 0,
+            "prompt_tokens": 6287,
+            "completion_tokens": 226,
+            "latency_s_sum": 19.298,
             "cost_eur": null
           },
           {
             "agent": "evidence_evaluator",
-            "model": null,
-            "calls_ok": 0,
-            "calls_failed": 5,
-            "prompt_tokens": 0,
-            "completion_tokens": 0,
-            "latency_s_sum": 29.009,
-            "cost_eur": null
-          },
-          {
-            "agent": "retriever",
-            "model": null,
-            "calls_ok": 0,
-            "calls_failed": 1,
-            "prompt_tokens": 0,
-            "completion_tokens": 0,
-            "latency_s_sum": 6.019,
+            "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+            "calls_ok": 5,
+            "calls_failed": 0,
+            "prompt_tokens": 2334,
+            "completion_tokens": 45,
+            "latency_s_sum": 121.994,
             "cost_eur": null
           },
           {
             "agent": "cause_analyst",
             "model": "nvidia/nemotron-3-ultra-550b-a55b",
-            "calls_ok": 1,
+            "calls_ok": 2,
             "calls_failed": 0,
-            "prompt_tokens": 392,
-            "completion_tokens": 13,
-            "latency_s_sum": 0.873,
+            "prompt_tokens": 796,
+            "completion_tokens": 26,
+            "latency_s_sum": 14.658,
             "cost_eur": null
           },
           {
@@ -803,33 +1139,33 @@
             "model": "nvidia/nemotron-3-ultra-550b-a55b",
             "calls_ok": 1,
             "calls_failed": 0,
-            "prompt_tokens": 823,
-            "completion_tokens": 151,
-            "latency_s_sum": 12.668,
+            "prompt_tokens": 637,
+            "completion_tokens": 129,
+            "latency_s_sum": 45.582,
             "cost_eur": null
           }
         ],
         "cost": "metered by Meterless/Nightshift (not visible to this app)",
         "s1_filter": {
-          "projected": 839,
-          "actual": 591,
-          "avoided": 248,
+          "projected": 1116,
+          "actual": 518,
+          "avoided": 598,
           "unit": "whitespace tokens (approx.)"
         },
         "markovian": {
           "status": "completed",
-          "totalTokensUsed": 31,
+          "totalTokensUsed": 30,
           "totalTokensSaved": 0,
           "tokenLabel": "estimated"
         }
       },
-      "memo_md": "# Decision memo: why did the on-time rate drop? (run example-004-nightshift)\nTop cause: **carrier_sla_breach** in carrier=CarrierB, region=North (estimated share of the excess late shipments vs the baseline rate: 104%; above 100% means other segments improved).\n\n- Question: Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?\n- Baseline 2026-09-15..2026-09-30 vs period 2026-10-01..2026-10-14\n- Resolution: resolved\n- Data: SYNTHETIC labelled dataset (generated by scripts/make_data.py; planted causes)\n- Backends: data=sample-duckdb [on_time_rate], meterless=meterless-bridge (vendored engines via node), model provider=nightshift\n- SAMPLE MODE: no Zetaris; local DuckDB snapshot with the same views and SQL\n\n## Summary (model-written, numbers re-found by the traceability check)\nCarrierB's on-time rate in the North region collapsed from 93.0% in the baseline window (2026-09-15 to 2026-09-30) to 44.2% in the period window (2026-10-01 to 2026-10-14). A promotional hypothesis (PROMO-HOME-SOUTH) for the home category in the South region was investigated and refuted; its dates overlapped but it accounted for only 49 shipments with 3 late deliveries and a negative share of excess late. The model verdict confirms the promotion did not drive the North region carrier breach.\n\n## Findings (each passed the traceability check: cited rows and numbers re-found in the data; not independently verified as true)\n- On-time rate for carrier=CarrierB, region=North was 44.2% in the period window (2026-10-01..2026-10-14). Rows: S000977, S000979, S001028, S001040, S001068\n- On-time rate for carrier=CarrierB, region=North was 93.0% in the baseline window (2026-09-15..2026-09-30). Rows: S000014, S000021, S000024, S000032, S000045\n\n## Discarded alternatives\n- Promotion PROMO-HOME-SOUTH: dates overlap the period, but its shipments account for 0% of the excess late shipments (3 of 49). Refuted.\n\n## Confidence: 100/100\n- Formula: round(100*(0.45*C + 0.35*A + 0.20*(1-R))); C=1.0, A=1.0, R=0.0; caps: none\n\n## Recommended actions\n- Review the SLA performance of CarrierB in North and consider rerouting.\n\n## Limitations\n- Synthetic data. Model calls: 10 ok, 8 fell back to deterministic rules.\n- Evidence graph: meterless-hmem (vendored reference, via bridge); Markovian status: completed.\n\n## Run report (tokens, cost, latency)\n- Provider: nightshift (wall clock and latencies: report JSON)\n- Model calls: 10 ok, 8 fell back; tokens 10584 (prompt 9907, completion 677)\n- Cost: metered by Meterless/Nightshift (not visible to this app)\n- S1 filter: 839 projected vs 591 sent (248 avoided, whitespace tokens (approx.))\n- planner / nvidia/nemotron-3-ultra-550b-a55b: 1 ok, 0 failed, 373+27 tok\n- retriever / nvidia/nemotron-3.5-lightning-30b-a3b: 7 ok, 0 failed, 8319+486 tok\n- s1_filter / None: 0 ok, 2 failed, 0+0 tok\n- evidence_evaluator / None: 0 ok, 5 failed, 0+0 tok\n- retriever / None: 0 ok, 1 failed, 0+0 tok\n- cause_analyst / nvidia/nemotron-3-ultra-550b-a55b: 1 ok, 0 failed, 392+13 tok\n- writer / nvidia/nemotron-3-ultra-550b-a55b: 1 ok, 0 failed, 823+151 tok\n"
+      "memo_md": "# Decision memo: why did the on-time rate drop? (run test-q02-v2)\nTop cause: **carrier_sla_breach** in carrier=CarrierC, region=West (estimated share of the excess late shipments vs the baseline rate: 65%; above 100% means other segments improved).\n\n- Question: Why did on-time delivery drop between 2026-10-01 and 2026-10-14 compared with 2026-09-15 to 2026-09-30?\n- Baseline 2026-09-15..2026-09-30 vs period 2026-10-01..2026-10-14\n- Resolution: resolved\n- Data: SYNTHETIC labelled dataset (generated by scripts/make_data.py; planted causes)\n- Backends: data=sample-duckdb [on_time_rate], meterless=meterless-bridge (vendored engines via node), model provider=nightshift\n- SAMPLE MODE: no Zetaris; local DuckDB snapshot with the same views and SQL\n\n## Findings (each passed the traceability check: cited rows and numbers re-found in the data; not independently verified as true)\n- On-time rate for carrier=CarrierC, region=West was 58.1% in the period window (2026-10-01..2026-10-14). Rows: S000981, S001001, S001018, S001023, S001046\n- On-time rate for carrier=CarrierC, region=West was 92.0% in the baseline window (2026-09-15..2026-09-30). Rows: S000017, S000032, S000048, S000057, S000093\n\n## Discarded alternatives\n- none\n\n## Blocked claims\n- narrative\n\n## Confidence: 85/100\n- Formula: round(100*(0.45*C + 0.35*A + 0.20*(1-R))); C=0.667, A=1.0, R=0.0; caps: none\n\n## Recommended actions\n- Review the SLA performance of CarrierC in West and consider rerouting.\n\n## Limitations\n- Synthetic data. Model calls: 22 ok, 0 fell back to deterministic rules.\n- Evidence graph: meterless-hmem (vendored reference, via bridge); Markovian status: completed.\n\n## Run report (tokens, cost, latency)\n- Provider: nightshift (wall clock and latencies: report JSON)\n- Model calls: 22 ok, 0 fell back; tokens 22300 (prompt 21157, completion 1143)\n- Cost: metered by Meterless/Nightshift (not visible to this app)\n- S1 filter: 1116 projected vs 518 sent (598 avoided, whitespace tokens (approx.))\n- planner / nvidia/nemotron-3-ultra-550b-a55b: 1 ok, 0 failed, 373+27 tok\n- retriever / nvidia/nemotron-3.5-lightning-30b-a3b: 8 ok, 0 failed, 10730+690 tok\n- s1_filter / nvidia/nemotron-3.5-lightning-30b-a3b: 5 ok, 0 failed, 6287+226 tok\n- evidence_evaluator / nvidia/nemotron-3.5-lightning-30b-a3b: 5 ok, 0 failed, 2334+45 tok\n- cause_analyst / nvidia/nemotron-3-ultra-550b-a55b: 2 ok, 0 failed, 796+26 tok\n- writer / nvidia/nemotron-3-ultra-550b-a55b: 1 ok, 0 failed, 637+129 tok\n"
     },
     "artifacts": [
-      "logs/memo-example-004-nightshift.md",
-      "logs/hmem-ledger-example-004-nightshift.jsonl",
-      "logs/report-example-004-nightshift.json",
-      "logs/memo-example-004-nightshift.pdf"
+      "logs/memo-test-q02-v2.md",
+      "logs/hmem-ledger-test-q02-v2.jsonl",
+      "logs/report-test-q02-v2.json",
+      "logs/memo-test-q02-v2.pdf"
     ]
   },
   "agents": [
@@ -866,7 +1202,7 @@
       "trace_id": "claim_gate"
     }
   ],
-  "trace_id": "1a22d206801a43d2",
-  "log_file": "logs/trace-example-004-nightshift.jsonl",
-  "execution_time_seconds": 91.127
+  "trace_id": "1abedf0fe7784059",
+  "log_file": "logs/trace-test-q02-v2.jsonl",
+  "execution_time_seconds": 248.065
 }

@@ -36,14 +36,27 @@ def plan(question: str, memory_context: str) -> tuple[list[str], dict]:
 
 
 def s1_scores(texts: list[str], question: str) -> tuple[list[float], list[dict]]:
-    def one(t):
-        r = _agent_call("s1_filter", [{"role": "system", "content": "Rate how relevant this evidence chunk is to the question. Reply with JSON only: {\"score\": number between 0 and 1}."},
-                          {"role": "user", "content": f"Question: {question}\nChunk: {t[:1200]}"}], "s1", 30)
-        s = float(_json(r["content"])["score"])
-        return max(0.0, min(1.0, s)), r
-    with ThreadPoolExecutor(8) as ex:
-        res = list(ex.map(one, texts))
-    return [s for s, _ in res], [r for _, r in res]
+    batch_sz = max(1, int(llm.env("S1_FILTER_BATCH_SIZE", "5")))
+    all_scores, all_meta = [], []
+    for start in range(0, len(texts), batch_sz):
+        sub = texts[start:start + batch_sz]
+        numbered = "\n".join(f"[{i}] {c[:450]}" for i, c in enumerate(sub))
+        r = _agent_call("s1_filter", [{"role": "system", "content": (
+            f"Rate how relevant each evidence chunk [0..{len(sub)-1}] is to the question. "
+            f"Reply with JSON only: {{\"scores\": [array of {len(sub)} numbers between 0 and 1 in order]}}.")},
+            {"role": "user", "content": f"Question: {question}\nChunks:\n{numbered}"}], "s1", min(512, 20 * len(sub) + 64))
+        d = _json(r["content"])
+        arr = d.get("scores") if isinstance(d, dict) else d if isinstance(d, list) else None
+        if isinstance(arr, list) and arr:
+            vals = [max(0.0, min(1.0, float(x["score"] if isinstance(x, dict) and "score" in x else x))) for x in arr]
+            vals = (vals + [vals[-1]] * len(sub))[:len(sub)]
+        elif isinstance(d, dict) and "score" in d:
+            vals = [max(0.0, min(1.0, float(d["score"])))] * len(sub)
+        else:
+            raise ValueError("invalid s1_scores response")
+        all_scores.extend(vals)
+        all_meta.append(r)
+    return all_scores, all_meta
 
 
 def verdict(hyp_text: str, stats: dict) -> tuple[str, dict]:
