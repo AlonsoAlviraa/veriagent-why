@@ -2,7 +2,7 @@
 
 **Open Agent Hackathon 2026 · Track 02: The Agent That Can Explain Why**
 
-**Demo video (3:38):** https://drive.google.com/file/d/1sW5a_M7Ane4bgK0BVGLQ9viBzVCo2TaQ/view?usp=drivesdk · **Slide deck:** [PDF](https://drive.google.com/file/d/1HtdwTb1-P8qb36tkG4JEEVtR1EdgHOoN/view?usp=drivesdk) · [PPTX / Google Slides](https://docs.google.com/presentation/d/12DkYETn7ofIspCDKuDY-sNen_hjltGv5/edit?usp=drivesdk)
+**Demo video (3:38):** https://youtu.be/zRKt_OgSGak (unlisted) · Drive copy: https://drive.google.com/file/d/1sW5a_M7Ane4bgK0BVGLQ9viBzVCo2TaQ/view?usp=drivesdk · **Slide deck:** [PDF](https://drive.google.com/file/d/1HtdwTb1-P8qb36tkG4JEEVtR1EdgHOoN/view?usp=drivesdk) · [PPTX / Google Slides](https://docs.google.com/presentation/d/12DkYETn7ofIspCDKuDY-sNen_hjltGv5/edit?usp=drivesdk)
 
 ```bash
 python run.py --input input_examples/example_1.json     # offline, no credentials (SAMPLE_MODE fallback)
