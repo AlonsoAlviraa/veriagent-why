@@ -2,6 +2,8 @@
 
 **Open Agent Hackathon 2026 · Track 02: The Agent That Can Explain Why**
 
+**Demo video (3:38):** https://drive.google.com/file/d/1sW5a_M7Ane4bgK0BVGLQ9viBzVCo2TaQ/view?usp=drivesdk · **Slide deck:** [PDF](https://drive.google.com/file/d/1HtdwTb1-P8qb36tkG4JEEVtR1EdgHOoN/view?usp=drivesdk) · [PPTX / Google Slides](https://docs.google.com/presentation/d/12DkYETn7ofIspCDKuDY-sNen_hjltGv5/edit?usp=drivesdk)
+
 ```bash
 python run.py --input input_examples/example_1.json     # offline, no credentials (SAMPLE_MODE fallback)
 ```
@@ -378,6 +380,9 @@ How the code was written:
 - The implementation was written during the build window (from 22 Oct 2026, 02:00 Madrid time) by AI coding agents (Grok Bot) working in a Linux workspace under the author's direction, and reviewed, tested and committed by the author. Work was committed in batches, which is why many commits share close timestamps.
 - Cursor was not used to write this code. The base rules list Cursor as "Required"; the organisers' announcement of 22 Oct 2026 (#hackathon-general, 14:32: "Cursor is now optional ... any AI coding tool"; repeated on HackOS #announcement) made it optional.
 - Pre-existing work and what was built in the window: see "Pre-existing work" below.
+
+Demo video narration:
+- The narration of the demo video is an AI voice cloned, with the author's consent, from his own voice recording, using Coqui XTTS-v2 (run locally on CPU via the `coqui-tts` package; model licence: Coqui Public Model License, non-commercial). The on-screen closing scene states "Narration: AI voice cloned from the author's own recording". Screens in the video are labelled LIVE RECORDING or REPLAY; the script is the author's. XTTS-v2 is used only for the video, not by the product.
 
 Models used by the product at runtime:
 - Through Meterless Nightshift (primary): Nemotron 3.5 Lightning 30B, reasoning off (S1: Agentic Retriever tool loop, relevance filter, Evidence Evaluator) and Nemotron 3 Ultra (S2: Planner, Cause Analyst, Writer), pinned and receipted per call.
