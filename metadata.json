@@ -12,8 +12,8 @@
     }
   ],
   "repository_url": "https://github.com/AlonsoAlviraa/veriagent-why",
-  "demo_video_url": "",
-  "slide_deck_url": "",
+  "demo_video_url": "https://drive.google.com/file/d/1sW5a_M7Ane4bgK0BVGLQ9viBzVCo2TaQ/view?usp=drivesdk",
+  "slide_deck_url": "https://drive.google.com/file/d/1HtdwTb1-P8qb36tkG4JEEVtR1EdgHOoN/view?usp=drivesdk",
   "colab_links": [],
   "sponsor_technology": {
     "zetaris": "Default data layer: five views (v_orders, v_returns, v_tickets, v_logistics, v_promotions) federated across PostgreSQL (veriagent_pg) and REST (veriagent_rest) into SchemaStore container veriagent and queried over JDBC (Zetaris Lightning) by the Retriever, Evidence Evaluator and Traceability Check. When Zetaris is not configured the same SQL runs on a local DuckDB snapshot (SAMPLE_MODE, the explicit fallback), which is logged and shown in the memo. Live Zetaris + Nightshift 1.2.7 runs (2026-10-26): output_examples/example_5_live_zetaris_nightshift.json and eval/nightshift_live/v2_agent_ids/zetaris-receipts-example-001..003.jsonl. Live Zetaris Olist session (2026-10-24 & re-verified 2026-10-26): logs/olist_zetaris_session_20261024_1041/.",
@@ -36,7 +36,7 @@
   "pre_existing_components": "Environment setup, design material and the empty repo skeleton existed before 22 Oct 2026; Olist is a pre-existing public dataset (its preparation code was written in the window). Details: docs/PRE_EXISTING_WORK.md.",
   "sample_mode": "fallback when Zetaris is not configured (SAMPLE_MODE=true forces it)",
   "data": "Demo data is synthetic (scripts/make_data.py, seeded). The Zetaris session also federates the public Olist Brazilian E-Commerce dataset (Kaggle olistbr/brazilian-ecommerce, CC BY-NC-SA 4.0), downloaded on demand, not committed. No private customer data.",
-  "ai_usage": "Code written during the build window by AI coding agents (Grok Bot) under the author's direction; Cursor not used (made optional by the organisers' 22 Oct 2026 announcement). See README 'AI and Model Usage'.",
+  "ai_usage": "Code written during the build window by AI coding agents (Grok Bot) under the author's direction; Cursor not used (made optional by the organisers' 22 Oct 2026 announcement). Demo video narration: AI voice cloned, with the author's consent, from his own recording using Coqui XTTS-v2 (Coqui Public Model License, non-commercial). See README 'AI and Model Usage'.",
   "final_system": "V7 answers + V9_full confidence (app/v9conf.py, V9_CONFIDENCE=on by default); per-row abstention decision from the frozen V9_full signal. Results: docs/TEST500_RESULTS.md, docs/V9_GENERALIZATION_RESULTS.md, docs/V10_RESULTS.md (PARTIAL), docs/V11_RESULTS.md (TableBench n=361, WORKS: V7 48.2% vs RAG 32.7%, V9_full AUROC 0.834, selective acc 77.3%, realized risk 8.3% <= 10%).",
   "sample_io": [
     "input_examples/example_1.json -> output_examples/example_1.json",
