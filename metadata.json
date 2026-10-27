@@ -13,7 +13,7 @@
   ],
   "repository_url": "https://github.com/AlonsoAlviraa/veriagent-why",
   "demo_video_url": "",
-  "slide_deck_url": "",
+  "slide_deck_url": "https://github.com/AlonsoAlviraa/veriagent-why/blob/main/docs/VeriAgent_Why_deck.pdf",
   "colab_links": [],
   "sponsor_technology": {
     "zetaris": "Default data layer: five views (v_orders, v_returns, v_tickets, v_logistics, v_promotions) federated across PostgreSQL (veriagent_pg) and REST (veriagent_rest) into SchemaStore container veriagent and queried over JDBC (Zetaris Lightning) by the Retriever, Evidence Evaluator and Traceability Check. When Zetaris is not configured the same SQL runs on a local DuckDB snapshot (SAMPLE_MODE, the explicit fallback), which is logged and shown in the memo. Live Zetaris + Nightshift 1.2.7 runs (2026-10-26): output_examples/example_5_live_zetaris_nightshift.json and eval/nightshift_live/v2_agent_ids/zetaris-receipts-example-001..003.jsonl. Live Zetaris Olist session (2026-10-24 & re-verified 2026-10-26): logs/olist_zetaris_session_20261024_1041/.",
